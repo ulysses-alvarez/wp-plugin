@@ -51,23 +51,8 @@ class Property_CPT {
             'show_in_menu'          => true,
             'query_var'             => true,
             'rewrite'               => ['slug' => 'propiedad'],
-            'capability_type'       => 'post',
+            'capability_type'       => 'post', // Use standard 'post' capabilities
             'map_meta_cap'          => true,
-            'capabilities'          => [
-                'edit_post'             => 'edit_properties',
-                'read_post'             => 'view_properties',
-                'delete_post'           => 'delete_properties',
-                'edit_posts'            => 'edit_properties',
-                'edit_others_posts'     => 'edit_others_properties',
-                'publish_posts'         => 'create_properties',
-                'read_private_posts'    => 'view_properties',
-                'delete_posts'          => 'delete_properties',
-                'delete_private_posts'  => 'delete_properties',
-                'delete_published_posts'=> 'delete_properties',
-                'delete_others_posts'   => 'delete_others_properties',
-                'edit_private_posts'    => 'edit_properties',
-                'edit_published_posts'  => 'edit_properties',
-            ],
             'has_archive'           => false,
             'hierarchical'          => false,
             'menu_position'         => 5,
@@ -79,6 +64,10 @@ class Property_CPT {
         ];
 
         register_post_type('property', $args);
+
+        // Add filters for role-based visibility
+        add_action('pre_get_posts', [self::class, 'filter_properties_by_role']);
+        add_filter('views_edit-property', [self::class, 'filter_property_views']);
     }
 
     /**
@@ -131,5 +120,91 @@ class Property_CPT {
             'yucatan'             => 'Yucatán',
             'zacatecas'           => 'Zacatecas',
         ];
+    }
+
+    /**
+     * Filter properties in admin list based on user role
+     * Associates can only see their own properties
+     * Managers and Admins can see all properties
+     */
+    public static function filter_properties_by_role($query) {
+        // Only apply in admin area
+        if (!is_admin()) {
+            return;
+        }
+
+        // Only apply to property post type
+        if (!isset($query->query['post_type']) || $query->query['post_type'] !== 'property') {
+            return;
+        }
+
+        // Only apply to main query
+        if (!$query->is_main_query()) {
+            return;
+        }
+
+        // Get current user
+        $user = wp_get_current_user();
+        if (!$user || !$user->ID) {
+            return;
+        }
+
+        // Check if user is an Associate (property_associate role)
+        if (in_array('property_associate', $user->roles)) {
+            // Associates can only see their own properties
+            $query->set('author', $user->ID);
+        }
+
+        // Managers with delete restrictions
+        if (in_array('property_manager', $user->roles)) {
+            // Managers can see all but have restricted delete permissions
+            // We handle this in the delete capability checks
+        }
+
+        // Administrators can see everything (no filter needed)
+    }
+
+    /**
+     * Filter the views (All/Published/Draft counts) for property list
+     * to show accurate counts based on user role
+     */
+    public static function filter_property_views($views) {
+        $user = wp_get_current_user();
+
+        // Associates see counts for only their properties
+        if (in_array('property_associate', $user->roles)) {
+            // Recalculate counts for this user's properties only
+            $counts = wp_count_posts('property');
+
+            // Get user's property counts
+            global $wpdb;
+            $user_counts = $wpdb->get_results(
+                $wpdb->prepare(
+                    "SELECT post_status, COUNT(*) as count
+                    FROM {$wpdb->posts}
+                    WHERE post_type = 'property'
+                    AND post_author = %d
+                    GROUP BY post_status",
+                    $user->ID
+                )
+            );
+
+            $user_count_array = [];
+            foreach ($user_counts as $count) {
+                $user_count_array[$count->post_status] = $count->count;
+            }
+
+            // Update the views with accurate counts
+            if (isset($views['all'])) {
+                $total = array_sum($user_count_array);
+                $views['all'] = preg_replace(
+                    '/\([^)]+\)/',
+                    "({$total})",
+                    $views['all']
+                );
+            }
+        }
+
+        return $views;
     }
 }

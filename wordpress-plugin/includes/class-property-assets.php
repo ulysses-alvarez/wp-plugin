@@ -41,18 +41,29 @@ class Property_Assets {
 
         // Determine JS and CSS file names
         // Vite typically outputs: assets/index-[hash].js and assets/index-[hash].css
+        $vendor_file = self::find_file($dist_path . 'assets/', 'vendor*.js');
         $js_file = self::find_file($dist_path . 'assets/', 'index*.js');
         $css_file = self::find_file($dist_path . 'assets/', 'index*.css');
 
         // Fallback to default names if not found
+        $vendor_url = $vendor_file ? $dist_url . 'assets/' . basename($vendor_file) : $dist_url . 'assets/vendor.js';
         $js_url = $js_file ? $dist_url . 'assets/' . basename($js_file) : $dist_url . 'assets/index.js';
         $css_url = $css_file ? $dist_url . 'assets/' . basename($css_file) : $dist_url . 'assets/index.css';
 
-        // Register JavaScript
+        // Register vendor JavaScript (React, React-DOM, etc.)
+        wp_register_script(
+            'property-dashboard-vendor',
+            $vendor_url,
+            [], // No dependencies
+            PROPERTY_DASHBOARD_VERSION,
+            true // Load in footer
+        );
+
+        // Register main JavaScript (depends on vendor)
         wp_register_script(
             'property-dashboard-app',
             $js_url,
-            ['wp-element'], // React is aliased to wp.element in WordPress
+            ['property-dashboard-vendor'], // Depends on vendor
             PROPERTY_DASHBOARD_VERSION,
             true // Load in footer
         );
@@ -73,6 +84,7 @@ class Property_Assets {
      */
     public static function enqueue_app($config = []) {
         // Enqueue scripts and styles
+        wp_enqueue_script('property-dashboard-vendor'); // Load vendor first
         wp_enqueue_script('property-dashboard-app');
         wp_enqueue_style('property-dashboard-app');
 

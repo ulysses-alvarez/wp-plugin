@@ -61,6 +61,15 @@ zip -r property-dashboard.zip .
 2. Busca "Property Dashboard"
 3. Haz clic en **Activar**
 
+**IMPORTANTE:** Al activar el plugin se ejecutarán automáticamente las siguientes acciones:
+- ✅ Se registrará el Custom Post Type "Propiedades"
+- ✅ Se crearán los roles personalizados (Gerente, Asociado)
+- ✅ Se asignarán permisos al rol Administrador
+- ✅ Se creará una página de ejemplo con el shortcode
+- ✅ Se configurarán las reglas de reescritura (permalinks)
+
+**Verificación:** Después de activar, deberías ver el menú "Propiedades" en el panel lateral del admin de WordPress. Si no aparece inmediatamente, recarga la página del navegador.
+
 ### 5. Crear página con shortcode
 
 1. Ve a **Páginas → Agregar nueva**
@@ -202,6 +211,46 @@ Cada propiedad contiene:
 - `google_maps_url` - URL de Google Maps
 - `attachment_id` - ID de ficha técnica PDF
 
+## 🐛 Troubleshooting
+
+### El CPT "Propiedades" no aparece en el menú del admin
+
+**Solución:**
+1. Desactiva el plugin desde **Plugins → Plugin instalados**
+2. Reactiva el plugin
+3. Recarga la página del navegador (F5 o Cmd+R)
+
+Si el problema persiste:
+1. Ve a **Ajustes → Enlaces permanentes**
+2. Haz clic en "Guardar cambios" (sin modificar nada)
+3. Esto forzará la regeneración de las reglas de reescritura
+
+### No tengo permisos para ver/editar propiedades
+
+Verifica que tu usuario tiene uno de los siguientes roles:
+- Administrador
+- Gerente (property_manager)
+- Asociado (property_associate)
+
+Para cambiar roles:
+1. Ve a **Usuarios → Todos los usuarios**
+2. Edita el usuario
+3. Cambia el "Rol" en el menú desplegable
+
+### El shortcode no muestra nada
+
+Verifica que:
+1. La carpeta `dist/` existe en el plugin
+2. Contiene los archivos `assets/index.js` y `assets/index.css`
+3. Los archivos se compilaron correctamente con `npm run build`
+
+### Errores en la consola del navegador
+
+Abre las herramientas de desarrollo (F12) y verifica:
+- Que no haya errores 404 al cargar JS/CSS
+- Que `window.wpPropertyDashboard` esté definido
+- Que `wpPropertyDashboard.nonce` esté presente
+
 ## 🐛 Debugging
 
 Habilita debug en WordPress:
@@ -210,6 +259,7 @@ Habilita debug en WordPress:
 // wp-config.php
 define('WP_DEBUG', true);
 define('WP_DEBUG_LOG', true);
+define('WP_DEBUG_DISPLAY', false);
 ```
 
 Los logs se guardan en: `wp-content/debug.log`

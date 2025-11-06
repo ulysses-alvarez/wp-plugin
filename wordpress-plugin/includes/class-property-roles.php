@@ -26,6 +26,17 @@ class Property_Roles {
 
         // Create Associate role (Asociado)
         self::create_associate_role();
+
+        // Add capability filters
+        self::init_capability_filters();
+    }
+
+    /**
+     * Initialize capability filters for fine-grained permission control
+     */
+    public static function init_capability_filters() {
+        // Filter for controlling delete permissions for managers
+        add_filter('map_meta_cap', [self::class, 'filter_property_deletion'], 10, 4);
     }
 
     /**
@@ -39,19 +50,24 @@ class Property_Roles {
             // Basic WordPress capabilities
             'read' => true,
 
-            // Property capabilities
+            // Standard WordPress post capabilities
+            'edit_posts' => true,
+            'edit_others_posts' => true,
+            'edit_published_posts' => true,
+            'publish_posts' => true,
+            'delete_posts' => true,
+            'delete_published_posts' => true,
+            'read_private_posts' => true,
+
+            // Custom property capabilities for additional features
             'view_properties'        => true,
             'view_all_properties'    => true,
-            'create_properties'      => true,
-            'edit_properties'        => true,
-            'edit_others_properties' => true,
-            'delete_properties'      => true,
-            'delete_others_properties' => false, // Can't delete others
             'assign_properties'      => true,
             'view_team_statistics'   => true,
             'export_properties'      => true,
 
-            // Can't manage roles
+            // Restrictions (used in REST API and custom checks)
+            'delete_others_properties' => false, // Can't delete others
             'manage_property_roles'  => false,
         ]);
     }
@@ -67,16 +83,25 @@ class Property_Roles {
             // Basic WordPress capabilities
             'read' => true,
 
-            // Property capabilities - limited to own properties
+            // Standard WordPress post capabilities (limited)
+            'edit_posts' => true,
+            'edit_published_posts' => true,
+            'publish_posts' => true,
+            'read_private_posts' => false,
+
+            // Cannot edit or delete others' posts
+            'edit_others_posts' => false,
+            'delete_posts' => false,
+            'delete_published_posts' => false,
+            'delete_others_posts' => false,
+
+            // Custom property capabilities
             'view_properties'        => true,
             'view_all_properties'    => false, // Only own properties
-            'create_properties'      => true,
-            'edit_properties'        => true,
-            'edit_others_properties' => false,
-            'delete_properties'      => false,
-            'delete_others_properties' => false,
-            'assign_properties'      => false,
             'view_own_statistics'    => true,
+
+            // Restrictions
+            'assign_properties'      => false,
             'export_properties'      => false,
             'manage_property_roles'  => false,
         ]);
@@ -256,5 +281,49 @@ class Property_Roles {
                 'label' => __('Asociado', 'property-dashboard'),
             ],
         ];
+    }
+
+    /**
+     * Filter property deletion capabilities
+     * Managers can only delete their own properties
+     *
+     * @param array  $caps    Required capabilities
+     * @param string $cap     Capability being checked
+     * @param int    $user_id User ID
+     * @param array  $args    Additional arguments
+     * @return array Modified capabilities
+     */
+    public static function filter_property_deletion($caps, $cap, $user_id, $args) {
+        // Only apply to delete_post capability
+        if ($cap !== 'delete_post' && $cap !== 'delete_published_post') {
+            return $caps;
+        }
+
+        // Get the post being deleted
+        if (!isset($args[0])) {
+            return $caps;
+        }
+
+        $post = get_post($args[0]);
+        if (!$post || $post->post_type !== 'property') {
+            return $caps;
+        }
+
+        // Get user
+        $user = get_user_by('id', $user_id);
+        if (!$user) {
+            return $caps;
+        }
+
+        // If user is a Manager
+        if (in_array('property_manager', $user->roles)) {
+            // Manager can only delete their own properties
+            if ((int) $post->post_author !== (int) $user_id) {
+                // Return 'do_not_allow' to prevent deletion
+                return ['do_not_allow'];
+            }
+        }
+
+        return $caps;
     }
 }

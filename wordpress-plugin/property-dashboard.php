@@ -53,6 +53,12 @@ function property_dashboard_init() {
     // Register meta fields
     Property_Meta::register_fields();
 
+    // Initialize meta boxes
+    Property_Meta::init();
+
+    // Initialize capability filters (for role-based permissions)
+    Property_Roles::init_capability_filters();
+
     // Initialize REST API
     $rest_api = new Property_REST_API();
     add_action('rest_api_init', [$rest_api, 'register_routes']);
