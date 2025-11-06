@@ -1,0 +1,22 @@
+# WordPress
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+debug.log
+error_log
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Temporary files
+*.tmp
+.cache/
+
+# Don't ignore dist folder (we need it for production)
+# dist/ is intentionally NOT ignored
