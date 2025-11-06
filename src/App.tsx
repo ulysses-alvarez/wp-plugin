@@ -1,272 +1,181 @@
-import { useState, useEffect } from 'react'
-import './App.css'
+/**
+ * Property Dashboard App
+ * Main application component
+ */
+
+import { useState } from 'react';
+import { Toaster } from 'react-hot-toast';
+import { PropertyGrid } from '@/components/properties/PropertyGrid';
+import { PropertyFilters } from '@/components/properties/PropertyFilters';
+import { PropertySidebar } from '@/components/properties/PropertySidebar';
+import type { Property } from '@/utils/permissions';
+import { getUserCapabilitiesSummary } from '@/utils/permissions';
 
 // Declarar el tipo para los datos de WordPress
 declare global {
   interface Window {
     wpPropertyDashboard?: {
-      apiUrl: string
-      wpApiUrl: string
-      nonce: string
-      siteUrl: string
+      apiUrl: string;
+      wpApiUrl: string;
+      nonce: string;
+      siteUrl: string;
       currentUser: {
-        id: number
-        name: string
-        email: string
-        role: string
-        roleLabel: string
-        capabilities: Record<string, boolean>
-      }
+        id: number;
+        name: string;
+        email: string;
+        role: string;
+        roleLabel: string;
+        capabilities: Record<string, boolean>;
+      };
       config: {
-        perPage: number
-        view: string
-      }
+        perPage: number;
+        view: string;
+      };
       i18n: {
-        dateFormat: string
-        timeFormat: string
-        locale: string
-        currency: string
-      }
-    }
+        dateFormat: string;
+        timeFormat: string;
+        locale: string;
+        currency: string;
+      };
+    };
   }
 }
 
 function App() {
-  const [wpData, setWpData] = useState<typeof window.wpPropertyDashboard | null>(null)
-  const [apiTest, setApiTest] = useState<{loading: boolean, data: any, error: string | null}>({
-    loading: false,
-    data: null,
-    error: null
-  })
+  const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
-  useEffect(() => {
-    // Obtener datos de WordPress
-    if (window.wpPropertyDashboard) {
-      setWpData(window.wpPropertyDashboard)
-      console.log('WordPress Data:', window.wpPropertyDashboard)
-    } else {
-      console.error('wpPropertyDashboard no está definido. Verifica que el shortcode esté cargando los scripts correctamente.')
-    }
-  }, [])
-
-  const testAPI = async () => {
-    if (!wpData) return
-
-    setApiTest({ loading: true, data: null, error: null })
-
-    try {
-      const response = await fetch(`${wpData.apiUrl}/properties?per_page=5`, {
-        headers: {
-          'X-WP-Nonce': wpData.nonce,
-          'Content-Type': 'application/json'
-        }
-      })
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`)
-      }
-
-      const data = await response.json()
-      setApiTest({ loading: false, data, error: null })
-      console.log('API Response:', data)
-    } catch (error) {
-      setApiTest({
-        loading: false,
-        data: null,
-        error: error instanceof Error ? error.message : 'Error desconocido'
-      })
-      console.error('API Error:', error)
-    }
-  }
-
-  if (!wpData) {
+  // Check if WordPress data is available
+  if (!window.wpPropertyDashboard) {
     return (
-      <div style={{ padding: '20px', backgroundColor: '#fff3cd', border: '1px solid #ffc107', borderRadius: '4px' }}>
-        <h2 style={{ color: '#856404', margin: '0 0 10px 0' }}>⚠️ Advertencia</h2>
-        <p style={{ color: '#856404', margin: 0 }}>
-          Los datos de WordPress no están disponibles. Verifica que estés usando el shortcode <code>[property_dashboard]</code>
-        </p>
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+        <div className="bg-warning-light border-2 border-warning rounded-lg p-6 max-w-md">
+          <div className="flex items-center gap-3 mb-3">
+            <svg className="w-8 h-8 text-warning-dark" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+            <h2 className="text-lg font-semibold text-warning-dark">Advertencia</h2>
+          </div>
+          <p className="text-warning-dark">
+            Los datos de WordPress no están disponibles. Verifica que estés usando el shortcode{' '}
+            <code className="bg-warning text-warning-dark px-1 py-0.5 rounded font-mono text-sm">
+              [property_dashboard]
+            </code>
+          </p>
+        </div>
       </div>
-    )
+    );
   }
+
+  const userCapabilities = getUserCapabilitiesSummary();
+
+  const handlePropertySelect = (property: Property) => {
+    setSelectedProperty(property);
+    setIsSidebarOpen(true);
+  };
+
+  const handleCloseSidebar = () => {
+    setIsSidebarOpen(false);
+    // Wait for animation to complete before clearing selection
+    setTimeout(() => setSelectedProperty(null), 300);
+  };
+
+  const handleEdit = (property: Property) => {
+    // TODO: Open edit modal/form
+    console.log('Edit property:', property);
+    alert(`Editar propiedad: ${property.title}\n(Funcionalidad pendiente en siguiente fase)`);
+  };
+
+  const handleDelete = (property: Property) => {
+    // TODO: Show confirmation modal
+    if (confirm(`¿Estás seguro de que deseas eliminar la propiedad "${property.title}"?`)) {
+      console.log('Delete property:', property);
+      alert('Funcionalidad de eliminación pendiente en siguiente fase');
+    }
+  };
+
+  const handleCreateNew = () => {
+    // TODO: Open create modal/form
+    console.log('Create new property');
+    alert('Funcionalidad de creación pendiente en siguiente fase');
+  };
 
   return (
-    <div style={{ fontFamily: 'system-ui, -apple-system, sans-serif', maxWidth: '1200px', margin: '0 auto', padding: '20px' }}>
+    <div className="min-h-screen bg-gray-50">
+      {/* Toast Notifications */}
+      <Toaster
+        position="top-right"
+        toastOptions={{
+          duration: 3000,
+          style: {
+            background: '#fff',
+            color: '#1e293b'
+          },
+          success: {
+            iconTheme: {
+              primary: '#10b981',
+              secondary: '#fff'
+            }
+          },
+          error: {
+            iconTheme: {
+              primary: '#ef4444',
+              secondary: '#fff'
+            }
+          }
+        }}
+      />
+
       {/* Header */}
-      <div style={{ backgroundColor: '#216121', color: 'white', padding: '20px', borderRadius: '8px', marginBottom: '20px' }}>
-        <h1 style={{ margin: '0 0 10px 0', fontSize: '28px' }}>
-          ✅ Property Dashboard - Componente de Prueba
-        </h1>
-        <p style={{ margin: 0, opacity: 0.9 }}>
-          Verificación de integración WordPress ↔ React
-        </p>
-      </div>
-
-      {/* Status Cards */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '20px', marginBottom: '20px' }}>
-        {/* React Status */}
-        <div style={{ backgroundColor: 'white', padding: '20px', borderRadius: '8px', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }}>
-          <h3 style={{ margin: '0 0 15px 0', color: '#216121', fontSize: '18px' }}>
-            ✅ React Montado
-          </h3>
-          <p style={{ margin: 0, color: '#666' }}>
-            La aplicación React se ha montado correctamente en el div del shortcode.
-          </p>
-        </div>
-
-        {/* WordPress Data Status */}
-        <div style={{ backgroundColor: 'white', padding: '20px', borderRadius: '8px', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }}>
-          <h3 style={{ margin: '0 0 15px 0', color: '#216121', fontSize: '18px' }}>
-            ✅ Datos de WordPress
-          </h3>
-          <p style={{ margin: 0, color: '#666' }}>
-            <code style={{ backgroundColor: '#f5f5f5', padding: '2px 6px', borderRadius: '3px' }}>
-              window.wpPropertyDashboard
-            </code> está disponible
-          </p>
-        </div>
-
-        {/* Nonce Status */}
-        <div style={{ backgroundColor: 'white', padding: '20px', borderRadius: '8px', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }}>
-          <h3 style={{ margin: '0 0 15px 0', color: '#216121', fontSize: '18px' }}>
-            ✅ Nonce Activo
-          </h3>
-          <p style={{ margin: 0, color: '#666', wordBreak: 'break-all', fontSize: '12px' }}>
-            {wpData.nonce.substring(0, 20)}...
-          </p>
-        </div>
-      </div>
-
-      {/* User Info */}
-      <div style={{ backgroundColor: 'white', padding: '20px', borderRadius: '8px', boxShadow: '0 2px 4px rgba(0,0,0,0.1)', marginBottom: '20px' }}>
-        <h2 style={{ margin: '0 0 15px 0', color: '#333', fontSize: '20px' }}>
-          👤 Información del Usuario Actual
-        </h2>
-        <div style={{ display: 'grid', gridTemplateColumns: '150px 1fr', gap: '10px', fontSize: '14px' }}>
-          <strong>Nombre:</strong>
-          <span>{wpData.currentUser.name}</span>
-
-          <strong>Email:</strong>
-          <span>{wpData.currentUser.email}</span>
-
-          <strong>Rol:</strong>
-          <span>{wpData.currentUser.roleLabel} ({wpData.currentUser.role})</span>
-
-          <strong>ID:</strong>
-          <span>{wpData.currentUser.id}</span>
-        </div>
-      </div>
-
-      {/* Capabilities */}
-      <div style={{ backgroundColor: 'white', padding: '20px', borderRadius: '8px', boxShadow: '0 2px 4px rgba(0,0,0,0.1)', marginBottom: '20px' }}>
-        <h2 style={{ margin: '0 0 15px 0', color: '#333', fontSize: '20px' }}>
-          🔐 Permisos (Capabilities)
-        </h2>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: '8px', fontSize: '13px' }}>
-          {Object.entries(wpData.currentUser.capabilities).map(([cap, hasPermission]) => (
-            <div key={cap} style={{
-              display: 'flex',
-              alignItems: 'center',
-              padding: '8px 12px',
-              backgroundColor: hasPermission ? '#e8f5e9' : '#ffebee',
-              borderRadius: '4px',
-              border: `1px solid ${hasPermission ? '#c8e6c9' : '#ffcdd2'}`
-            }}>
-              <span style={{ marginRight: '8px' }}>{hasPermission ? '✅' : '❌'}</span>
-              <code style={{ fontSize: '12px' }}>{cap}</code>
+      <header className="bg-white shadow-sm border-b border-gray-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900">
+                Dashboard de Propiedades
+              </h1>
+              <p className="text-sm text-gray-600 mt-1">
+                {window.wpPropertyDashboard.currentUser.name} · {userCapabilities.roleLabel}
+              </p>
             </div>
-          ))}
-        </div>
-      </div>
-
-      {/* API Configuration */}
-      <div style={{ backgroundColor: 'white', padding: '20px', borderRadius: '8px', boxShadow: '0 2px 4px rgba(0,0,0,0.1)', marginBottom: '20px' }}>
-        <h2 style={{ margin: '0 0 15px 0', color: '#333', fontSize: '20px' }}>
-          🌐 Configuración de API
-        </h2>
-        <div style={{ display: 'grid', gridTemplateColumns: '150px 1fr', gap: '10px', fontSize: '14px' }}>
-          <strong>API URL:</strong>
-          <code style={{ backgroundColor: '#f5f5f5', padding: '4px 8px', borderRadius: '3px', fontSize: '12px', wordBreak: 'break-all' }}>
-            {wpData.apiUrl}
-          </code>
-
-          <strong>Site URL:</strong>
-          <code style={{ backgroundColor: '#f5f5f5', padding: '4px 8px', borderRadius: '3px', fontSize: '12px', wordBreak: 'break-all' }}>
-            {wpData.siteUrl}
-          </code>
-
-          <strong>Locale:</strong>
-          <span>{wpData.i18n.locale}</span>
-
-          <strong>Currency:</strong>
-          <span>{wpData.i18n.currency}</span>
-        </div>
-      </div>
-
-      {/* API Test */}
-      <div style={{ backgroundColor: 'white', padding: '20px', borderRadius: '8px', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }}>
-        <h2 style={{ margin: '0 0 15px 0', color: '#333', fontSize: '20px' }}>
-          🧪 Prueba de REST API
-        </h2>
-        <p style={{ margin: '0 0 15px 0', color: '#666', fontSize: '14px' }}>
-          Haz clic en el botón para probar la conexión con la REST API de propiedades:
-        </p>
-
-        <button
-          onClick={testAPI}
-          disabled={apiTest.loading}
-          style={{
-            backgroundColor: '#216121',
-            color: 'white',
-            border: 'none',
-            padding: '12px 24px',
-            borderRadius: '6px',
-            fontSize: '16px',
-            cursor: apiTest.loading ? 'not-allowed' : 'pointer',
-            opacity: apiTest.loading ? 0.6 : 1,
-            fontWeight: '500'
-          }}
-        >
-          {apiTest.loading ? '⏳ Consultando API...' : '🚀 Probar API'}
-        </button>
-
-        {apiTest.error && (
-          <div style={{ marginTop: '15px', padding: '15px', backgroundColor: '#ffebee', border: '1px solid #ef5350', borderRadius: '4px' }}>
-            <strong style={{ color: '#c62828' }}>❌ Error:</strong>
-            <p style={{ margin: '5px 0 0 0', color: '#c62828' }}>{apiTest.error}</p>
+            <div className="flex items-center gap-4">
+              <div className="hidden md:flex items-center gap-2 px-3 py-2 bg-gray-100 rounded-lg">
+                <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                </svg>
+                <span className="text-sm font-medium text-gray-700">
+                  {userCapabilities.roleLabel}
+                </span>
+              </div>
+            </div>
           </div>
-        )}
+        </div>
+      </header>
 
-        {apiTest.data && (
-          <div style={{ marginTop: '15px', padding: '15px', backgroundColor: '#e8f5e9', border: '1px solid #66bb6a', borderRadius: '4px' }}>
-            <strong style={{ color: '#2e7d32' }}>✅ Respuesta exitosa:</strong>
-            <pre style={{
-              margin: '10px 0 0 0',
-              padding: '10px',
-              backgroundColor: 'white',
-              border: '1px solid #c8e6c9',
-              borderRadius: '4px',
-              overflow: 'auto',
-              fontSize: '12px',
-              maxHeight: '300px'
-            }}>
-              {JSON.stringify(apiTest.data, null, 2)}
-            </pre>
-          </div>
-        )}
-      </div>
+      {/* Main Content */}
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Filters */}
+        <PropertyFilters />
 
-      {/* Footer */}
-      <div style={{ marginTop: '30px', padding: '20px', backgroundColor: '#f5f5f5', borderRadius: '8px', textAlign: 'center' }}>
-        <p style={{ margin: 0, color: '#666', fontSize: '14px' }}>
-          🎉 <strong>Todo está funcionando correctamente!</strong>
-        </p>
-        <p style={{ margin: '10px 0 0 0', color: '#999', fontSize: '13px' }}>
-          Ahora puedes proceder con la implementación completa del dashboard
-        </p>
-      </div>
+        {/* Property Grid */}
+        <PropertyGrid
+          onPropertySelect={handlePropertySelect}
+          onPropertyEdit={handleEdit}
+          onPropertyDelete={handleDelete}
+          onCreateNew={handleCreateNew}
+        />
+      </main>
+
+      {/* Property Sidebar */}
+      <PropertySidebar
+        property={selectedProperty}
+        isOpen={isSidebarOpen}
+        onClose={handleCloseSidebar}
+        onEdit={handleEdit}
+        onDelete={handleDelete}
+      />
     </div>
-  )
+  );
 }
 
-export default App
+export default App;

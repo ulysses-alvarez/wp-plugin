@@ -23,10 +23,8 @@ export default defineConfig({
         chunkFileNames: 'assets/[name].js',
         assetFileNames: 'assets/[name].[ext]',
 
-        // Separar vendor para optimización
-        manualChunks: {
-          vendor: ['react', 'react-dom']
-        }
+        // NO separar en chunks - todo en un solo archivo
+        manualChunks: undefined
       }
     },
 

@@ -34,12 +34,15 @@ class Property_Assets {
     public static function enqueue_app($config = []) {
         $dist_url = plugin_dir_url(dirname(__FILE__)) . 'dist/';
 
+        // Version con timestamp para forzar recarga
+        $version = '1.0.0-' . time();
+
         // Enqueue CSS normally
         wp_enqueue_style(
             'property-manager-app',
             $dist_url . 'assets/index.css',
             [],
-            '1.0.0'
+            $version
         );
 
         // Get current user data
@@ -87,15 +90,14 @@ class Property_Assets {
         ];
 
         // Add inline script to set wpPropertyDashboard BEFORE loading ES modules
-        add_action('wp_footer', function() use ($wp_data, $dist_url) {
+        add_action('wp_footer', function() use ($wp_data, $dist_url, $version) {
             // Output wpPropertyDashboard data
             echo '<script id="property-manager-data">';
             echo 'window.wpPropertyDashboard = ' . wp_json_encode($wp_data) . ';';
             echo '</script>';
 
-            // Load ES modules with type="module"
-            echo '<script type="module" crossorigin src="' . esc_url($dist_url . 'assets/index.js') . '"></script>';
-            echo '<link rel="modulepreload" crossorigin href="' . esc_url($dist_url . 'assets/vendor.js') . '">';
+            // Load ES modules with type="module" and version param
+            echo '<script type="module" crossorigin src="' . esc_url($dist_url . 'assets/index.js?ver=' . $version) . '"></script>';
         }, 20);
     }
 
