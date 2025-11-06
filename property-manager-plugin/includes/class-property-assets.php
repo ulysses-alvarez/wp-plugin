@@ -22,59 +22,8 @@ class Property_Assets {
      * Register assets (don't enqueue yet - wait for shortcode)
      */
     public static function register_assets() {
-        $dist_path = PROPERTY_DASHBOARD_PATH . 'dist/';
-        $dist_url = PROPERTY_DASHBOARD_URL . 'dist/';
-
-        // Check if dist folder exists
-        if (!file_exists($dist_path)) {
-            error_log('Property Dashboard: dist folder not found. Run npm run build first.');
-            return;
-        }
-
-        // Try to load manifest for cache busting
-        $manifest_file = $dist_path . '.vite/manifest.json';
-        $manifest = [];
-
-        if (file_exists($manifest_file)) {
-            $manifest = json_decode(file_get_contents($manifest_file), true);
-        }
-
-        // Determine JS and CSS file names
-        // Vite typically outputs: assets/index-[hash].js and assets/index-[hash].css
-        $vendor_file = self::find_file($dist_path . 'assets/', 'vendor*.js');
-        $js_file = self::find_file($dist_path . 'assets/', 'index*.js');
-        $css_file = self::find_file($dist_path . 'assets/', 'index*.css');
-
-        // Fallback to default names if not found
-        $vendor_url = $vendor_file ? $dist_url . 'assets/' . basename($vendor_file) : $dist_url . 'assets/vendor.js';
-        $js_url = $js_file ? $dist_url . 'assets/' . basename($js_file) : $dist_url . 'assets/index.js';
-        $css_url = $css_file ? $dist_url . 'assets/' . basename($css_file) : $dist_url . 'assets/index.css';
-
-        // Register vendor JavaScript (React, React-DOM, etc.)
-        wp_register_script(
-            'property-dashboard-vendor',
-            $vendor_url,
-            [], // No dependencies
-            PROPERTY_DASHBOARD_VERSION,
-            true // Load in footer
-        );
-
-        // Register main JavaScript (depends on vendor)
-        wp_register_script(
-            'property-dashboard-app',
-            $js_url,
-            ['property-dashboard-vendor'], // Depends on vendor
-            PROPERTY_DASHBOARD_VERSION,
-            true // Load in footer
-        );
-
-        // Register CSS
-        wp_register_style(
-            'property-dashboard-app',
-            $css_url,
-            [],
-            PROPERTY_DASHBOARD_VERSION
-        );
+        // No hacemos nada aquí porque los módulos ES requieren un manejo especial
+        // La carga se hace directamente en enqueue_app()
     }
 
     /**
@@ -83,10 +32,15 @@ class Property_Assets {
      * @param array $config Configuration passed from shortcode
      */
     public static function enqueue_app($config = []) {
-        // Enqueue scripts and styles
-        wp_enqueue_script('property-dashboard-vendor'); // Load vendor first
-        wp_enqueue_script('property-dashboard-app');
-        wp_enqueue_style('property-dashboard-app');
+        $dist_url = plugin_dir_url(dirname(__FILE__)) . 'dist/';
+
+        // Enqueue CSS normally
+        wp_enqueue_style(
+            'property-manager-app',
+            $dist_url . 'assets/index.css',
+            [],
+            '1.0.0'
+        );
 
         // Get current user data
         $current_user = wp_get_current_user();
@@ -132,12 +86,17 @@ class Property_Assets {
             'options' => get_option('property_dashboard_settings', []),
         ];
 
-        // Localize script - makes data available to React via window.wpPropertyDashboard
-        wp_localize_script(
-            'property-dashboard-app',
-            'wpPropertyDashboard',
-            $wp_data
-        );
+        // Add inline script to set wpPropertyDashboard BEFORE loading ES modules
+        add_action('wp_footer', function() use ($wp_data, $dist_url) {
+            // Output wpPropertyDashboard data
+            echo '<script id="property-manager-data">';
+            echo 'window.wpPropertyDashboard = ' . wp_json_encode($wp_data) . ';';
+            echo '</script>';
+
+            // Load ES modules with type="module"
+            echo '<script type="module" crossorigin src="' . esc_url($dist_url . 'assets/index.js') . '"></script>';
+            echo '<link rel="modulepreload" crossorigin href="' . esc_url($dist_url . 'assets/vendor.js') . '">';
+        }, 20);
     }
 
     /**

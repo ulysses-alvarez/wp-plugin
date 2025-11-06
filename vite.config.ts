@@ -13,7 +13,7 @@ export default defineConfig({
   },
 
   build: {
-    outDir: 'wordpress-plugin/dist',
+    outDir: 'property-manager-plugin/dist',
     emptyOutDir: true,
 
     rollupOptions: {

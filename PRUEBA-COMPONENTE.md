@@ -218,15 +218,15 @@ Una vez que confirmes que todo funciona:
 
 Marca cada item cuando lo completes:
 
-- [ ] Ejecuté `npm run build` sin errores
-- [ ] Copié la carpeta `dist/` al plugin
-- [ ] Subí los archivos al servidor
-- [ ] Veo la interfaz del componente de prueba
-- [ ] Veo mi información de usuario correctamente
-- [ ] Veo la lista de permisos
-- [ ] El botón "Probar API" funciona
-- [ ] La respuesta de la API muestra datos (o array vacío si no hay propiedades)
-- [ ] No hay errores en la consola del navegador (F12)
+- [x] Ejecuté `npm run build` sin errores
+- [x] Copié la carpeta `dist/` al plugin
+- [x] Subí los archivos al servidor
+- [x] Veo la interfaz del componente de prueba
+- [x] Veo mi información de usuario correctamente
+- [x] Veo la lista de permisos
+- [x] El botón "Probar API" funciona
+- [x] La respuesta de la API muestra datos (o array vacío si no hay propiedades)
+- [x] No hay errores en la consola del navegador (F12)
 
 ---
 
