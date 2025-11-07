@@ -5,7 +5,7 @@
 
 import { useState } from 'react';
 import { Toaster } from 'react-hot-toast';
-import { PropertyGrid } from '@/components/properties/PropertyGrid';
+import { PropertyTable } from '@/components/properties/PropertyTable';
 import { PropertyFilters } from '@/components/properties/PropertyFilters';
 import { PropertySidebar } from '@/components/properties/PropertySidebar';
 import type { Property } from '@/utils/permissions';
@@ -157,8 +157,8 @@ function App() {
         {/* Filters */}
         <PropertyFilters />
 
-        {/* Property Grid */}
-        <PropertyGrid
+        {/* Property Table */}
+        <PropertyTable
           onPropertySelect={handlePropertySelect}
           onPropertyEdit={handleEdit}
           onPropertyDelete={handleDelete}

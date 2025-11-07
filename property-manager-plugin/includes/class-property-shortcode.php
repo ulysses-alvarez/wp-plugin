@@ -27,8 +27,8 @@ class Property_Shortcode {
     public static function render($atts = []) {
         // Parse attributes
         $atts = shortcode_atts([
-            'view'     => 'grid',     // grid or list
-            'per_page' => 20,         // Properties per page
+            'view'       => 'grid',     // grid or list
+            'per_page'   => 20,         // Properties per page
         ], $atts, 'property_dashboard');
 
         // Check if user is logged in
@@ -44,8 +44,8 @@ class Property_Shortcode {
         // Enqueue assets (JS and CSS)
         Property_Assets::enqueue_app($atts);
 
-        // Return root div where React will mount
-        return '<div id="property-dashboard-root" class="property-dashboard-wrapper"></div>';
+        // Always apply fullscreen mode
+        return '<div id="property-dashboard-root" class="property-dashboard-wrapper property-dashboard-fullscreen-mode"></div>';
     }
 
     /**

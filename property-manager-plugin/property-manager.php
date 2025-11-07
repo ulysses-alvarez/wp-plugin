@@ -32,6 +32,7 @@ require_once PROPERTY_MANAGER_PATH . 'includes/class-property-roles.php';
 require_once PROPERTY_MANAGER_PATH . 'includes/class-property-rest-api.php';
 require_once PROPERTY_MANAGER_PATH . 'includes/class-property-shortcode.php';
 require_once PROPERTY_MANAGER_PATH . 'includes/class-property-assets.php';
+require_once PROPERTY_MANAGER_PATH . 'includes/class-property-template.php';
 
 /**
  * Activation hook
@@ -68,6 +69,9 @@ function property_manager_init() {
 
     // Initialize assets
     Property_Assets::init();
+
+    // Initialize template handler
+    Property_Template::init();
 }
 add_action('init', 'property_manager_init');
 

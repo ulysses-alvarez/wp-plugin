@@ -45,6 +45,35 @@ class Property_Assets {
             $version
         );
 
+        // Add inline CSS for fullscreen mode
+        $fullscreen_css = "
+            /* Fullscreen mode styles */
+            .property-dashboard-fullscreen-mode {
+                width: 100% !important;
+                min-height: 100vh !important;
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+
+            /* Remove any container constraints in fullscreen */
+            .property-dashboard-fullscreen .entry-content,
+            .property-dashboard-fullscreen .site-main,
+            .property-dashboard-fullscreen .content-area,
+            .property-dashboard-fullscreen article {
+                max-width: none !important;
+                width: 100% !important;
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+
+            /* Ensure React app fills available space */
+            .property-dashboard-fullscreen-mode #property-dashboard-root {
+                min-height: 100vh;
+            }
+        ";
+
+        wp_add_inline_style('property-manager-app', $fullscreen_css);
+
         // Get current user data
         $current_user = wp_get_current_user();
         $user_role = !empty($current_user->roles) ? $current_user->roles[0] : '';
