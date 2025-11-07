@@ -115,15 +115,39 @@ function App() {
   };
 
   const handleFormSubmit = async (data: PropertyFormData) => {
+    // Import uploadFile dynamically
+    const { uploadFile } = await import('@/services/api');
+
+    // Handle file upload if present
+    let attachmentId: number | undefined;
+    if (data.attachment && data.attachment instanceof File) {
+      try {
+        const uploadResult = await uploadFile(data.attachment);
+        attachmentId = uploadResult.id;
+      } catch (error) {
+        console.error('Error uploading file:', error);
+        // Continue without attachment if upload fails
+      }
+    }
+
+    // Prepare property data
+    const propertyData = {
+      ...data,
+      attachment_id: attachmentId
+    };
+
+    // Remove the file object as we've uploaded it
+    delete (propertyData as any).attachment;
+
     if (sidebarMode === 'create') {
-      const newProperty = await createProperty(data as any);
+      const newProperty = await createProperty(propertyData as any);
       if (newProperty) {
         handleCloseSidebar();
         // Reload properties
         loadProperties();
       }
     } else if (sidebarMode === 'edit' && selectedProperty) {
-      const updatedProperty = await updateProperty(selectedProperty.id, data as any);
+      const updatedProperty = await updateProperty(selectedProperty.id, propertyData as any);
       if (updatedProperty) {
         handleCloseSidebar();
         // Reload properties

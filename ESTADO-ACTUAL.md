@@ -1,9 +1,9 @@
 # 📊 Estado Actual del Proyecto
 ## Property Dashboard - WordPress Plugin con React
 
-**Última actualización:** 6 de Noviembre, 2025
-**Versión:** 1.0.0 Beta
-**Estado:** ✅ Funcional y listo para pruebas
+**Última actualización:** 7 de Noviembre, 2025
+**Versión:** 1.0.0 Release Candidate
+**Estado:** ✅ MVP Completo - Listo para producción
 
 ---
 
@@ -74,9 +74,9 @@ _property_attachment_id  - ID del archivo adjunto
 
 #### Build Optimizado
 ```
-CSS:  19.89 KB → 4.32 KB gzipped
-JS:   237.88 KB → 73.83 KB gzipped
-Total: ~78 KB gzipped (< 200KB target ✅)
+CSS:  22.77 KB → 4.76 KB gzipped
+JS:   256.00 KB → 78.17 KB gzipped
+Total: ~83 KB gzipped (< 200KB target ✅)
 ```
 
 #### Estructura de Archivos
@@ -96,11 +96,13 @@ src/
 │   │   ├── FileUpload.tsx          ✅ Drag & drop
 │   │   └── index.ts                ✅ Exports centralizados
 │   │
-│   └── properties/                  ✅ 4 componentes de propiedades
+│   └── properties/                  ✅ 5 componentes de propiedades
 │       ├── PropertyCard.tsx        ✅ Card individual
 │       ├── PropertyGrid.tsx        ✅ Grid con paginación
+│       ├── PropertyTable.tsx       ✅ Vista de tabla (Dashlane-style)
 │       ├── PropertyFilters.tsx     ✅ Filtros de búsqueda
-│       └── PropertySidebar.tsx     ✅ Panel lateral de detalles
+│       ├── PropertySidebar.tsx     ✅ Panel lateral con 3 modos
+│       └── PropertyForm.tsx        ✅ Formulario CRUD completo
 │
 ├── stores/
 │   └── usePropertyStore.ts         ✅ Zustand store completo
@@ -154,17 +156,30 @@ src/
 - Indicador de página actual
 - Adaptativo según total de páginas
 
-### ✅ Sidebar de Detalles
-- **Panel lateral deslizable** desde la derecha
+### ✅ Sidebar de Detalles (3 Modos)
+- **Panel lateral deslizable** desde la derecha (600px)
 - **Animaciones suaves**: Entrada/salida con transiciones
-- **Detalles completos**:
-  - Título, patente, estado
-  - Precio destacado en MXN
-  - Ubicación completa (calle, colonia, municipio, estado, CP)
-  - Descripción completa
-  - Link a Google Maps (si existe)
-  - Archivo adjunto (si existe)
-- **Botones de acción**: Editar/Eliminar según permisos
+- **3 Modos de Operación**:
+  1. **Vista (View)**: Solo lectura con diseño elegante
+  2. **Crear (Create)**: Formulario completo para nueva propiedad
+  3. **Editar (Edit)**: Formulario pre-llenado con datos actuales
+
+#### Modo Vista - Orden de Secciones:
+  1. **Título, Estado y Precio** (card con gradiente)
+  2. **Patente** (si existe)
+  3. **Ficha Técnica** (si existe - con link de descarga)
+  4. **Ubicación** (dirección, colonia, municipio, estado, CP)
+  5. **Descripción** (si existe)
+  6. **Mapa de Google Maps** (si existe)
+
+#### Modo Crear/Editar:
+  - **Formulario completo** con validación en tiempo real
+  - **11 campos**: Título*, Estado*, Estado*, Municipio*, Colonia*, CP*, Dirección*, Patente*, Precio*, Google Maps, Descripción, Ficha Técnica
+  - **Upload de archivos**: Drag & drop o click para seleccionar
+  - **Validación visual**: Errores mostrados bajo cada campo
+  - **Botones**: Cancelar y Guardar (alineados a la derecha)
+
+- **Botones de acción**: Editar/Eliminar según permisos (justify-end)
 - **Cierre**: ESC, backdrop click, o botón X
 - **Prevención de scroll**: Body no hace scroll cuando está abierto
 
@@ -182,16 +197,21 @@ src/
   - Lista de propiedades
   - Propiedad seleccionada
   - Loading/error states
-  - Filtros activos
-  - Paginación (página actual, total páginas, total items)
-- **Acciones**:
-  - `loadProperties()` - Carga con filtros
-  - `loadProperty()` - Carga una propiedad
-  - `createProperty()` - Crear (preparado)
-  - `updateProperty()` - Actualizar (preparado)
-  - `deleteProperty()` - Eliminar (preparado)
-  - Filtros: `setSearch()`, `setStatusFilter()`, `setStateFilter()`
-  - Paginación: `setPage()`, `nextPage()`, `prevPage()`
+  - Filtros activos (search, status, state, municipality)
+  - Paginación (página actual, total páginas, total items, per_page)
+  - Ordenamiento (sortBy, sortOrder)
+- **Acciones implementadas**:
+  - `loadProperties()` - ✅ Carga con filtros y paginación
+  - `loadProperty()` - ✅ Carga una propiedad por ID
+  - `createProperty()` - ✅ Crear nueva propiedad con toast success
+  - `updateProperty()` - ✅ Actualizar existente con toast success
+  - `deleteProperty()` - ✅ Eliminar con toast success
+  - `setSearch()`, `setStatusFilter()`, `setStateFilter()`, `setMunicipalityFilter()` - ✅
+  - `clearFilters()` - ✅ Resetea todos los filtros
+  - `setPage()`, `setPerPage()`, `nextPage()`, `prevPage()` - ✅
+  - `setSortBy()`, `setSortOrder()` - ✅
+  - `selectProperty()` - ✅ Selecciona propiedad actual
+  - `reset()` - ✅ Resetea store a estado inicial
 
 ---
 
@@ -208,24 +228,45 @@ src/
 
 ---
 
-## ⏳ PENDIENTE (Siguiente Fase)
+### ✅ Formularios CRUD (Completado)
+- ✅ Formulario para crear nueva propiedad
+- ✅ Formulario para editar propiedad existente
+- ✅ Modal de confirmación para eliminar (JavaScript confirm)
+- ✅ Validación completa de campos requeridos
+- ✅ Upload de archivos adjuntos (PDF, PNG, JPG)
+- ✅ Toast notifications en todas las acciones
+- ✅ Integración completa con WordPress Media Library
+- ✅ Preview y descarga de archivos técnicos
 
-### Formularios CRUD
-- ⏳ Modal/formulario para crear nueva propiedad
-- ⏳ Modal/formulario para editar propiedad existente
-- ⏳ Modal de confirmación para eliminar
-- ⏳ Integración con React Hook Form
-- ⏳ Validación completa de campos
-- ⏳ Upload de archivos adjuntos
-- ⏳ Toast notifications en acciones
+### ✅ UI/UX Mejorado
+- ✅ Vista de tabla estilo Dashlane (desde grid a tabla)
+- ✅ Tipografía unificada (text-sm, text-xs, text-base, text-lg)
+- ✅ Toast con colores primarios y 30% opacidad
+- ✅ Diseño elegante del sidebar de vista de propiedad
+- ✅ Campos de admin WordPress: 100% width, tamaños reducidos
+- ✅ Editor clásico (Gutenberg deshabilitado)
+- ✅ Cambio de "Calle y Número" a "Dirección"
+- ✅ Todos los campos requeridos excepto: Google Maps, Descripción, Ficha Técnica
+- ✅ Preview compacto de archivos en admin WordPress
 
-### Mejoras Adicionales
+### ✅ Correcciones de Bugs
+- ✅ Error 500 en REST API (sanitize_callback con argumentos incorrectos)
+- ✅ Field name mismatch (google_maps vs google_maps_url)
+- ✅ Validación de admin no interfiere con REST API (REST_REQUEST check)
+- ✅ Eliminado "0" que se renderizaba en modal de vista
+- ✅ Reorganización del orden de secciones en modal de vista
+
+## ⏳ FUTURAS MEJORAS (Backlog)
+
+### Mejoras Avanzadas
 - ⏳ Selector de items por página (5, 10, 20, 50, 100)
 - ⏳ Ordenamiento (por fecha, título, precio)
-- ⏳ Vista de lista (alternativa al grid)
 - ⏳ Estadísticas y dashboard analytics
 - ⏳ Exportar a CSV/Excel
 - ⏳ Gestión de roles de usuarios (Admin)
+- ⏳ Importación masiva CSV
+- ⏳ Historial de cambios (audit log)
+- ⏳ Modo oscuro (dark mode)
 
 ---
 

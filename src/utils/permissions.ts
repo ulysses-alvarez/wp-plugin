@@ -22,6 +22,7 @@ export interface Property {
   price?: number;
   google_maps_url?: string;
   attachment_id?: number;
+  attachment_url?: string;
   created_at?: string;
   updated_at?: string;
 }

@@ -72,6 +72,36 @@ class Property_Assets {
             .property-meta-table tr td {
                 padding: 12px 0;
             }
+
+            /* Attachment preview styles */
+            .property-attachment-container .attachment-preview {
+                display: inline-flex;
+                align-items: center;
+                gap: 10px;
+                margin-bottom: 10px;
+            }
+
+            .property-attachment-container .attachment-link {
+                display: inline-flex;
+                align-items: center;
+                gap: 5px;
+                text-decoration: none;
+                font-size: 14px;
+            }
+
+            .property-attachment-container .dashicons {
+                font-size: 20px;
+                width: 20px;
+                height: 20px;
+            }
+
+            .property-attachment-container img {
+                max-width: 150px;
+                max-height: 150px;
+                object-fit: contain;
+                border: 1px solid #ddd;
+                border-radius: 4px;
+            }
         ";
 
         wp_add_inline_style('common', $admin_css);

@@ -494,6 +494,16 @@ class Property_REST_API {
 
             $author = get_userdata($post->post_author);
 
+            // Get attachment URL if attachment_id exists
+            $attachment_id = isset($meta['attachment_id']) ? intval($meta['attachment_id']) : 0;
+            $attachment_url = '';
+            if ($attachment_id > 0) {
+                $attachment_url = wp_get_attachment_url($attachment_id);
+                if (!$attachment_url) {
+                    $attachment_url = '';
+                }
+            }
+
             return [
                 'id'              => $post->ID,
                 'title'           => $post->post_title,
@@ -507,7 +517,8 @@ class Property_REST_API {
                 'patent'          => isset($meta['patent']) ? $meta['patent'] : '',
                 'price'           => isset($meta['price']) ? $meta['price'] : 0,
                 'google_maps_url' => isset($meta['google_maps_url']) ? $meta['google_maps_url'] : '',
-                'attachment_id'   => isset($meta['attachment_id']) ? $meta['attachment_id'] : 0,
+                'attachment_id'   => $attachment_id,
+                'attachment_url'  => $attachment_url,
                 'author_id'       => $post->post_author,
                 'author_name'     => $author ? $author->display_name : '',
                 'created_at'      => $post->post_date,
