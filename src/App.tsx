@@ -140,16 +140,29 @@ function App() {
         toastOptions={{
           duration: 3000,
           style: {
+            fontSize: '14px',
             background: '#fff',
             color: '#1e293b'
           },
           success: {
+            style: {
+              background: 'rgba(16, 185, 129, 0.3)',
+              color: '#059669',
+              fontSize: '14px',
+              fontWeight: '500'
+            },
             iconTheme: {
               primary: '#10b981',
               secondary: '#fff'
             }
           },
           error: {
+            style: {
+              background: 'rgba(239, 68, 68, 0.3)',
+              color: '#dc2626',
+              fontSize: '14px',
+              fontWeight: '500'
+            },
             iconTheme: {
               primary: '#ef4444',
               secondary: '#fff'

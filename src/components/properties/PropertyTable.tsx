@@ -87,11 +87,11 @@ export const PropertyTable = ({
         <svg className="w-12 h-12 text-danger mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
         </svg>
-        <h3 className="text-lg font-semibold text-danger mb-2">Error al cargar propiedades</h3>
-        <p className="text-danger-dark">{error}</p>
+        <h3 className="text-base font-semibold text-danger mb-2">Error al cargar propiedades</h3>
+        <p className="text-sm text-danger-dark">{error}</p>
         <button
           onClick={() => loadProperties()}
-          className="mt-4 px-4 py-2 bg-danger text-white rounded-lg hover:bg-danger-dark transition-colors"
+          className="mt-4 px-4 py-2 bg-danger text-white rounded-lg hover:bg-danger-dark transition-colors text-sm"
         >
           Reintentar
         </button>
@@ -105,10 +105,10 @@ export const PropertyTable = ({
         <svg className="w-20 h-20 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
         </svg>
-        <h3 className="text-xl font-semibold text-gray-700 mb-2">
+        <h3 className="text-lg font-semibold text-gray-700 mb-2">
           No hay propiedades disponibles
         </h3>
-        <p className="text-gray-500 mb-6">
+        <p className="text-sm text-gray-500 mb-6">
           {canCreate
             ? 'Comienza agregando tu primera propiedad'
             : 'No tienes propiedades asignadas en este momento'
@@ -117,7 +117,7 @@ export const PropertyTable = ({
         {canCreate && onCreateNew && (
           <button
             onClick={onCreateNew}
-            className="px-6 py-3 bg-primary text-white rounded-lg hover:bg-primary-hover transition-colors font-medium"
+            className="px-6 py-3 bg-primary text-white rounded-lg hover:bg-primary-hover transition-colors font-medium text-sm"
           >
             + Agregar Primera Propiedad
           </button>
@@ -131,7 +131,7 @@ export const PropertyTable = ({
       {/* Header - Fixed */}
       <div className="flex-shrink-0 flex items-center justify-between mb-4">
         <div>
-          <h2 className="text-xl font-bold text-gray-900">Propiedades</h2>
+          <h2 className="text-lg font-bold text-gray-900">Propiedades</h2>
           <p className="text-sm text-gray-600 mt-1">
             {total} {total === 1 ? 'propiedad encontrada' : 'propiedades encontradas'}
           </p>
@@ -192,7 +192,7 @@ export const PropertyTable = ({
                     {/* Property Name & Patent */}
                     <td className="px-6 py-4">
                       <div className="flex flex-col">
-                        <div className="text-base font-medium text-gray-900 truncate max-w-xs">
+                        <div className="text-sm font-medium text-gray-900 truncate max-w-xs">
                           {property.title}
                         </div>
                         {property.patent && (
@@ -205,7 +205,7 @@ export const PropertyTable = ({
 
                     {/* Location */}
                     <td className="px-6 py-4">
-                      <div className="text-base text-gray-900 flex items-start gap-1.5">
+                      <div className="text-sm text-gray-900 flex items-start gap-1.5">
                         <svg className="w-4 h-4 text-gray-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -231,7 +231,7 @@ export const PropertyTable = ({
 
                     {/* Price */}
                     <td className="px-6 py-4">
-                      <div className="text-base font-semibold text-gray-900">
+                      <div className="text-sm font-semibold text-gray-900">
                         {formatPrice(property.price)}
                       </div>
                     </td>
