@@ -8,7 +8,9 @@ import type { DragEvent, ChangeEvent } from 'react';
 import clsx from 'clsx';
 
 interface FileUploadProps {
-  onFileSelect: (file: File) => void;
+  name?: string;
+  onChange?: (file: File | null) => void;
+  onFileSelect?: (file: File) => void; // Keep for backwards compatibility
   accept?: string;
   maxSizeMB?: number;
   currentFile?: string | null;
@@ -16,9 +18,11 @@ interface FileUploadProps {
   helperText?: string;
   error?: string;
   className?: string;
+  disabled?: boolean;
 }
 
 export const FileUpload = ({
+  onChange,
   onFileSelect,
   accept = '.pdf,.doc,.docx',
   maxSizeMB = 10,
@@ -26,7 +30,8 @@ export const FileUpload = ({
   label = 'Subir archivo',
   helperText,
   error,
-  className
+  className,
+  disabled = false
 }: FileUploadProps) => {
   const [isDragging, setIsDragging] = useState(false);
   const [selectedFileName, setSelectedFileName] = useState<string | null>(null);
@@ -70,7 +75,12 @@ export const FileUpload = ({
     }
 
     setSelectedFileName(file.name);
-    onFileSelect(file);
+    if (onChange) {
+      onChange(file);
+    }
+    if (onFileSelect) {
+      onFileSelect(file);
+    }
   };
 
   const handleDrop = (e: DragEvent<HTMLDivElement>) => {
@@ -99,6 +109,9 @@ export const FileUpload = ({
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
+    if (onChange) {
+      onChange(null);
+    }
   };
 
   return (
@@ -108,17 +121,19 @@ export const FileUpload = ({
       )}
 
       <div
-        onDragOver={handleDragOver}
-        onDragLeave={handleDragLeave}
-        onDrop={handleDrop}
-        onClick={handleClick}
+        onDragOver={disabled ? undefined : handleDragOver}
+        onDragLeave={disabled ? undefined : handleDragLeave}
+        onDrop={disabled ? undefined : handleDrop}
+        onClick={disabled ? undefined : handleClick}
         className={clsx(
-          'border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition-colors',
-          isDragging
+          'border-2 border-dashed rounded-lg p-6 text-center transition-colors',
+          disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer',
+          isDragging && !disabled
             ? 'border-primary bg-primary-light'
             : error
             ? 'border-danger bg-danger-light'
-            : 'border-gray-300 hover:border-primary hover:bg-gray-50'
+            : 'border-gray-300',
+          !disabled && 'hover:border-primary hover:bg-gray-50'
         )}
       >
         <input

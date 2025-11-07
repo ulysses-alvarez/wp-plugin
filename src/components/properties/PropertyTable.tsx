@@ -127,11 +127,11 @@ export const PropertyTable = ({
   }
 
   return (
-    <div className="space-y-4">
-      {/* Header */}
-      <div className="flex items-center justify-between">
+    <div className="h-full flex flex-col">
+      {/* Header - Fixed */}
+      <div className="flex-shrink-0 flex items-center justify-between mb-4">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">Propiedades</h2>
+          <h2 className="text-xl font-bold text-gray-900">Propiedades</h2>
           <p className="text-sm text-gray-600 mt-1">
             {total} {total === 1 ? 'propiedad encontrada' : 'propiedades encontradas'}
           </p>
@@ -139,9 +139,9 @@ export const PropertyTable = ({
         {canCreate && onCreateNew && (
           <button
             onClick={onCreateNew}
-            className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-hover transition-colors font-medium flex items-center gap-2"
+            className="px-3 py-1.5 bg-primary text-white rounded-lg hover:bg-primary-hover transition-colors font-medium flex items-center gap-2 text-sm"
           >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
             </svg>
             Nueva Propiedad
@@ -149,9 +149,9 @@ export const PropertyTable = ({
         )}
       </div>
 
-      {/* Table Container */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-        <div className="overflow-x-auto">
+      {/* Table Container - Scrollable */}
+      <div className="flex-1 bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden flex flex-col">
+        <div className="flex-1 overflow-auto">
           <table className="w-full">
             <thead>
               <tr className="bg-gray-50 border-b border-gray-200">
@@ -192,11 +192,11 @@ export const PropertyTable = ({
                     {/* Property Name & Patent */}
                     <td className="px-6 py-4">
                       <div className="flex flex-col">
-                        <div className="text-sm font-medium text-gray-900 truncate max-w-xs">
+                        <div className="text-base font-medium text-gray-900 truncate max-w-xs">
                           {property.title}
                         </div>
                         {property.patent && (
-                          <div className="text-xs text-gray-500 mt-0.5">
+                          <div className="text-sm text-gray-500 mt-0.5">
                             Patente: {property.patent}
                           </div>
                         )}
@@ -205,7 +205,7 @@ export const PropertyTable = ({
 
                     {/* Location */}
                     <td className="px-6 py-4">
-                      <div className="text-sm text-gray-900 flex items-start gap-1.5">
+                      <div className="text-base text-gray-900 flex items-start gap-1.5">
                         <svg className="w-4 h-4 text-gray-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -214,7 +214,7 @@ export const PropertyTable = ({
                           {property.neighborhood && (
                             <span className="truncate">{property.neighborhood}</span>
                           )}
-                          <span className="text-gray-600 text-xs truncate">
+                          <span className="text-gray-600 text-sm truncate">
                             {property.municipality}
                             {property.state && `, ${property.state}`}
                           </span>
@@ -231,7 +231,7 @@ export const PropertyTable = ({
 
                     {/* Price */}
                     <td className="px-6 py-4">
-                      <div className="text-sm font-semibold text-gray-900">
+                      <div className="text-base font-semibold text-gray-900">
                         {formatPrice(property.price)}
                       </div>
                     </td>
@@ -290,6 +290,17 @@ export const PropertyTable = ({
             </tbody>
           </table>
         </div>
+
+        {/* Pagination - Fixed at bottom */}
+        {totalPages > 1 && (
+          <div className="flex-shrink-0 border-t border-gray-200 px-6 py-4 bg-gray-50">
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={handlePageChange}
+            />
+          </div>
+        )}
       </div>
 
       {/* Loading Overlay */}
@@ -298,17 +309,6 @@ export const PropertyTable = ({
           <div className="bg-white rounded-lg p-6 shadow-xl">
             <LoadingSpinner size="lg" />
           </div>
-        </div>
-      )}
-
-      {/* Pagination */}
-      {totalPages > 1 && (
-        <div className="flex justify-center pt-4">
-          <Pagination
-            currentPage={currentPage}
-            totalPages={totalPages}
-            onPageChange={handlePageChange}
-          />
         </div>
       )}
     </div>

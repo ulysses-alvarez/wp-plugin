@@ -8,6 +8,8 @@ import { Toaster } from 'react-hot-toast';
 import { PropertyTable } from '@/components/properties/PropertyTable';
 import { PropertyFilters } from '@/components/properties/PropertyFilters';
 import { PropertySidebar } from '@/components/properties/PropertySidebar';
+import type { PropertyFormData } from '@/components/properties/PropertyForm';
+import { usePropertyStore } from '@/stores/usePropertyStore';
 import type { Property } from '@/utils/permissions';
 import { getUserCapabilitiesSummary } from '@/utils/permissions';
 
@@ -44,6 +46,11 @@ declare global {
 function App() {
   const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [sidebarMode, setSidebarMode] = useState<'view' | 'create' | 'edit'>('view');
+
+  // Access store functions
+  const { createProperty, updateProperty, deleteProperty, loadProperties } = usePropertyStore();
+  const loading = usePropertyStore(state => state.loading);
 
   // Check if WordPress data is available
   if (!window.wpPropertyDashboard) {
@@ -71,37 +78,62 @@ function App() {
 
   const handlePropertySelect = (property: Property) => {
     setSelectedProperty(property);
+    setSidebarMode('view');
     setIsSidebarOpen(true);
   };
 
   const handleCloseSidebar = () => {
     setIsSidebarOpen(false);
     // Wait for animation to complete before clearing selection
-    setTimeout(() => setSelectedProperty(null), 300);
+    setTimeout(() => {
+      setSelectedProperty(null);
+      setSidebarMode('view');
+    }, 300);
   };
 
   const handleEdit = (property: Property) => {
-    // TODO: Open edit modal/form
-    console.log('Edit property:', property);
-    alert(`Editar propiedad: ${property.title}\n(Funcionalidad pendiente en siguiente fase)`);
+    setSelectedProperty(property);
+    setSidebarMode('edit');
+    setIsSidebarOpen(true);
   };
 
-  const handleDelete = (property: Property) => {
-    // TODO: Show confirmation modal
+  const handleDelete = async (property: Property) => {
     if (confirm(`¿Estás seguro de que deseas eliminar la propiedad "${property.title}"?`)) {
-      console.log('Delete property:', property);
-      alert('Funcionalidad de eliminación pendiente en siguiente fase');
+      const success = await deleteProperty(property.id);
+      if (success) {
+        handleCloseSidebar();
+        // Reload properties
+        loadProperties();
+      }
     }
   };
 
   const handleCreateNew = () => {
-    // TODO: Open create modal/form
-    console.log('Create new property');
-    alert('Funcionalidad de creación pendiente en siguiente fase');
+    setSelectedProperty(null);
+    setSidebarMode('create');
+    setIsSidebarOpen(true);
+  };
+
+  const handleFormSubmit = async (data: PropertyFormData) => {
+    if (sidebarMode === 'create') {
+      const newProperty = await createProperty(data as any);
+      if (newProperty) {
+        handleCloseSidebar();
+        // Reload properties
+        loadProperties();
+      }
+    } else if (sidebarMode === 'edit' && selectedProperty) {
+      const updatedProperty = await updateProperty(selectedProperty.id, data as any);
+      if (updatedProperty) {
+        handleCloseSidebar();
+        // Reload properties
+        loadProperties();
+      }
+    }
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="h-screen flex flex-col bg-gray-50 overflow-hidden">
       {/* Toast Notifications */}
       <Toaster
         position="top-right"
@@ -126,12 +158,12 @@ function App() {
         }}
       />
 
-      {/* Header */}
-      <header className="bg-white shadow-sm border-b border-gray-200">
+      {/* Header - Fixed height */}
+      <header className="flex-shrink-0 bg-white shadow-sm border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">
+              <h1 className="text-xl font-bold text-gray-900">
                 Dashboard de Propiedades
               </h1>
               <p className="text-sm text-gray-600 mt-1">
@@ -152,27 +184,36 @@ function App() {
         </div>
       </header>
 
-      {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Filters */}
-        <PropertyFilters />
+      {/* Main Content - Flexible with internal scroll */}
+      <main className="flex-1 overflow-auto">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 h-full flex flex-col">
+          {/* Filters */}
+          <div className="flex-shrink-0 mb-6">
+            <PropertyFilters />
+          </div>
 
-        {/* Property Table */}
-        <PropertyTable
-          onPropertySelect={handlePropertySelect}
-          onPropertyEdit={handleEdit}
-          onPropertyDelete={handleDelete}
-          onCreateNew={handleCreateNew}
-        />
+          {/* Property Table - Flexible with internal scroll */}
+          <div className="flex-1 overflow-hidden">
+            <PropertyTable
+              onPropertySelect={handlePropertySelect}
+              onPropertyEdit={handleEdit}
+              onPropertyDelete={handleDelete}
+              onCreateNew={handleCreateNew}
+            />
+          </div>
+        </div>
       </main>
 
       {/* Property Sidebar */}
       <PropertySidebar
         property={selectedProperty}
         isOpen={isSidebarOpen}
+        mode={sidebarMode}
         onClose={handleCloseSidebar}
         onEdit={handleEdit}
         onDelete={handleDelete}
+        onSubmit={handleFormSubmit}
+        loading={loading}
       />
     </div>
   );
