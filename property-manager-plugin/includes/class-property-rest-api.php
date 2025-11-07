@@ -161,87 +161,149 @@ class Property_REST_API {
      * Create property
      */
     public function create_property($request) {
-        $title = $request->get_param('title');
-        $description = $request->get_param('description');
+        try {
+            // Validate required fields
+            $validation_error = $this->validate_required_fields($request);
+            if (is_wp_error($validation_error)) {
+                return $validation_error;
+            }
 
-        if (empty($title)) {
+            $title = $request->get_param('title');
+            $description = $request->get_param('description');
+
+            // Create post
+            $post_data = [
+                'post_type'    => 'property',
+                'post_title'   => sanitize_text_field($title),
+                'post_content' => wp_kses_post($description),
+                'post_status'  => 'publish',
+                'post_author'  => get_current_user_id(),
+            ];
+
+            $property_id = wp_insert_post($post_data, true);
+
+            if (is_wp_error($property_id)) {
+                error_log('Property Create Error (wp_insert_post): ' . $property_id->get_error_message());
+                return $property_id;
+            }
+
+            // Update meta fields
+            $this->update_property_meta($property_id, $request);
+
+            $post = get_post($property_id);
+
+            if (!$post) {
+                error_log('Property Create Error: Post not found after creation. ID: ' . $property_id);
+                return new WP_Error(
+                    'post_not_found',
+                    __('No se pudo recuperar la propiedad después de crearla', 'property-dashboard'),
+                    ['status' => 500]
+                );
+            }
+
+            $response = $this->prepare_property_response($post);
+            return rest_ensure_response($response);
+
+        } catch (Exception $e) {
+            error_log('Property Create Exception: ' . $e->getMessage() . ' in ' . $e->getFile() . ':' . $e->getLine());
             return new WP_Error(
-                'missing_title',
-                __('El título es requerido', 'property-dashboard'),
-                ['status' => 400]
+                'create_exception',
+                __('Error al crear la propiedad: ', 'property-dashboard') . $e->getMessage(),
+                ['status' => 500]
+            );
+        } catch (Error $e) {
+            error_log('Property Create Fatal Error: ' . $e->getMessage() . ' in ' . $e->getFile() . ':' . $e->getLine());
+            return new WP_Error(
+                'create_fatal_error',
+                __('Error fatal al crear la propiedad: ', 'property-dashboard') . $e->getMessage(),
+                ['status' => 500]
             );
         }
-
-        // Create post
-        $post_data = [
-            'post_type'    => 'property',
-            'post_title'   => sanitize_text_field($title),
-            'post_content' => wp_kses_post($description),
-            'post_status'  => 'publish',
-            'post_author'  => get_current_user_id(),
-        ];
-
-        $property_id = wp_insert_post($post_data, true);
-
-        if (is_wp_error($property_id)) {
-            return $property_id;
-        }
-
-        // Update meta fields
-        $this->update_property_meta($property_id, $request);
-
-        $post = get_post($property_id);
-        return rest_ensure_response($this->prepare_property_response($post));
     }
 
     /**
      * Update property
      */
     public function update_property($request) {
-        $property_id = (int) $request->get_param('id');
-        $post = get_post($property_id);
+        try {
+            $property_id = (int) $request->get_param('id');
+            $post = get_post($property_id);
 
-        if (!$post || $post->post_type !== 'property') {
+            if (!$post || $post->post_type !== 'property') {
+                return new WP_Error(
+                    'property_not_found',
+                    __('Propiedad no encontrada', 'property-dashboard'),
+                    ['status' => 404]
+                );
+            }
+
+            // Check if user can edit this property
+            if (!Property_Roles::can_edit_property(get_current_user_id(), $property_id)) {
+                return new WP_Error(
+                    'forbidden',
+                    __('No tienes permisos para editar esta propiedad', 'property-dashboard'),
+                    ['status' => 403]
+                );
+            }
+
+            // Validate required fields
+            $validation_error = $this->validate_required_fields($request);
+            if (is_wp_error($validation_error)) {
+                return $validation_error;
+            }
+
+            // Update post
+            $post_data = [
+                'ID' => $property_id,
+            ];
+
+            if ($request->has_param('title')) {
+                $post_data['post_title'] = sanitize_text_field($request->get_param('title'));
+            }
+
+            if ($request->has_param('description')) {
+                $post_data['post_content'] = wp_kses_post($request->get_param('description'));
+            }
+
+            $result = wp_update_post($post_data, true);
+
+            if (is_wp_error($result)) {
+                error_log('Property Update Error (wp_update_post): ' . $result->get_error_message());
+                return $result;
+            }
+
+            // Update meta fields
+            $this->update_property_meta($property_id, $request);
+
+            $updated_post = get_post($property_id);
+
+            if (!$updated_post) {
+                error_log('Property Update Error: Post not found after update. ID: ' . $property_id);
+                return new WP_Error(
+                    'post_not_found',
+                    __('No se pudo recuperar la propiedad después de actualizarla', 'property-dashboard'),
+                    ['status' => 500]
+                );
+            }
+
+            $response = $this->prepare_property_response($updated_post);
+            return rest_ensure_response($response);
+
+        } catch (Exception $e) {
+            error_log('Property Update Exception: ' . $e->getMessage() . ' in ' . $e->getFile() . ':' . $e->getLine());
             return new WP_Error(
-                'property_not_found',
-                __('Propiedad no encontrada', 'property-dashboard'),
-                ['status' => 404]
+                'update_exception',
+                __('Error al actualizar la propiedad: ', 'property-dashboard') . $e->getMessage(),
+                ['status' => 500]
+            );
+        } catch (Error $e) {
+            error_log('Property Update Fatal Error: ' . $e->getMessage() . ' in ' . $e->getFile() . ':' . $e->getLine());
+            return new WP_Error(
+                'update_fatal_error',
+                __('Error fatal al actualizar la propiedad: ', 'property-dashboard') . $e->getMessage(),
+                ['status' => 500]
             );
         }
-
-        // Check if user can edit this property
-        if (!Property_Roles::can_edit_property(get_current_user_id(), $property_id)) {
-            return new WP_Error(
-                'forbidden',
-                __('No tienes permisos para editar esta propiedad', 'property-dashboard'),
-                ['status' => 403]
-            );
-        }
-
-        // Update post
-        $post_data = [
-            'ID' => $property_id,
-        ];
-
-        if ($request->has_param('title')) {
-            $post_data['post_title'] = sanitize_text_field($request->get_param('title'));
-        }
-
-        if ($request->has_param('description')) {
-            $post_data['post_content'] = wp_kses_post($request->get_param('description'));
-        }
-
-        $result = wp_update_post($post_data, true);
-
-        if (is_wp_error($result)) {
-            return $result;
-        }
-
-        // Update meta fields
-        $this->update_property_meta($property_id, $request);
-
-        $updated_post = get_post($property_id);
-        return rest_ensure_response($this->prepare_property_response($updated_post));
     }
 
     /**
@@ -311,26 +373,105 @@ class Property_REST_API {
     }
 
     /**
+     * Validate required fields
+     */
+    private function validate_required_fields($request) {
+        $required_fields = [
+            'title'        => __('Título', 'property-dashboard'),
+            'status'       => __('Estado', 'property-dashboard'),
+            'state'        => __('Estado de la República', 'property-dashboard'),
+            'municipality' => __('Municipio', 'property-dashboard'),
+            'neighborhood' => __('Colonia', 'property-dashboard'),
+            'postal_code'  => __('Código Postal', 'property-dashboard'),
+            'street'       => __('Dirección', 'property-dashboard'),
+            'patent'       => __('Patente', 'property-dashboard'),
+            'price'        => __('Precio', 'property-dashboard'),
+        ];
+
+        $missing_fields = [];
+
+        foreach ($required_fields as $field => $label) {
+            $value = $request->get_param($field);
+            if (empty($value) && $value !== '0' && $value !== 0) {
+                $missing_fields[] = $label;
+            }
+        }
+
+        if (!empty($missing_fields)) {
+            return new WP_Error(
+                'missing_required_fields',
+                sprintf(
+                    __('Los siguientes campos son requeridos: %s', 'property-dashboard'),
+                    implode(', ', $missing_fields)
+                ),
+                ['status' => 400]
+            );
+        }
+
+        return true;
+    }
+
+    /**
      * Update property meta fields
      */
     private function update_property_meta($property_id, $request) {
-        $meta_fields = [
-            'status'          => '_property_status',
-            'state'           => '_property_state',
-            'municipality'    => '_property_municipality',
-            'neighborhood'    => '_property_neighborhood',
-            'postal_code'     => '_property_postal_code',
-            'street'          => '_property_street',
-            'patent'          => '_property_patent',
-            'price'           => '_property_price',
-            'google_maps_url' => '_property_google_maps_url',
-            'attachment_id'   => '_property_attachment_id',
-        ];
+        try {
+            $meta_fields = [
+                'status'          => '_property_status',
+                'state'           => '_property_state',
+                'municipality'    => '_property_municipality',
+                'neighborhood'    => '_property_neighborhood',
+                'postal_code'     => '_property_postal_code',
+                'street'          => '_property_street',
+                'patent'          => '_property_patent',
+                'price'           => '_property_price',
+                'google_maps_url' => '_property_google_maps_url',
+                'attachment_id'   => '_property_attachment_id',
+            ];
 
-        foreach ($meta_fields as $param => $meta_key) {
-            if ($request->has_param($param)) {
-                update_post_meta($property_id, $meta_key, $request->get_param($param));
+            foreach ($meta_fields as $param => $meta_key) {
+                if ($request->has_param($param)) {
+                    $value = $request->get_param($param);
+
+                    // Sanitize based on field type
+                    switch ($meta_key) {
+                        case '_property_status':
+                            $allowed = ['available', 'sold', 'rented', 'reserved'];
+                            $value = in_array($value, $allowed, true) ? $value : 'available';
+                            break;
+
+                        case '_property_postal_code':
+                            // Remove all non-numeric characters and limit to 5 digits
+                            $value = substr(preg_replace('/[^0-9]/', '', $value), 0, 5);
+                            break;
+
+                        case '_property_price':
+                            // Convert to float, handle empty string as 0
+                            $value = !empty($value) ? floatval($value) : 0;
+                            break;
+
+                        case '_property_google_maps_url':
+                            $value = !empty($value) ? esc_url_raw($value) : '';
+                            break;
+
+                        case '_property_attachment_id':
+                            $value = absint($value);
+                            break;
+
+                        default:
+                            $value = sanitize_text_field($value);
+                            break;
+                    }
+
+                    $result = update_post_meta($property_id, $meta_key, $value);
+                    if ($result === false) {
+                        error_log("update_property_meta: Failed to update meta key {$meta_key} for property {$property_id}");
+                    }
+                }
             }
+        } catch (Exception $e) {
+            error_log('update_property_meta Exception: ' . $e->getMessage() . ' in ' . $e->getFile() . ':' . $e->getLine());
+            throw $e;
         }
     }
 
@@ -338,28 +479,44 @@ class Property_REST_API {
      * Prepare property for response
      */
     private function prepare_property_response($post) {
-        $meta = Property_Meta::get_property_meta($post->ID);
-        $author = get_userdata($post->post_author);
+        try {
+            if (!$post || !is_object($post)) {
+                error_log('prepare_property_response: Invalid post object');
+                throw new Exception('Invalid post object');
+            }
 
-        return [
-            'id'              => $post->ID,
-            'title'           => $post->post_title,
-            'description'     => $post->post_content,
-            'status'          => $meta['status'],
-            'state'           => $meta['state'],
-            'municipality'    => $meta['municipality'],
-            'neighborhood'    => $meta['neighborhood'],
-            'postal_code'     => $meta['postal_code'],
-            'street'          => $meta['street'],
-            'patent'          => $meta['patent'],
-            'price'           => $meta['price'],
-            'google_maps_url' => $meta['google_maps_url'],
-            'attachment_id'   => $meta['attachment_id'],
-            'author_id'       => $post->post_author,
-            'author_name'     => $author ? $author->display_name : '',
-            'created_at'      => $post->post_date,
-            'updated_at'      => $post->post_modified,
-        ];
+            $meta = Property_Meta::get_property_meta($post->ID);
+
+            if (!is_array($meta)) {
+                error_log('prepare_property_response: Invalid meta data for post ID ' . $post->ID);
+                $meta = [];
+            }
+
+            $author = get_userdata($post->post_author);
+
+            return [
+                'id'              => $post->ID,
+                'title'           => $post->post_title,
+                'description'     => $post->post_content,
+                'status'          => isset($meta['status']) ? $meta['status'] : 'available',
+                'state'           => isset($meta['state']) ? $meta['state'] : '',
+                'municipality'    => isset($meta['municipality']) ? $meta['municipality'] : '',
+                'neighborhood'    => isset($meta['neighborhood']) ? $meta['neighborhood'] : '',
+                'postal_code'     => isset($meta['postal_code']) ? $meta['postal_code'] : '',
+                'street'          => isset($meta['street']) ? $meta['street'] : '',
+                'patent'          => isset($meta['patent']) ? $meta['patent'] : '',
+                'price'           => isset($meta['price']) ? $meta['price'] : 0,
+                'google_maps_url' => isset($meta['google_maps_url']) ? $meta['google_maps_url'] : '',
+                'attachment_id'   => isset($meta['attachment_id']) ? $meta['attachment_id'] : 0,
+                'author_id'       => $post->post_author,
+                'author_name'     => $author ? $author->display_name : '',
+                'created_at'      => $post->post_date,
+                'updated_at'      => $post->post_modified,
+            ];
+        } catch (Exception $e) {
+            error_log('prepare_property_response Exception: ' . $e->getMessage() . ' in ' . $e->getFile() . ':' . $e->getLine());
+            throw $e;
+        }
     }
 
     /**

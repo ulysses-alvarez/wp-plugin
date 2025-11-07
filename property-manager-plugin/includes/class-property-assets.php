@@ -16,6 +16,65 @@ class Property_Assets {
      */
     public static function init() {
         add_action('wp_enqueue_scripts', [self::class, 'register_assets']);
+        add_action('admin_enqueue_scripts', [self::class, 'enqueue_admin_styles']);
+    }
+
+    /**
+     * Enqueue admin styles for property post type
+     */
+    public static function enqueue_admin_styles($hook) {
+        // Only load on property edit/new screens
+        global $post_type;
+        if ('property' !== $post_type) {
+            return;
+        }
+
+        // Add inline CSS for admin
+        $admin_css = "
+            /* Required field asterisk */
+            .property-meta-table .required {
+                color: #dc3232;
+                font-weight: bold;
+            }
+
+            /* Smaller input fields */
+            .property-meta-table input[type='text'],
+            .property-meta-table input[type='number'],
+            .property-meta-table input[type='url'],
+            .property-meta-table select {
+                height: 36px;
+                padding: 6px 10px;
+                font-size: 14px;
+                line-height: 1.4;
+            }
+
+            /* Full width fields */
+            .property-meta-table .widefat {
+                width: 100%;
+                max-width: 100%;
+            }
+
+            /* Smaller labels */
+            .property-meta-table th label {
+                font-size: 13px;
+                font-weight: 600;
+            }
+
+            /* Smaller descriptions */
+            .property-meta-table .description {
+                font-size: 12px;
+                line-height: 1.4;
+                margin-top: 4px;
+            }
+
+            /* Reduce table row padding */
+            .property-meta-table tr th,
+            .property-meta-table tr td {
+                padding: 12px 0;
+            }
+        ";
+
+        wp_add_inline_style('common', $admin_css);
     }
 
     /**

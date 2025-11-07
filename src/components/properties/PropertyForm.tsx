@@ -25,7 +25,7 @@ export interface PropertyFormData {
   street: string;
   patent: string;
   price?: number | string;
-  google_maps?: string;
+  google_maps_url?: string;
   description?: string;
   attachment?: File | null;
 }
@@ -51,7 +51,7 @@ export const PropertyForm = forwardRef<HTMLFormElement, PropertyFormProps>(({
     street: '',
     patent: '',
     price: '',
-    google_maps: '',
+    google_maps_url: '',
     description: '',
     attachment: null
   });
@@ -72,7 +72,7 @@ export const PropertyForm = forwardRef<HTMLFormElement, PropertyFormProps>(({
         street: property.street || '',
         patent: property.patent || '',
         price: property.price || '',
-        google_maps: property.google_maps_url || '',
+        google_maps_url: property.google_maps_url || '',
         description: property.description || '',
         attachment: null
       });
@@ -90,7 +90,8 @@ export const PropertyForm = forwardRef<HTMLFormElement, PropertyFormProps>(({
       'neighborhood',
       'postal_code',
       'street',
-      'patent'
+      'patent',
+      'price'
     ];
 
     if (requiredFields.includes(name) && !value) {
@@ -111,7 +112,7 @@ export const PropertyForm = forwardRef<HTMLFormElement, PropertyFormProps>(({
         }
         break;
 
-      case 'google_maps':
+      case 'google_maps_url':
         if (value && !isValidUrl(value)) {
           return 'Ingresa una URL válida';
         }
@@ -279,7 +280,7 @@ export const PropertyForm = forwardRef<HTMLFormElement, PropertyFormProps>(({
 
       {/* Street */}
       <Input
-        label="Calle y Número"
+        label="Dirección"
         name="street"
         value={formData.street}
         onChange={(e) => handleChange('street', e.target.value)}
@@ -319,7 +320,7 @@ export const PropertyForm = forwardRef<HTMLFormElement, PropertyFormProps>(({
 
       {/* Divider */}
       <div className="border-t border-gray-200 my-6"></div>
-      <h3 className="text-base font-medium text-gray-700 -mt-4">Información Adicional (Opcional)</h3>
+      <h3 className="text-base font-medium text-gray-700 -mt-4">Información Adicional</h3>
 
       {/* Price */}
       <Input
@@ -330,6 +331,7 @@ export const PropertyForm = forwardRef<HTMLFormElement, PropertyFormProps>(({
         onChange={(e) => handleChange('price', e.target.value)}
         onBlur={() => handleBlur('price')}
         error={errors.price}
+        required
         placeholder="Ej: 2500000"
         min={0}
         disabled={loading}
@@ -338,11 +340,11 @@ export const PropertyForm = forwardRef<HTMLFormElement, PropertyFormProps>(({
       {/* Google Maps URL */}
       <Input
         label="URL de Google Maps"
-        name="google_maps"
-        value={formData.google_maps}
-        onChange={(e) => handleChange('google_maps', e.target.value)}
-        onBlur={() => handleBlur('google_maps')}
-        error={errors.google_maps}
+        name="google_maps_url"
+        value={formData.google_maps_url}
+        onChange={(e) => handleChange('google_maps_url', e.target.value)}
+        onBlur={() => handleBlur('google_maps_url')}
+        error={errors.google_maps_url}
         placeholder="https://maps.google.com/..."
         disabled={loading}
       />

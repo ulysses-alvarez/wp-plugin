@@ -65,9 +65,26 @@ class Property_CPT {
 
         register_post_type('property', $args);
 
+        // Disable Gutenberg for property post type
+        add_filter('use_block_editor_for_post_type', [self::class, 'disable_gutenberg'], 10, 2);
+
         // Add filters for role-based visibility
         add_action('pre_get_posts', [self::class, 'filter_properties_by_role']);
         add_filter('views_edit-property', [self::class, 'filter_property_views']);
+    }
+
+    /**
+     * Disable Gutenberg editor for property post type
+     *
+     * @param bool   $use_block_editor
+     * @param string $post_type
+     * @return bool
+     */
+    public static function disable_gutenberg($use_block_editor, $post_type) {
+        if ($post_type === 'property') {
+            return false;
+        }
+        return $use_block_editor;
     }
 
     /**

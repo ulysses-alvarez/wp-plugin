@@ -20,6 +20,21 @@ class Property_Meta {
 
         // Save meta data when property is saved
         add_action('save_post_property', [self::class, 'save_meta_boxes'], 10, 2);
+
+        // Enqueue media uploader scripts
+        add_action('admin_enqueue_scripts', [self::class, 'enqueue_media_uploader']);
+    }
+
+    /**
+     * Enqueue media uploader scripts
+     */
+    public static function enqueue_media_uploader($hook) {
+        global $post_type;
+
+        // Only load on property edit/new screens
+        if (('post.php' === $hook || 'post-new.php' === $hook) && 'property' === $post_type) {
+            wp_enqueue_media();
+        }
     }
 
     /**
@@ -96,7 +111,7 @@ class Property_Meta {
             'description'       => __('Precio', 'property-dashboard'),
             'single'            => true,
             'show_in_rest'      => true,
-            'sanitize_callback' => 'floatval',
+            'sanitize_callback' => [self::class, 'sanitize_price'],
         ]);
 
         // Google Maps URL
@@ -105,7 +120,7 @@ class Property_Meta {
             'description'       => __('URL de Google Maps', 'property-dashboard'),
             'single'            => true,
             'show_in_rest'      => true,
-            'sanitize_callback' => 'esc_url_raw',
+            'sanitize_callback' => [self::class, 'sanitize_url'],
         ]);
 
         // Attachment ID (Ficha técnica PDF)
@@ -114,7 +129,7 @@ class Property_Meta {
             'description'       => __('ID de ficha técnica', 'property-dashboard'),
             'single'            => true,
             'show_in_rest'      => true,
-            'sanitize_callback' => 'absint',
+            'sanitize_callback' => [self::class, 'sanitize_attachment_id'],
         ]);
     }
 
@@ -141,6 +156,36 @@ class Property_Meta {
 
         // Ensure exactly 5 digits
         return substr($cleaned, 0, 5);
+    }
+
+    /**
+     * Sanitize price field
+     *
+     * @param mixed $value
+     * @return float
+     */
+    public static function sanitize_price($value) {
+        return floatval($value);
+    }
+
+    /**
+     * Sanitize URL field
+     *
+     * @param string $value
+     * @return string
+     */
+    public static function sanitize_url($value) {
+        return esc_url_raw($value);
+    }
+
+    /**
+     * Sanitize attachment ID
+     *
+     * @param mixed $value
+     * @return int
+     */
+    public static function sanitize_attachment_id($value) {
+        return absint($value);
     }
 
     /**
@@ -178,15 +223,24 @@ class Property_Meta {
         $patent = get_post_meta($post->ID, '_property_patent', true);
         $price = get_post_meta($post->ID, '_property_price', true);
         $google_maps_url = get_post_meta($post->ID, '_property_google_maps_url', true);
+        $attachment_id = get_post_meta($post->ID, '_property_attachment_id', true);
+
+        // Get attachment details if exists
+        $attachment_url = '';
+        $attachment_filename = '';
+        if ($attachment_id) {
+            $attachment_url = wp_get_attachment_url($attachment_id);
+            $attachment_filename = basename($attachment_url);
+        }
 
         ?>
-        <table class="form-table">
+        <table class="form-table property-meta-table">
             <tr>
                 <th scope="row">
-                    <label for="property_status"><?php _e('Estado', 'property-dashboard'); ?></label>
+                    <label for="property_status"><?php _e('Estado', 'property-dashboard'); ?> <span class="required">*</span></label>
                 </th>
                 <td>
-                    <select name="property_status" id="property_status" class="regular-text">
+                    <select name="property_status" id="property_status" class="widefat" required>
                         <?php foreach (Property_CPT::get_status_options() as $value => $label): ?>
                             <option value="<?php echo esc_attr($value); ?>" <?php selected($status, $value); ?>>
                                 <?php echo esc_html($label); ?>
@@ -199,30 +253,32 @@ class Property_Meta {
 
             <tr>
                 <th scope="row">
-                    <label for="property_patent"><?php _e('Patente', 'property-dashboard'); ?></label>
+                    <label for="property_patent"><?php _e('Patente', 'property-dashboard'); ?> <span class="required">*</span></label>
                 </th>
                 <td>
                     <input type="text"
                            name="property_patent"
                            id="property_patent"
                            value="<?php echo esc_attr($patent); ?>"
-                           class="regular-text">
+                           class="widefat"
+                           required>
                     <p class="description"><?php _e('Número único de identificación', 'property-dashboard'); ?></p>
                 </td>
             </tr>
 
             <tr>
                 <th scope="row">
-                    <label for="property_price"><?php _e('Precio (MXN)', 'property-dashboard'); ?></label>
+                    <label for="property_price"><?php _e('Precio (MXN)', 'property-dashboard'); ?> <span class="required">*</span></label>
                 </th>
                 <td>
                     <input type="number"
                            name="property_price"
                            id="property_price"
                            value="<?php echo esc_attr($price); ?>"
-                           class="regular-text"
+                           class="widefat"
                            step="0.01"
-                           min="0">
+                           min="0"
+                           required>
                     <p class="description"><?php _e('Precio en pesos mexicanos', 'property-dashboard'); ?></p>
                 </td>
             </tr>
@@ -236,11 +292,140 @@ class Property_Meta {
                            name="property_google_maps_url"
                            id="property_google_maps_url"
                            value="<?php echo esc_attr($google_maps_url); ?>"
-                           class="large-text">
-                    <p class="description"><?php _e('URL de Google Maps de la ubicación', 'property-dashboard'); ?></p>
+                           class="widefat"
+                           placeholder="https://maps.google.com/...">
+                    <p class="description"><?php _e('URL de Google Maps de la ubicación (opcional)', 'property-dashboard'); ?></p>
+                </td>
+            </tr>
+
+            <tr>
+                <th scope="row">
+                    <label for="property_attachment"><?php _e('Ficha Técnica', 'property-dashboard'); ?></label>
+                </th>
+                <td>
+                    <input type="hidden" name="property_attachment_id" id="property_attachment_id" value="<?php echo esc_attr($attachment_id); ?>">
+
+                    <div class="property-attachment-container">
+                        <?php if ($attachment_id && $attachment_url): ?>
+                            <div id="property-attachment-preview" class="attachment-preview">
+                                <a href="<?php echo esc_url($attachment_url); ?>" target="_blank" class="attachment-link">
+                                    <span class="dashicons dashicons-media-document"></span>
+                                    <?php echo esc_html($attachment_filename); ?>
+                                </a>
+                                <button type="button" class="button property-remove-attachment" style="margin-left: 10px;">
+                                    <?php _e('Eliminar', 'property-dashboard'); ?>
+                                </button>
+                            </div>
+                        <?php else: ?>
+                            <div id="property-attachment-preview" class="attachment-preview" style="display: none;">
+                                <a href="" target="_blank" class="attachment-link">
+                                    <span class="dashicons dashicons-media-document"></span>
+                                    <span class="attachment-filename"></span>
+                                </a>
+                                <button type="button" class="button property-remove-attachment" style="margin-left: 10px;">
+                                    <?php _e('Eliminar', 'property-dashboard'); ?>
+                                </button>
+                            </div>
+                        <?php endif; ?>
+
+                        <button type="button" class="button property-upload-attachment" id="property-upload-attachment" <?php echo $attachment_id ? 'style="display:none;"' : ''; ?>>
+                            <?php _e('Subir Archivo', 'property-dashboard'); ?>
+                        </button>
+                    </div>
+
+                    <p class="description"><?php _e('PDF, PNG o JPG (opcional)', 'property-dashboard'); ?></p>
                 </td>
             </tr>
         </table>
+
+        <script type="text/javascript">
+        jQuery(document).ready(function($) {
+            var mediaUploader;
+
+            // Upload button click
+            $('#property-upload-attachment').on('click', function(e) {
+                e.preventDefault();
+
+                // If the uploader object has already been created, reopen the dialog
+                if (mediaUploader) {
+                    mediaUploader.open();
+                    return;
+                }
+
+                // Create the media uploader
+                mediaUploader = wp.media({
+                    title: '<?php _e('Seleccionar Ficha Técnica', 'property-dashboard'); ?>',
+                    button: {
+                        text: '<?php _e('Usar este archivo', 'property-dashboard'); ?>'
+                    },
+                    library: {
+                        type: ['application/pdf', 'image/png', 'image/jpeg', 'image/jpg']
+                    },
+                    multiple: false
+                });
+
+                // When a file is selected
+                mediaUploader.on('select', function() {
+                    var attachment = mediaUploader.state().get('selection').first().toJSON();
+
+                    // Set the attachment ID
+                    $('#property_attachment_id').val(attachment.id);
+
+                    // Update preview
+                    var preview = $('#property-attachment-preview');
+                    preview.find('.attachment-link').attr('href', attachment.url);
+                    preview.find('.attachment-filename').text(attachment.filename);
+                    preview.show();
+
+                    // Hide upload button
+                    $('#property-upload-attachment').hide();
+                });
+
+                // Open the uploader dialog
+                mediaUploader.open();
+            });
+
+            // Remove button click
+            $('.property-remove-attachment').on('click', function(e) {
+                e.preventDefault();
+
+                // Clear the attachment ID
+                $('#property_attachment_id').val('');
+
+                // Hide preview and show upload button
+                $('#property-attachment-preview').hide();
+                $('#property-upload-attachment').show();
+            });
+        });
+        </script>
+
+        <style>
+        .property-attachment-container {
+            margin-bottom: 10px;
+        }
+        .attachment-preview {
+            padding: 10px;
+            background: #f5f5f5;
+            border: 1px solid #ddd;
+            border-radius: 3px;
+            display: inline-block;
+        }
+        .attachment-link {
+            text-decoration: none;
+            color: #0073aa;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .attachment-link:hover {
+            color: #005177;
+        }
+        .attachment-link .dashicons {
+            font-size: 20px;
+            width: 20px;
+            height: 20px;
+        }
+        </style>
         <?php
     }
 
@@ -256,13 +441,13 @@ class Property_Meta {
         $street = get_post_meta($post->ID, '_property_street', true);
 
         ?>
-        <table class="form-table">
+        <table class="form-table property-meta-table">
             <tr>
                 <th scope="row">
-                    <label for="property_state"><?php _e('Estado de la República', 'property-dashboard'); ?></label>
+                    <label for="property_state"><?php _e('Estado', 'property-dashboard'); ?> <span class="required">*</span></label>
                 </th>
                 <td>
-                    <select name="property_state" id="property_state" class="regular-text">
+                    <select name="property_state" id="property_state" class="widefat" required>
                         <option value=""><?php _e('Seleccione un estado', 'property-dashboard'); ?></option>
                         <?php foreach (Property_CPT::get_states_options() as $value => $label): ?>
                             <option value="<?php echo esc_attr($value); ?>" <?php selected($state, $value); ?>>
@@ -275,57 +460,64 @@ class Property_Meta {
 
             <tr>
                 <th scope="row">
-                    <label for="property_municipality"><?php _e('Municipio', 'property-dashboard'); ?></label>
+                    <label for="property_municipality"><?php _e('Municipio', 'property-dashboard'); ?> <span class="required">*</span></label>
                 </th>
                 <td>
                     <input type="text"
                            name="property_municipality"
                            id="property_municipality"
                            value="<?php echo esc_attr($municipality); ?>"
-                           class="regular-text">
+                           class="widefat"
+                           required
+                           placeholder="Ej: Guadalajara">
                 </td>
             </tr>
 
             <tr>
                 <th scope="row">
-                    <label for="property_neighborhood"><?php _e('Colonia', 'property-dashboard'); ?></label>
+                    <label for="property_neighborhood"><?php _e('Colonia', 'property-dashboard'); ?> <span class="required">*</span></label>
                 </th>
                 <td>
                     <input type="text"
                            name="property_neighborhood"
                            id="property_neighborhood"
                            value="<?php echo esc_attr($neighborhood); ?>"
-                           class="regular-text">
+                           class="widefat"
+                           required
+                           placeholder="Ej: Colonia Americana">
                 </td>
             </tr>
 
             <tr>
                 <th scope="row">
-                    <label for="property_postal_code"><?php _e('Código Postal', 'property-dashboard'); ?></label>
+                    <label for="property_postal_code"><?php _e('Código Postal', 'property-dashboard'); ?> <span class="required">*</span></label>
                 </th>
                 <td>
                     <input type="text"
                            name="property_postal_code"
                            id="property_postal_code"
                            value="<?php echo esc_attr($postal_code); ?>"
-                           class="regular-text"
+                           class="widefat"
                            maxlength="5"
-                           pattern="[0-9]{5}">
+                           pattern="[0-9]{5}"
+                           required
+                           placeholder="44100">
                     <p class="description"><?php _e('5 dígitos', 'property-dashboard'); ?></p>
                 </td>
             </tr>
 
             <tr>
                 <th scope="row">
-                    <label for="property_street"><?php _e('Calle y Número', 'property-dashboard'); ?></label>
+                    <label for="property_street"><?php _e('Dirección', 'property-dashboard'); ?> <span class="required">*</span></label>
                 </th>
                 <td>
                     <input type="text"
                            name="property_street"
                            id="property_street"
                            value="<?php echo esc_attr($street); ?>"
-                           class="large-text">
-                    <p class="description"><?php _e('Dirección completa de la calle', 'property-dashboard'); ?></p>
+                           class="widefat"
+                           required>
+                    <p class="description"><?php _e('Dirección completa', 'property-dashboard'); ?></p>
                 </td>
             </tr>
         </table>
@@ -336,6 +528,11 @@ class Property_Meta {
      * Save meta box data
      */
     public static function save_meta_boxes($post_id, $post) {
+        // Skip if this is a REST API request
+        if (defined('REST_REQUEST') && REST_REQUEST) {
+            return;
+        }
+
         // Verify nonce
         if (!isset($_POST['property_meta_box_nonce']) ||
             !wp_verify_nonce($_POST['property_meta_box_nonce'], 'property_meta_box')) {
@@ -352,6 +549,41 @@ class Property_Meta {
             return;
         }
 
+        // Required fields validation
+        $required_fields = [
+            'property_status'       => __('Estado', 'property-dashboard'),
+            'property_state'        => __('Estado', 'property-dashboard'),
+            'property_municipality' => __('Municipio', 'property-dashboard'),
+            'property_neighborhood' => __('Colonia', 'property-dashboard'),
+            'property_postal_code'  => __('Código Postal', 'property-dashboard'),
+            'property_street'       => __('Dirección', 'property-dashboard'),
+            'property_patent'       => __('Patente', 'property-dashboard'),
+            'property_price'        => __('Precio', 'property-dashboard'),
+        ];
+
+        $errors = [];
+        foreach ($required_fields as $field => $label) {
+            if (empty($_POST[$field])) {
+                $errors[] = sprintf(__('El campo "%s" es requerido', 'property-dashboard'), $label);
+            }
+        }
+
+        // If there are errors, prevent save and show error
+        if (!empty($errors)) {
+            // Store errors in transient to show after redirect
+            set_transient('property_validation_errors_' . $post_id, $errors, 45);
+
+            // Prevent post status from changing to publish
+            remove_action('save_post_property', [self::class, 'save_meta_boxes']);
+            wp_update_post([
+                'ID' => $post_id,
+                'post_status' => 'draft'
+            ]);
+            add_action('save_post_property', [self::class, 'save_meta_boxes'], 10, 2);
+
+            return;
+        }
+
         // Save fields
         $fields = [
             'property_status'          => '_property_status',
@@ -363,6 +595,7 @@ class Property_Meta {
             'property_patent'          => '_property_patent',
             'property_price'           => '_property_price',
             'property_google_maps_url' => '_property_google_maps_url',
+            'property_attachment_id'   => '_property_attachment_id',
         ];
 
         foreach ($fields as $field => $meta_key) {
@@ -382,6 +615,9 @@ class Property_Meta {
                         break;
                     case '_property_google_maps_url':
                         $value = esc_url_raw($value);
+                        break;
+                    case '_property_attachment_id':
+                        $value = absint($value);
                         break;
                     default:
                         $value = sanitize_text_field($value);
