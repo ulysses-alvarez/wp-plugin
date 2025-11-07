@@ -74,9 +74,9 @@ _property_attachment_id  - ID del archivo adjunto
 
 #### Build Optimizado
 ```
-CSS:  22.77 KB → 4.76 KB gzipped
-JS:   256.00 KB → 78.17 KB gzipped
-Total: ~83 KB gzipped (< 200KB target ✅)
+CSS:  23.14 KB → 4.79 KB gzipped
+JS:   258.45 KB → 78.71 KB gzipped
+Total: ~83.5 KB gzipped (< 200KB target ✅)
 ```
 
 #### Estructura de Archivos
@@ -155,6 +155,16 @@ src/
 - Máximo 5 páginas visibles
 - Indicador de página actual
 - Adaptativo según total de páginas
+- **Selector de items por página**: 5, 10, 20, 50, 100
+- **Texto informativo**: "Mostrando X a Y de Z propiedades"
+
+### ✅ Ordenamiento
+- **Por fecha de creación**: Más reciente primero / Más antigua primero
+- **Por título**: Alfabético A-Z / Z-A
+- **Por precio**: Menor a mayor / Mayor a menor
+- **Toggle visual**: Botón con iconos para cambiar orden ascendente/descendente
+- **Integrado con filtros**: Se mantiene al aplicar búsquedas y filtros
+- **Backend optimizado**: Ordenamiento numérico correcto para precios
 
 ### ✅ Sidebar de Detalles (3 Modos)
 - **Panel lateral deslizable** desde la derecha (600px)
@@ -256,11 +266,19 @@ src/
 - ✅ Eliminado "0" que se renderizaba en modal de vista
 - ✅ Reorganización del orden de secciones en modal de vista
 
+### ✅ Mejoras de Paginación y Ordenamiento (NUEVO - Nov 7, 2025)
+- ✅ **Selector de items por página**: Dropdown con opciones 5, 10, 20, 50, 100
+- ✅ **Texto informativo de rango**: "Mostrando X a Y de Z propiedades"
+- ✅ **Ordenamiento por fecha**: Ordena por fecha de creación (ASC/DESC)
+- ✅ **Ordenamiento por título**: Ordena alfabéticamente por título (A-Z / Z-A)
+- ✅ **Ordenamiento por precio**: Ordena numéricamente por precio (menor a mayor / mayor a menor)
+- ✅ **Toggle de orden**: Botón visual para cambiar entre ascendente/descendente
+- ✅ **Integración con filtros**: El ordenamiento se mantiene al aplicar filtros
+- ✅ **API actualizada**: Soporte para meta_value_num en ordenamiento por precio
+
 ## ⏳ FUTURAS MEJORAS (Backlog)
 
 ### Mejoras Avanzadas
-- ⏳ Selector de items por página (5, 10, 20, 50, 100)
-- ⏳ Ordenamiento (por fecha, título, precio)
 - ⏳ Estadísticas y dashboard analytics
 - ⏳ Exportar a CSV/Excel
 - ⏳ Gestión de roles de usuarios (Admin)

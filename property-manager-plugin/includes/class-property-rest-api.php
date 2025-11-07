@@ -76,14 +76,26 @@ class Property_REST_API {
     public function get_properties($request) {
         $current_user = wp_get_current_user();
 
+        $orderby = $request->get_param('orderby') ?: 'date';
+        $order = strtoupper($request->get_param('order') ?: 'DESC');
+
         $args = [
             'post_type'      => 'property',
             'posts_per_page' => $request->get_param('per_page') ?: 20,
             'paged'          => $request->get_param('page') ?: 1,
             'post_status'    => 'publish',
-            'orderby'        => $request->get_param('orderby') ?: 'date',
-            'order'          => $request->get_param('order') ?: 'DESC',
+            'order'          => $order,
         ];
+
+        // Handle different orderby options
+        if ($orderby === 'price') {
+            // Order by price meta field (numeric)
+            $args['meta_key'] = '_property_price';
+            $args['orderby'] = 'meta_value_num';
+        } else {
+            // Default ordering (date, title, etc)
+            $args['orderby'] = $orderby;
+        }
 
         // If user can't view all properties, only show their own
         if (!current_user_can('view_all_properties')) {

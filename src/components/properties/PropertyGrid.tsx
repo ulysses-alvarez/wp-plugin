@@ -30,21 +30,27 @@ export const PropertyGrid = ({
     currentPage,
     totalPages,
     total,
+    perPage,
     loadProperties,
-    setPage
+    setPage,
+    setPerPage
   } = usePropertyStore();
 
   const [initialLoad, setInitialLoad] = useState(true);
 
   const canCreate = canCreateProperty();
 
-  // Load properties on mount and when page changes
+  // Load properties on mount and when page or perPage changes
   useEffect(() => {
     loadProperties().finally(() => setInitialLoad(false));
-  }, [currentPage, loadProperties]);
+  }, [currentPage, perPage, loadProperties]);
 
   const handlePageChange = (page: number) => {
     setPage(page);
+  };
+
+  const handlePerPageChange = (newPerPage: number) => {
+    setPerPage(newPerPage);
   };
 
   if (initialLoad && loading) {
@@ -146,12 +152,15 @@ export const PropertyGrid = ({
       )}
 
       {/* Pagination */}
-      {totalPages > 1 && (
-        <div className="flex justify-center pt-6">
+      {total > 0 && (
+        <div className="pt-6">
           <Pagination
             currentPage={currentPage}
             totalPages={totalPages}
+            total={total}
+            perPage={perPage}
             onPageChange={handlePageChange}
+            onPerPageChange={handlePerPageChange}
           />
         </div>
       )}

@@ -8,21 +8,33 @@ import clsx from 'clsx';
 interface PaginationProps {
   currentPage: number;
   totalPages: number;
+  total?: number;
+  perPage?: number;
   onPageChange: (page: number) => void;
+  onPerPageChange?: (perPage: number) => void;
   maxVisiblePages?: number;
   showFirstLast?: boolean;
+  showPerPageSelector?: boolean;
   className?: string;
 }
 
 export const Pagination = ({
   currentPage,
   totalPages,
+  total = 0,
+  perPage = 20,
   onPageChange,
+  onPerPageChange,
   maxVisiblePages = 5,
   showFirstLast = true,
+  showPerPageSelector = true,
   className
 }: PaginationProps) => {
-  if (totalPages <= 1) return null;
+  if (totalPages <= 1 && !showPerPageSelector) return null;
+
+  const perPageOptions = [5, 10, 20, 50, 100];
+  const startItem = (currentPage - 1) * perPage + 1;
+  const endItem = Math.min(currentPage * perPage, total);
 
   const getPageNumbers = (): (number | string)[] => {
     const pages: (number | string)[] = [];
@@ -62,25 +74,27 @@ export const Pagination = ({
   const pages = getPageNumbers();
 
   return (
-    <div className={clsx('flex items-center justify-center gap-2', className)}>
-      {/* First Page Button */}
-      {showFirstLast && (
-        <button
-          onClick={() => onPageChange(1)}
-          disabled={currentPage === 1}
-          className={clsx(
-            'px-3 py-2 rounded-lg border transition-colors',
-            currentPage === 1
-              ? 'border-gray-200 text-gray-400 cursor-not-allowed'
-              : 'border-gray-300 text-gray-700 hover:bg-gray-100'
-          )}
-          aria-label="Primera página"
-        >
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
-          </svg>
-        </button>
-      )}
+    <div className="space-y-4">
+      {/* Pagination Controls */}
+      <div className={clsx('flex items-center justify-center gap-2', className)}>
+        {/* First Page Button */}
+        {showFirstLast && (
+          <button
+            onClick={() => onPageChange(1)}
+            disabled={currentPage === 1}
+            className={clsx(
+              'px-3 py-2 rounded-lg border transition-colors',
+              currentPage === 1
+                ? 'border-gray-200 text-gray-400 cursor-not-allowed'
+                : 'border-gray-300 text-gray-700 hover:bg-gray-100'
+            )}
+            aria-label="Primera página"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
+            </svg>
+          </button>
+        )}
 
       {/* Previous Button */}
       <button
@@ -165,6 +179,40 @@ export const Pagination = ({
           </svg>
         </button>
       )}
+      </div>
+
+      {/* Info and Per Page Selector */}
+      <div className="flex items-center justify-between text-sm text-gray-600">
+        {/* Results Info */}
+        {total > 0 && (
+          <p>
+            Mostrando <span className="font-semibold">{startItem}</span> a{' '}
+            <span className="font-semibold">{endItem}</span> de{' '}
+            <span className="font-semibold">{total}</span> propiedades
+          </p>
+        )}
+
+        {/* Per Page Selector */}
+        {showPerPageSelector && onPerPageChange && (
+          <div className="flex items-center gap-2">
+            <label htmlFor="perPage" className="text-sm text-gray-600">
+              Items por página:
+            </label>
+            <select
+              id="perPage"
+              value={perPage}
+              onChange={(e) => onPerPageChange(Number(e.target.value))}
+              className="px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary"
+            >
+              {perPageOptions.map((option) => (
+                <option key={option} value={option}>
+                  {option}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
+      </div>
     </div>
   );
 };
