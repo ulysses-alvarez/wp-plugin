@@ -5,7 +5,8 @@
 
 import { useEffect, useState } from 'react';
 import { usePropertyStore } from '@/stores/usePropertyStore';
-import { LoadingSpinner, Pagination, Badge } from '@/components/ui';
+import { LoadingSpinner, Pagination, Badge, SortableTableHeader } from '@/components/ui';
+import type { SortKey } from '@/components/ui';
 import type { Property } from '@/utils/permissions';
 import { canCreateProperty, canEditProperty, canDeleteProperty, getStatusLabel } from '@/utils/permissions';
 import clsx from 'clsx';
@@ -55,8 +56,14 @@ export const PropertyTable = ({
     currentPage,
     totalPages,
     total,
+    perPage,
+    sortBy,
+    sortOrder,
     loadProperties,
-    setPage
+    setPage,
+    setPerPage,
+    setSortBy,
+    setSortOrder
   } = usePropertyStore();
 
   const [initialLoad, setInitialLoad] = useState(true);
@@ -64,13 +71,28 @@ export const PropertyTable = ({
 
   const canCreate = canCreateProperty();
 
-  // Load properties on mount and when page changes
+  // Load properties on mount and when page or perPage changes
   useEffect(() => {
     loadProperties().finally(() => setInitialLoad(false));
-  }, [currentPage, loadProperties]);
+  }, [currentPage, perPage, loadProperties]);
 
   const handlePageChange = (page: number) => {
     setPage(page);
+  };
+
+  const handlePerPageChange = (newPerPage: number) => {
+    setPerPage(newPerPage);
+  };
+
+  const handleSort = (sortKey: SortKey) => {
+    if (sortBy === sortKey) {
+      // Toggle order if same column
+      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+    } else {
+      // New column, default to descending
+      setSortBy(sortKey);
+      setSortOrder('desc');
+    }
   };
 
   if (initialLoad && loading) {
@@ -155,18 +177,34 @@ export const PropertyTable = ({
           <table className="w-full">
             <thead>
               <tr className="bg-gray-50 border-b border-gray-200">
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Propiedad
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Ubicación
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Estado
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Precio
-                </th>
+                <SortableTableHeader
+                  label="Propiedad"
+                  sortKey="title"
+                  currentSortBy={sortBy}
+                  currentSortOrder={sortOrder}
+                  onSort={handleSort}
+                />
+                <SortableTableHeader
+                  label="Ubicación"
+                  sortKey="state"
+                  currentSortBy={sortBy}
+                  currentSortOrder={sortOrder}
+                  onSort={handleSort}
+                />
+                <SortableTableHeader
+                  label="Estado"
+                  sortKey="status"
+                  currentSortBy={sortBy}
+                  currentSortOrder={sortOrder}
+                  onSort={handleSort}
+                />
+                <SortableTableHeader
+                  label="Precio"
+                  sortKey="price"
+                  currentSortBy={sortBy}
+                  currentSortOrder={sortOrder}
+                  onSort={handleSort}
+                />
                 <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Acciones
                 </th>
@@ -292,12 +330,15 @@ export const PropertyTable = ({
         </div>
 
         {/* Pagination - Fixed at bottom */}
-        {totalPages > 1 && (
+        {total > 0 && (
           <div className="flex-shrink-0 border-t border-gray-200 px-6 py-4 bg-gray-50">
             <Pagination
               currentPage={currentPage}
               totalPages={totalPages}
+              total={total}
+              perPage={perPage}
               onPageChange={handlePageChange}
+              onPerPageChange={handlePerPageChange}
             />
           </div>
         )}

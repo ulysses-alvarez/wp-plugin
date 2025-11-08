@@ -38,7 +38,7 @@ interface PropertyState {
   };
 
   // Sort
-  sortBy: 'date' | 'title' | 'price';
+  sortBy: 'date' | 'title' | 'price' | 'status' | 'state' | 'municipality';
   sortOrder: 'asc' | 'desc';
 
   // Actions
@@ -62,7 +62,7 @@ interface PropertyState {
   prevPage: () => void;
 
   // Sort Actions
-  setSortBy: (sortBy: 'date' | 'title' | 'price') => void;
+  setSortBy: (sortBy: 'date' | 'title' | 'price' | 'status' | 'state' | 'municipality') => void;
   setSortOrder: (order: 'asc' | 'desc') => void;
 
   // Selection Actions
@@ -310,7 +310,7 @@ export const usePropertyStore = create<PropertyState>((set, get) => ({
   /**
    * Sort Actions
    */
-  setSortBy: (sortBy: 'date' | 'title' | 'price') => {
+  setSortBy: (sortBy: 'date' | 'title' | 'price' | 'status' | 'state' | 'municipality') => {
     set({ sortBy, currentPage: 1 });
   },
 

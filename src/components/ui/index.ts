@@ -13,6 +13,9 @@ export { SearchBar } from './SearchBar';
 
 export { Pagination } from './Pagination';
 
+export { SortableTableHeader } from './SortableTableHeader';
+export type { SortKey } from './SortableTableHeader';
+
 export { LoadingSpinner } from './LoadingSpinner';
 export type { SpinnerSize } from './LoadingSpinner';
 

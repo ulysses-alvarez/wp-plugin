@@ -92,6 +92,18 @@ class Property_REST_API {
             // Order by price meta field (numeric)
             $args['meta_key'] = '_property_price';
             $args['orderby'] = 'meta_value_num';
+        } elseif ($orderby === 'status') {
+            // Order by status meta field (alphabetic)
+            $args['meta_key'] = '_property_status';
+            $args['orderby'] = 'meta_value';
+        } elseif ($orderby === 'state') {
+            // Order by state meta field (alphabetic)
+            $args['meta_key'] = '_property_state';
+            $args['orderby'] = 'meta_value';
+        } elseif ($orderby === 'municipality') {
+            // Order by municipality meta field (alphabetic)
+            $args['meta_key'] = '_property_municipality';
+            $args['orderby'] = 'meta_value';
         } else {
             // Default ordering (date, title, etc)
             $args['orderby'] = $orderby;

@@ -30,7 +30,7 @@ export interface PropertyQueryParams {
   state?: string;
   municipality?: string;
   author?: number;
-  orderby?: 'date' | 'title' | 'price';
+  orderby?: 'date' | 'title' | 'price' | 'status' | 'state' | 'municipality';
   order?: 'asc' | 'desc';
 }
 
