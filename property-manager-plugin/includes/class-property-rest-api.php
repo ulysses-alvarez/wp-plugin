@@ -114,28 +114,103 @@ class Property_REST_API {
             $args['author'] = $current_user->ID;
         }
 
-        // Search filter
-        $search = $request->get_param('search');
-        if (!empty($search)) {
-            $args['s'] = sanitize_text_field($search);
-        }
+        // Advanced search with field context
+        $search_field = $request->get_param('search_field');
+        $search_value = $request->get_param('search_value');
 
-        // Status filter
-        $status = $request->get_param('status');
-        if (!empty($status)) {
-            $args['meta_query'][] = [
-                'key'   => '_property_status',
-                'value' => sanitize_text_field($status),
-            ];
-        }
+        if (!empty($search_field) && !empty($search_value)) {
+            // Field-specific search
+            switch ($search_field) {
+                case 'all':
+                    // General search across title and content
+                    $args['s'] = sanitize_text_field($search_value);
+                    break;
 
-        // State filter
-        $state = $request->get_param('state');
-        if (!empty($state)) {
-            $args['meta_query'][] = [
-                'key'   => '_property_state',
-                'value' => sanitize_text_field($state),
-            ];
+                case 'title':
+                    // Search in post title only
+                    $args['s'] = sanitize_text_field($search_value);
+                    break;
+
+                case 'status':
+                    // Exact match for status
+                    $args['meta_query'][] = [
+                        'key'     => '_property_status',
+                        'value'   => sanitize_text_field($search_value),
+                        'compare' => '='
+                    ];
+                    break;
+
+                case 'state':
+                    // Exact match for state
+                    $args['meta_query'][] = [
+                        'key'     => '_property_state',
+                        'value'   => sanitize_text_field($search_value),
+                        'compare' => '='
+                    ];
+                    break;
+
+                case 'municipality':
+                    // Partial match for municipality
+                    $args['meta_query'][] = [
+                        'key'     => '_property_municipality',
+                        'value'   => sanitize_text_field($search_value),
+                        'compare' => 'LIKE'
+                    ];
+                    break;
+
+                case 'street':
+                    // Partial match for street
+                    $args['meta_query'][] = [
+                        'key'     => '_property_street',
+                        'value'   => sanitize_text_field($search_value),
+                        'compare' => 'LIKE'
+                    ];
+                    break;
+
+                case 'postal_code':
+                    // Exact match for postal code
+                    $args['meta_query'][] = [
+                        'key'     => '_property_postal_code',
+                        'value'   => sanitize_text_field($search_value),
+                        'compare' => '='
+                    ];
+                    break;
+
+                case 'price':
+                    // Exact match for price (numeric)
+                    $args['meta_query'][] = [
+                        'key'     => '_property_price',
+                        'value'   => floatval($search_value),
+                        'type'    => 'NUMERIC',
+                        'compare' => '='
+                    ];
+                    break;
+            }
+        } else {
+            // Fallback to old filter format for backward compatibility
+            // Search filter
+            $search = $request->get_param('search');
+            if (!empty($search)) {
+                $args['s'] = sanitize_text_field($search);
+            }
+
+            // Status filter
+            $status = $request->get_param('status');
+            if (!empty($status)) {
+                $args['meta_query'][] = [
+                    'key'   => '_property_status',
+                    'value' => sanitize_text_field($status),
+                ];
+            }
+
+            // State filter
+            $state = $request->get_param('state');
+            if (!empty($state)) {
+                $args['meta_query'][] = [
+                    'key'   => '_property_state',
+                    'value' => sanitize_text_field($state),
+                ];
+            }
         }
 
         $query = new WP_Query($args);
@@ -608,13 +683,15 @@ class Property_REST_API {
      */
     private function get_collection_params() {
         return [
-            'page'     => ['default' => 1],
-            'per_page' => ['default' => 20],
-            'search'   => ['default' => ''],
-            'status'   => ['default' => ''],
-            'state'    => ['default' => ''],
-            'orderby'  => ['default' => 'date'],
-            'order'    => ['default' => 'DESC'],
+            'page'         => ['default' => 1],
+            'per_page'     => ['default' => 20],
+            'search'       => ['default' => ''],
+            'status'       => ['default' => ''],
+            'state'        => ['default' => ''],
+            'orderby'      => ['default' => 'date'],
+            'order'        => ['default' => 'DESC'],
+            'search_field' => ['default' => ''],
+            'search_value' => ['default' => ''],
         ];
     }
 

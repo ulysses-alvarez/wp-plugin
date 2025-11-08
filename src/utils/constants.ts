@@ -106,3 +106,69 @@ export const CURRENCY_FORMAT = 'es-MX';
 // Date Format
 export const DATE_FORMAT = 'dd/MM/yyyy';
 export const DATETIME_FORMAT = 'dd/MM/yyyy HH:mm';
+
+// Advanced Search Field Types
+export interface SearchOption {
+  value: string;
+  label: string;
+}
+
+export interface SearchContext {
+  value: string;
+  label: string;
+  type: 'text' | 'number' | 'select';
+  placeholder?: string;
+  options?: readonly SearchOption[];
+}
+
+// Advanced Search Field Configurations
+export const SEARCH_CONTEXTS: SearchContext[] = [
+  {
+    value: 'all',
+    label: 'Búsqueda General',
+    type: 'text',
+    placeholder: 'Buscar por título, patente, municipio...'
+  },
+  {
+    value: 'title',
+    label: 'Título',
+    type: 'text',
+    placeholder: 'Buscar por título...'
+  },
+  {
+    value: 'status',
+    label: 'Estado Propiedad',
+    type: 'select',
+    options: PROPERTY_STATUS_OPTIONS
+  },
+  {
+    value: 'state',
+    label: 'Estado República',
+    type: 'select',
+    options: MEXICAN_STATES
+  },
+  {
+    value: 'municipality',
+    label: 'Municipio',
+    type: 'text',
+    placeholder: 'Buscar por municipio...'
+  },
+  {
+    value: 'street',
+    label: 'Calle',
+    type: 'text',
+    placeholder: 'Buscar por calle...'
+  },
+  {
+    value: 'postal_code',
+    label: 'Código Postal',
+    type: 'number',
+    placeholder: 'Ej: 44100'
+  },
+  {
+    value: 'price',
+    label: 'Precio',
+    type: 'number',
+    placeholder: 'Precio exacto'
+  }
+];

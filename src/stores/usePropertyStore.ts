@@ -35,6 +35,8 @@ interface PropertyState {
     status: string;
     state: string;
     municipality: string;
+    searchField: string;  // Field context for advanced search
+    searchValue: string;  // Value for advanced search
   };
 
   // Sort
@@ -53,6 +55,7 @@ interface PropertyState {
   setStatusFilter: (status: string) => void;
   setStateFilter: (state: string) => void;
   setMunicipalityFilter: (municipality: string) => void;
+  setFieldSearch: (field: string, value: string) => void;  // Advanced search
   clearFilters: () => void;
 
   // Pagination Actions
@@ -86,7 +89,9 @@ const initialState = {
     search: '',
     status: '',
     state: '',
-    municipality: ''
+    municipality: '',
+    searchField: 'all',
+    searchValue: ''
   },
   sortBy: 'date' as const,
   sortOrder: 'desc' as const
@@ -107,16 +112,25 @@ export const usePropertyStore = create<PropertyState>((set, get) => ({
     try {
       const { filters, currentPage, perPage, sortBy, sortOrder } = get();
 
+      // Build query params, prioritizing advanced search over old filters
       const queryParams: PropertyQueryParams = {
         page: params?.page ?? currentPage,
         per_page: params?.per_page ?? perPage,
-        search: params?.search ?? filters.search,
-        status: params?.status ?? filters.status,
-        state: params?.state ?? filters.state,
-        municipality: params?.municipality ?? filters.municipality,
         orderby: params?.orderby ?? sortBy,
         order: params?.order ?? sortOrder
       };
+
+      // Use advanced search if available
+      if (filters.searchField && filters.searchValue) {
+        queryParams.search_field = filters.searchField;
+        queryParams.search_value = filters.searchValue;
+      } else {
+        // Fallback to old filter format for backward compatibility
+        queryParams.search = params?.search ?? filters.search;
+        queryParams.status = params?.status ?? filters.status;
+        queryParams.state = params?.state ?? filters.state;
+        queryParams.municipality = params?.municipality ?? filters.municipality;
+      }
 
       const response = await fetchProperties(queryParams);
 
@@ -270,13 +284,31 @@ export const usePropertyStore = create<PropertyState>((set, get) => ({
     }));
   },
 
+  setFieldSearch: (searchField: string, searchValue: string) => {
+    set(state => ({
+      filters: {
+        ...state.filters,
+        searchField,
+        searchValue,
+        // Clear old filter format when using advanced search
+        search: '',
+        status: '',
+        state: '',
+        municipality: ''
+      },
+      currentPage: 1
+    }));
+  },
+
   clearFilters: () => {
     set({
       filters: {
         search: '',
         status: '',
         state: '',
-        municipality: ''
+        municipality: '',
+        searchField: 'all',
+        searchValue: ''
       },
       currentPage: 1
     });

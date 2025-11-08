@@ -32,6 +32,8 @@ export interface PropertyQueryParams {
   author?: number;
   orderby?: 'date' | 'title' | 'price' | 'status' | 'state' | 'municipality';
   order?: 'asc' | 'desc';
+  search_field?: string;  // Field context for advanced search
+  search_value?: string;  // Value for advanced search
 }
 
 // Property Create/Update Data

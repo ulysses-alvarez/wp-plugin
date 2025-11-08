@@ -10,6 +10,7 @@ export { Input } from './Input';
 export { Select } from './Select';
 export { Textarea } from './Textarea';
 export { SearchBar } from './SearchBar';
+export { AdvancedSearchBar } from './AdvancedSearchBar';
 
 export { Pagination } from './Pagination';
 
