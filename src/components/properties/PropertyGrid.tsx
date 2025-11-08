@@ -31,6 +31,7 @@ export const PropertyGrid = ({
     totalPages,
     total,
     perPage,
+    filters,
     loadProperties,
     setPage,
     setPerPage
@@ -40,10 +41,11 @@ export const PropertyGrid = ({
 
   const canCreate = canCreateProperty();
 
-  // Load properties on mount and when page or perPage changes
+  // Load properties on mount and when pagination or filters change
   useEffect(() => {
     loadProperties().finally(() => setInitialLoad(false));
-  }, [currentPage, perPage, loadProperties]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentPage, perPage, filters.searchField, filters.searchValue]);
 
   const handlePageChange = (page: number) => {
     setPage(page);

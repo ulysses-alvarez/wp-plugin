@@ -59,6 +59,7 @@ export const PropertyTable = ({
     perPage,
     sortBy,
     sortOrder,
+    filters,
     loadProperties,
     setPage,
     setPerPage,
@@ -71,10 +72,11 @@ export const PropertyTable = ({
 
   const canCreate = canCreateProperty();
 
-  // Load properties on mount and when page, perPage, or sorting changes
+  // Load properties on mount and when pagination, sorting, or filters change
   useEffect(() => {
     loadProperties().finally(() => setInitialLoad(false));
-  }, [currentPage, perPage, sortBy, sortOrder, loadProperties]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentPage, perPage, sortBy, sortOrder, filters.searchField, filters.searchValue]);
 
   const handlePageChange = (page: number) => {
     setPage(page);

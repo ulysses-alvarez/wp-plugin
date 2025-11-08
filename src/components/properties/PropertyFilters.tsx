@@ -3,7 +3,6 @@
  * Filter controls for properties with advanced search
  */
 
-import { useEffect } from 'react';
 import { usePropertyStore } from '@/stores/usePropertyStore';
 import { AdvancedSearchBar } from '@/components/ui';
 
@@ -11,16 +10,10 @@ export const PropertyFilters = () => {
   const {
     filters,
     setFieldSearch,
-    clearFilters,
-    loadProperties
+    clearFilters
   } = usePropertyStore();
 
   const hasActiveFilters = filters.searchField && filters.searchValue;
-
-  // Reload properties when filters change
-  useEffect(() => {
-    loadProperties();
-  }, [filters, loadProperties]);
 
   const handleClearFilters = () => {
     clearFilters();
