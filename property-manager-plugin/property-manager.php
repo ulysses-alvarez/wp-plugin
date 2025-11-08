@@ -30,6 +30,7 @@ require_once PROPERTY_MANAGER_PATH . 'includes/class-property-cpt.php';
 require_once PROPERTY_MANAGER_PATH . 'includes/class-property-meta.php';
 require_once PROPERTY_MANAGER_PATH . 'includes/class-property-roles.php';
 require_once PROPERTY_MANAGER_PATH . 'includes/class-property-rest-api.php';
+require_once PROPERTY_MANAGER_PATH . 'includes/class-property-settings.php';
 require_once PROPERTY_MANAGER_PATH . 'includes/class-property-shortcode.php';
 require_once PROPERTY_MANAGER_PATH . 'includes/class-property-assets.php';
 require_once PROPERTY_MANAGER_PATH . 'includes/class-property-template.php';
@@ -63,6 +64,9 @@ function property_manager_init() {
     // Initialize REST API
     $rest_api = new Property_REST_API();
     add_action('rest_api_init', [$rest_api, 'register_routes']);
+
+    // Initialize Settings API
+    Property_Settings::init();
 
     // Register shortcode
     Property_Shortcode::register();

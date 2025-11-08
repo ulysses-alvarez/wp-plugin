@@ -5,6 +5,27 @@
 @tailwind components;
 @tailwind utilities;
 
+/* CSS Variables for theming */
+:root {
+  /* Colores dinámicos (actualizables desde configuración) */
+  --color-primary: #216121;
+  --color-primary-hover: #1a4d1a;
+  --color-primary-light: #e8f5e9;
+
+  /* Sidebar */
+  --color-sidebar-bg: #1e293b;
+  --color-sidebar-text: #f1f5f9;
+  --color-sidebar-hover: #334155;
+  --color-sidebar-active: #216121;
+
+  /* Dimensiones */
+  --sidebar-width: 260px;
+  --sidebar-collapsed-width: 60px;
+
+  /* Transiciones */
+  --transition-base: 150ms ease-in-out;
+}
+
 /* Base styles */
 @layer base {
   body {
