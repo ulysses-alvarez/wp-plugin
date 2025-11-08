@@ -79,6 +79,10 @@ class Property_REST_API {
         $orderby = $request->get_param('orderby') ?: 'date';
         $order = strtoupper($request->get_param('order') ?: 'DESC');
 
+        // Store search parameters for use in search filter hook
+        $search_field = $request->get_param('search_field');
+        $search_value = $request->get_param('search_value');
+
         $args = [
             'post_type'      => 'property',
             'posts_per_page' => $request->get_param('per_page') ?: 20,
@@ -122,8 +126,41 @@ class Property_REST_API {
             // Field-specific search
             switch ($search_field) {
                 case 'all':
-                    // General search across title and content
-                    $args['s'] = sanitize_text_field($search_value);
+                    // General search in title, content, and key meta fields
+                    $search_term = sanitize_text_field($search_value);
+                    $args['s'] = $search_term;
+
+                    // Define filter function for extending search to meta fields
+                    $meta_search_filter = function($search, $wp_query) use ($search_term) {
+                        global $wpdb;
+
+                        // Only modify search clause if it exists
+                        if (empty($search)) {
+                            return $search;
+                        }
+
+                        // Extend search to include meta fields with OR condition
+                        $meta_search = $wpdb->prepare(
+                            " OR EXISTS (
+                                SELECT 1 FROM {$wpdb->postmeta} pm
+                                WHERE pm.post_id = {$wpdb->posts}.ID
+                                AND pm.meta_key IN ('_property_patent', '_property_municipality', '_property_neighborhood', '_property_street', '_property_postal_code')
+                                AND pm.meta_value LIKE %s
+                            )",
+                            '%' . $wpdb->esc_like($search_term) . '%'
+                        );
+
+                        // Append meta search to existing search (before the closing parenthesis)
+                        $search = preg_replace('/\)\s*$/', $meta_search . ')', $search);
+
+                        return $search;
+                    };
+
+                    // Add the filter
+                    add_filter('posts_search', $meta_search_filter, 10, 2);
+
+                    // Store filter reference to remove it later
+                    $args['_meta_search_filter'] = $meta_search_filter;
                     break;
 
                 case 'title':
@@ -213,7 +250,14 @@ class Property_REST_API {
             }
         }
 
+        // Execute query
         $query = new WP_Query($args);
+
+        // Remove meta search filter if it was added
+        if (isset($args['_meta_search_filter'])) {
+            remove_filter('posts_search', $args['_meta_search_filter'], 10);
+        }
+
         $properties = [];
 
         foreach ($query->posts as $post) {

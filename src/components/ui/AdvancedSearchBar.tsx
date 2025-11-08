@@ -3,7 +3,7 @@
  * Search bar with field context selector and dynamic input rendering
  */
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import clsx from 'clsx';
 import { SEARCH_CONTEXTS, type SearchContext } from '@/utils/constants';
 
@@ -20,12 +20,18 @@ export const AdvancedSearchBar = ({
 }: AdvancedSearchBarProps) => {
   const [selectedContext, setSelectedContext] = useState<SearchContext>(SEARCH_CONTEXTS[0]);
   const [searchValue, setSearchValue] = useState<string>('');
+  const isFirstRender = useRef(true);
 
   // Debounced search effect
   useEffect(() => {
-    // Only debounce for text/number inputs, not for selects
+    // Skip the very first render to avoid calling onSearch on mount
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
+
+    // For selects, search immediately
     if (selectedContext.type === 'select') {
-      // For selects, search immediately
       onSearch(selectedContext.value, searchValue);
       return;
     }
@@ -36,7 +42,7 @@ export const AdvancedSearchBar = ({
     }, debounceMs);
 
     return () => clearTimeout(timeoutId);
-  }, [searchValue, selectedContext, onSearch, debounceMs]);
+  }, [searchValue, selectedContext.value, selectedContext.type, onSearch, debounceMs]);
 
   // Handle context change
   const handleContextChange = useCallback((newContextValue: string) => {
