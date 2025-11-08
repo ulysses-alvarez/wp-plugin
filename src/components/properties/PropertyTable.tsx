@@ -71,10 +71,10 @@ export const PropertyTable = ({
 
   const canCreate = canCreateProperty();
 
-  // Load properties on mount and when page or perPage changes
+  // Load properties on mount and when page, perPage, or sorting changes
   useEffect(() => {
     loadProperties().finally(() => setInitialLoad(false));
-  }, [currentPage, perPage, loadProperties]);
+  }, [currentPage, perPage, sortBy, sortOrder, loadProperties]);
 
   const handlePageChange = (page: number) => {
     setPage(page);
