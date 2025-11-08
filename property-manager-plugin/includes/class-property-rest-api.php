@@ -118,49 +118,15 @@ class Property_REST_API {
             $args['author'] = $current_user->ID;
         }
 
-        // Advanced search with field context
-        $search_field = $request->get_param('search_field');
-        $search_value = $request->get_param('search_value');
-
+        // Advanced search with field context (already retrieved above)
         if (!empty($search_field) && !empty($search_value)) {
             // Field-specific search
             switch ($search_field) {
                 case 'all':
-                    // General search in title, content, and key meta fields
-                    $search_term = sanitize_text_field($search_value);
-                    $args['s'] = $search_term;
-
-                    // Define filter function for extending search to meta fields
-                    $meta_search_filter = function($search, $wp_query) use ($search_term) {
-                        global $wpdb;
-
-                        // Only modify search clause if it exists
-                        if (empty($search)) {
-                            return $search;
-                        }
-
-                        // Extend search to include meta fields with OR condition
-                        $meta_search = $wpdb->prepare(
-                            " OR EXISTS (
-                                SELECT 1 FROM {$wpdb->postmeta} pm
-                                WHERE pm.post_id = {$wpdb->posts}.ID
-                                AND pm.meta_key IN ('_property_patent', '_property_municipality', '_property_neighborhood', '_property_street', '_property_postal_code')
-                                AND pm.meta_value LIKE %s
-                            )",
-                            '%' . $wpdb->esc_like($search_term) . '%'
-                        );
-
-                        // Append meta search to existing search (before the closing parenthesis)
-                        $search = preg_replace('/\)\s*$/', $meta_search . ')', $search);
-
-                        return $search;
-                    };
-
-                    // Add the filter
-                    add_filter('posts_search', $meta_search_filter, 10, 2);
-
-                    // Store filter reference to remove it later
-                    $args['_meta_search_filter'] = $meta_search_filter;
+                    // General search across all fields (title, content, and all meta fields)
+                    $args['s'] = sanitize_text_field($search_value);
+                    // Mark this query for general search filter
+                    $args['property_general_search'] = true;
                     break;
 
                 case 'title':
@@ -250,12 +216,57 @@ class Property_REST_API {
             }
         }
 
+        // Add filter for general search if needed
+        $general_search_filter = null;
+        if (!empty($args['property_general_search'])) {
+            $search_term = $args['s'];
+            unset($args['property_general_search']); // Remove the marker as it's not a valid WP_Query arg
+
+            $general_search_filter = function($where, $wp_query) use ($search_term) {
+                global $wpdb;
+
+                if (empty($search_term)) {
+                    return $where;
+                }
+
+                // Build OR conditions for meta fields
+                $meta_where = $wpdb->prepare(
+                    "OR EXISTS (
+                        SELECT 1 FROM {$wpdb->postmeta} pm
+                        WHERE pm.post_id = {$wpdb->posts}.ID
+                        AND (
+                            (pm.meta_key = '_property_status' AND pm.meta_value LIKE %s) OR
+                            (pm.meta_key = '_property_state' AND pm.meta_value LIKE %s) OR
+                            (pm.meta_key = '_property_municipality' AND pm.meta_value LIKE %s) OR
+                            (pm.meta_key = '_property_street' AND pm.meta_value LIKE %s) OR
+                            (pm.meta_key = '_property_postal_code' AND pm.meta_value LIKE %s) OR
+                            (pm.meta_key = '_property_patent' AND pm.meta_value LIKE %s) OR
+                            (pm.meta_key = '_property_neighborhood' AND pm.meta_value LIKE %s)
+                        )
+                    )",
+                    '%' . $wpdb->esc_like($search_term) . '%',
+                    '%' . $wpdb->esc_like($search_term) . '%',
+                    '%' . $wpdb->esc_like($search_term) . '%',
+                    '%' . $wpdb->esc_like($search_term) . '%',
+                    '%' . $wpdb->esc_like($search_term) . '%',
+                    '%' . $wpdb->esc_like($search_term) . '%',
+                    '%' . $wpdb->esc_like($search_term) . '%'
+                );
+
+                $where .= " {$meta_where}";
+
+                return $where;
+            };
+
+            add_filter('posts_where', $general_search_filter, 10, 2);
+        }
+
         // Execute query
         $query = new WP_Query($args);
 
-        // Remove meta search filter if it was added
-        if (isset($args['_meta_search_filter'])) {
-            remove_filter('posts_search', $args['_meta_search_filter'], 10);
+        // Remove the filter if it was added
+        if ($general_search_filter !== null) {
+            remove_filter('posts_where', $general_search_filter, 10);
         }
 
         $properties = [];
