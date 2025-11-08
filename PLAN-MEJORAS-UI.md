@@ -198,6 +198,312 @@ if (!empty($search_field) && !empty($search_value)) {
 
 ---
 
+## 🔄 Manejo de Campos SELECT en Buscador Avanzado
+
+### Problema Identificado
+
+Algunos campos de búsqueda tienen valores predefinidos (enumerados), como:
+- **Estado de Propiedad**: Disponible, Vendida, Alquilada, Reservada
+- **Estado de la República**: Los 32 estados de México
+
+Para estos campos, un **input de texto libre no tiene sentido**. La solución óptima es mostrar un **select con las opciones válidas**.
+
+---
+
+### Solución Propuesta: Tipado Dinámico
+
+**Definir el tipo de cada campo de búsqueda:**
+
+```typescript
+interface SearchOption {
+  value: string;
+  label: string;
+}
+
+interface SearchContext {
+  value: string;           // ID del campo (ej: 'status', 'state')
+  label: string;           // Label visible (ej: 'Estado Propiedad')
+  type: 'text' | 'number' | 'select';  // Tipo de input
+  placeholder?: string;    // Para text/number
+  options?: SearchOption[]; // Para select
+}
+
+const SEARCH_CONTEXTS: SearchContext[] = [
+  {
+    value: 'general',
+    label: 'General',
+    type: 'text',
+    placeholder: 'Buscar en todo...'
+  },
+  {
+    value: 'title',
+    label: 'Título',
+    type: 'text',
+    placeholder: 'Buscar por título...'
+  },
+  {
+    value: 'patent',
+    label: 'Patente',
+    type: 'text',
+    placeholder: 'Buscar por patente...'
+  },
+  {
+    value: 'status',
+    label: 'Estado Propiedad',
+    type: 'select',
+    options: PROPERTY_STATUS_OPTIONS  // Importado de constants.ts
+  },
+  {
+    value: 'state',
+    label: 'Estado República',
+    type: 'select',
+    options: MEXICAN_STATES  // Importado de constants.ts
+  },
+  {
+    value: 'municipality',
+    label: 'Municipio',
+    type: 'text',
+    placeholder: 'Buscar por municipio...'
+  },
+  {
+    value: 'neighborhood',
+    label: 'Colonia',
+    type: 'text',
+    placeholder: 'Buscar por colonia...'
+  },
+  {
+    value: 'postal_code',
+    label: 'Código Postal',
+    type: 'number',
+    placeholder: 'Ej: 12345'
+  },
+  {
+    value: 'street',
+    label: 'Dirección',
+    type: 'text',
+    placeholder: 'Buscar por dirección...'
+  },
+  {
+    value: 'price',
+    label: 'Precio',
+    type: 'number',
+    placeholder: 'Ej: 5000000'
+  }
+];
+```
+
+---
+
+### Renderizado Condicional en AdvancedSearchBar
+
+**Lógica del componente:**
+
+```tsx
+const AdvancedSearchBar = () => {
+  const [searchContext, setSearchContext] = useState('general');
+  const [searchValue, setSearchValue] = useState('');
+
+  const currentContext = SEARCH_CONTEXTS.find(ctx => ctx.value === searchContext);
+
+  return (
+    <div className="flex gap-0 border border-gray-300 rounded-lg overflow-hidden">
+      {/* Context Selector */}
+      <select
+        value={searchContext}
+        onChange={(e) => {
+          setSearchContext(e.target.value);
+          setSearchValue(''); // Reset value on context change
+        }}
+        className="w-[180px] px-3 py-2 border-r border-gray-300 bg-gray-50"
+      >
+        {SEARCH_CONTEXTS.map(ctx => (
+          <option key={ctx.value} value={ctx.value}>
+            {ctx.label}
+          </option>
+        ))}
+      </select>
+
+      {/* Dynamic Input Area */}
+      <div className="flex-1 flex items-center px-3">
+        {currentContext?.type === 'select' ? (
+          // Render SELECT for enum fields
+          <select
+            value={searchValue}
+            onChange={(e) => setSearchValue(e.target.value)}
+            className="w-full bg-transparent focus:outline-none"
+          >
+            <option value="">Todos</option>
+            {currentContext.options?.map(opt => (
+              <option key={opt.value} value={opt.value}>
+                {opt.label}
+              </option>
+            ))}
+          </select>
+        ) : currentContext?.type === 'number' ? (
+          // Render NUMBER input
+          <input
+            type="number"
+            value={searchValue}
+            onChange={(e) => setSearchValue(e.target.value)}
+            placeholder={currentContext.placeholder}
+            className="w-full bg-transparent focus:outline-none"
+          />
+        ) : (
+          // Render TEXT input (default)
+          <input
+            type="text"
+            value={searchValue}
+            onChange={(e) => setSearchValue(e.target.value)}
+            placeholder={currentContext?.placeholder || 'Buscar...'}
+            className="w-full bg-transparent focus:outline-none"
+          />
+        )}
+
+        {/* Clear Button */}
+        {searchValue && (
+          <button onClick={() => setSearchValue('')}>✕</button>
+        )}
+      </div>
+    </div>
+  );
+};
+```
+
+---
+
+### Ventajas de esta Solución
+
+✅ **Tipo de dato correcto**: SELECT para enums, input para texto libre
+✅ **Validación implícita**: Solo valores válidos para enums
+✅ **UX consistente**: Usa componentes nativos conocidos
+✅ **Extensible**: Fácil agregar nuevos tipos (date, range, etc.)
+✅ **Mantenible**: Toda la configuración en un solo lugar
+✅ **Reutilizable**: PROPERTY_STATUS_OPTIONS ya existe en constants.ts
+
+---
+
+### Estados Visuales Ejemplos
+
+**1. Búsqueda General (default):**
+```
+┌──────────────────────────────────────────────┐
+│ [General ▼] │ 🔍 Buscar en todo...       [X]│
+└──────────────────────────────────────────────┘
+```
+
+**2. Búsqueda por Título (text):**
+```
+┌──────────────────────────────────────────────┐
+│ [Título ▼] │ 🔍 Buscar por título...    [X]│
+└──────────────────────────────────────────────┘
+```
+
+**3. Búsqueda por Estado Propiedad (select):**
+```
+┌──────────────────────────────────────────────────┐
+│ [Estado Propiedad ▼] │ [Disponible ▼]        [X]│
+└──────────────────────────────────────────────────┘
+```
+Opciones del segundo select: Todos, Disponible, Vendida, Alquilada, Reservada
+
+**4. Búsqueda por Estado República (select):**
+```
+┌──────────────────────────────────────────────────┐
+│ [Estado República ▼] │ [Jalisco ▼]           [X]│
+└──────────────────────────────────────────────────┘
+```
+Opciones del segundo select: Todos, + 32 estados de México
+
+**5. Búsqueda por Precio (number):**
+```
+┌──────────────────────────────────────────────┐
+│ [Precio ▼] │ 🔢 Ej: 5000000             [X]│
+└──────────────────────────────────────────────┘
+```
+
+---
+
+### Integración con Backend
+
+**API recibe:**
+```json
+{
+  "search_field": "status",
+  "search_value": "available"
+}
+```
+
+**Backend procesa:**
+```php
+if (!empty($search_field) && !empty($search_value)) {
+    switch ($search_field) {
+        case 'title':
+            $args['s'] = $search_value;
+            break;
+
+        case 'status':
+        case 'state':
+            // Para enums, búsqueda exacta
+            $args['meta_query'][] = [
+                'key'     => "_property_{$search_field}",
+                'value'   => $search_value,
+                'compare' => '='  // Exacta, no LIKE
+            ];
+            break;
+
+        case 'municipality':
+        case 'neighborhood':
+        case 'street':
+            // Para texto libre, búsqueda LIKE
+            $args['meta_query'][] = [
+                'key'     => "_property_{$search_field}",
+                'value'   => $search_value,
+                'compare' => 'LIKE'
+            ];
+            break;
+
+        case 'price':
+        case 'postal_code':
+            // Para números, búsqueda exacta o rango
+            $args['meta_query'][] = [
+                'key'     => "_property_{$search_field}",
+                'value'   => $search_value,
+                'compare' => '=',
+                'type'    => 'NUMERIC'
+            ];
+            break;
+    }
+}
+```
+
+---
+
+### Mejoras Futuras (Post-MVP)
+
+**Rangos de búsqueda:**
+```
+┌──────────────────────────────────────────────────────┐
+│ [Precio ▼] │ Min: 1000000 │ Max: 5000000       [X]│
+└──────────────────────────────────────────────────────┘
+```
+
+**Fecha de creación:**
+```
+┌──────────────────────────────────────────────────────┐
+│ [Fecha ▼] │ 📅 Desde: 01/01/2025 │ Hasta: ...   [X]│
+└──────────────────────────────────────────────────────┘
+```
+
+**Búsqueda con operadores:**
+```
+┌──────────────────────────────────────────────────────┐
+│ [Precio ▼] │ [Mayor que ▼] │ 5000000           [X]│
+└──────────────────────────────────────────────────────┘
+```
+Operadores: Igual a, Mayor que, Menor que, Entre
+
+---
+
 ## 🎨 Diseño Visual
 
 ### PropertyTable con Ordenamiento

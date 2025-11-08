@@ -74,23 +74,23 @@ export const Pagination = ({
   const pages = getPageNumbers();
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3">
       {/* Pagination Controls */}
-      <div className={clsx('flex items-center justify-center gap-2', className)}>
+      <div className={clsx('flex items-center justify-center gap-1', className)}>
         {/* First Page Button */}
         {showFirstLast && (
           <button
             onClick={() => onPageChange(1)}
             disabled={currentPage === 1}
             className={clsx(
-              'px-3 py-2 rounded-lg border transition-colors',
+              'px-2 py-1.5 rounded-md border transition-colors text-sm',
               currentPage === 1
                 ? 'border-gray-200 text-gray-400 cursor-not-allowed'
                 : 'border-gray-300 text-gray-700 hover:bg-gray-100'
             )}
             aria-label="Primera página"
           >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
             </svg>
           </button>
@@ -101,14 +101,14 @@ export const Pagination = ({
         onClick={() => onPageChange(currentPage - 1)}
         disabled={currentPage === 1}
         className={clsx(
-          'px-3 py-2 rounded-lg border transition-colors',
+          'px-2 py-1.5 rounded-md border transition-colors text-sm',
           currentPage === 1
             ? 'border-gray-200 text-gray-400 cursor-not-allowed'
             : 'border-gray-300 text-gray-700 hover:bg-gray-100'
         )}
         aria-label="Página anterior"
       >
-        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
         </svg>
       </button>
@@ -117,7 +117,7 @@ export const Pagination = ({
       {pages.map((page, index) => {
         if (page === '...') {
           return (
-            <span key={`ellipsis-${index}`} className="px-3 py-2 text-gray-500">
+            <span key={`ellipsis-${index}`} className="px-2 py-1.5 text-gray-500 text-sm">
               ...
             </span>
           );
@@ -131,7 +131,7 @@ export const Pagination = ({
             key={pageNumber}
             onClick={() => onPageChange(pageNumber)}
             className={clsx(
-              'px-4 py-2 rounded-lg border transition-colors min-w-[40px]',
+              'px-3 py-1.5 rounded-md border transition-colors min-w-[32px] text-sm',
               isActive
                 ? 'bg-primary text-white border-primary'
                 : 'border-gray-300 text-gray-700 hover:bg-gray-100'
@@ -149,14 +149,14 @@ export const Pagination = ({
         onClick={() => onPageChange(currentPage + 1)}
         disabled={currentPage === totalPages}
         className={clsx(
-          'px-3 py-2 rounded-lg border transition-colors',
+          'px-2 py-1.5 rounded-md border transition-colors text-sm',
           currentPage === totalPages
             ? 'border-gray-200 text-gray-400 cursor-not-allowed'
             : 'border-gray-300 text-gray-700 hover:bg-gray-100'
         )}
         aria-label="Página siguiente"
       >
-        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
         </svg>
       </button>
@@ -167,14 +167,14 @@ export const Pagination = ({
           onClick={() => onPageChange(totalPages)}
           disabled={currentPage === totalPages}
           className={clsx(
-            'px-3 py-2 rounded-lg border transition-colors',
+            'px-2 py-1.5 rounded-md border transition-colors text-sm',
             currentPage === totalPages
               ? 'border-gray-200 text-gray-400 cursor-not-allowed'
               : 'border-gray-300 text-gray-700 hover:bg-gray-100'
           )}
           aria-label="Última página"
         >
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 5l7 7-7 7M5 5l7 7-7 7" />
           </svg>
         </button>
