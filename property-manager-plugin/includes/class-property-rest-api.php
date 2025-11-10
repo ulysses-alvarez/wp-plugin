@@ -531,35 +531,27 @@ class Property_REST_API {
      */
     private function validate_required_fields($request) {
         $required_fields = [
-            'title'        => __('Título', 'property-dashboard'),
-            'status'       => __('Estado', 'property-dashboard'),
-            'state'        => __('Estado de la República', 'property-dashboard'),
-            'municipality' => __('Municipio', 'property-dashboard'),
-            'neighborhood' => __('Colonia', 'property-dashboard'),
-            'postal_code'  => __('Código Postal', 'property-dashboard'),
-            'street'       => __('Dirección', 'property-dashboard'),
-            'patent'       => __('Patente', 'property-dashboard'),
-            'price'        => __('Precio', 'property-dashboard'),
+            'title'        => __('El título es obligatorio', 'property-dashboard'),
+            'status'       => __('El status es obligatorio', 'property-dashboard'),
+            'state'        => __('El estado es obligatorio', 'property-dashboard'),
+            'municipality' => __('El municipio es obligatorio', 'property-dashboard'),
+            'neighborhood' => __('La colonia es obligatoria', 'property-dashboard'),
+            'postal_code'  => __('El código postal es obligatorio', 'property-dashboard'),
+            'street'       => __('La dirección es obligatoria', 'property-dashboard'),
+            'patent'       => __('La patente es obligatoria', 'property-dashboard'),
+            'price'        => __('El precio es obligatorio', 'property-dashboard'),
         ];
 
-        $missing_fields = [];
-
-        foreach ($required_fields as $field => $label) {
+        // Return the first missing field error for consistency with frontend validation
+        foreach ($required_fields as $field => $error_message) {
             $value = $request->get_param($field);
             if (empty($value) && $value !== '0' && $value !== 0) {
-                $missing_fields[] = $label;
+                return new WP_Error(
+                    'missing_required_field',
+                    $error_message,
+                    ['status' => 400]
+                );
             }
-        }
-
-        if (!empty($missing_fields)) {
-            return new WP_Error(
-                'missing_required_fields',
-                sprintf(
-                    __('Los siguientes campos son requeridos: %s', 'property-dashboard'),
-                    implode(', ', $missing_fields)
-                ),
-                ['status' => 400]
-            );
         }
 
         return true;

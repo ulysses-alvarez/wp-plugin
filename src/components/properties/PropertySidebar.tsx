@@ -185,6 +185,74 @@ export const PropertySidebar = ({
                 </div>
               </div>
 
+              {/* Location Card */}
+              <div className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm">
+                <h4 className="text-sm font-semibold text-gray-900 mb-4 flex items-center gap-2 uppercase tracking-wide">
+                  <svg className="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+                  Ubicación
+                </h4>
+                <div className="space-y-3">
+                  {property.street && (
+                    <div className="flex items-start gap-3 pb-2 border-b border-gray-100">
+                      <span className="text-sm text-gray-500 min-w-[90px] font-medium">Dirección:</span>
+                      <span className="text-sm text-gray-900 font-medium flex-1">{property.street}</span>
+                    </div>
+                  )}
+                  {property.neighborhood && (
+                    <div className="flex items-start gap-3 pb-2 border-b border-gray-100">
+                      <span className="text-sm text-gray-500 min-w-[90px] font-medium">Colonia:</span>
+                      <span className="text-sm text-gray-900 font-medium flex-1">{property.neighborhood}</span>
+                    </div>
+                  )}
+                  {property.municipality && (
+                    <div className="flex items-start gap-3 pb-2 border-b border-gray-100">
+                      <span className="text-sm text-gray-500 min-w-[90px] font-medium">Municipio:</span>
+                      <span className="text-sm text-gray-900 font-medium flex-1">{property.municipality}</span>
+                    </div>
+                  )}
+                  {property.state && (
+                    <div className="flex items-start gap-3 pb-2 border-b border-gray-100">
+                      <span className="text-sm text-gray-500 min-w-[90px] font-medium">Estado:</span>
+                      <span className="text-sm text-gray-900 font-medium flex-1">{property.state}</span>
+                    </div>
+                  )}
+                  {property.postal_code && (
+                    <div className="flex items-start gap-3 pb-2 border-b border-gray-100">
+                      <span className="text-sm text-gray-500 min-w-[90px] font-medium">Código Postal:</span>
+                      <span className="text-sm text-gray-900 font-semibold flex-1">{property.postal_code}</span>
+                    </div>
+                  )}
+
+                  {/* Google Maps Link - Integrated inside Location Card */}
+                  {property.google_maps_url && (
+                    <div className="pt-2">
+                      <a
+                        href={property.google_maps_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center justify-between gap-3 bg-gray-50 border border-gray-200 rounded-lg px-4 py-3 hover:border-primary hover:bg-primary-light transition-all duration-200 group"
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="w-9 h-9 bg-primary-light rounded-lg flex items-center justify-center group-hover:bg-primary transition-colors">
+                            <svg className="w-5 h-5 text-primary group-hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                            </svg>
+                          </div>
+                          <span className="text-sm font-medium text-gray-900">Ver en Google Maps</span>
+                        </div>
+                        <svg className="w-4 h-4 text-gray-400 group-hover:text-primary transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                        </svg>
+                      </a>
+                    </div>
+                  )}
+                </div>
+              </div>
+
               {/* Patent Card */}
               {property.patent && (
                 <div className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm">
@@ -229,49 +297,6 @@ export const PropertySidebar = ({
                 </div>
               )}
 
-              {/* Location Card */}
-              <div className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm">
-                <h4 className="text-sm font-semibold text-gray-900 mb-4 flex items-center gap-2 uppercase tracking-wide">
-                  <svg className="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                  </svg>
-                  Ubicación
-                </h4>
-                <div className="space-y-3">
-                  {property.street && (
-                    <div className="flex items-start gap-3 pb-2 border-b border-gray-100">
-                      <span className="text-sm text-gray-500 min-w-[90px] font-medium">Dirección:</span>
-                      <span className="text-sm text-gray-900 font-medium flex-1">{property.street}</span>
-                    </div>
-                  )}
-                  {property.neighborhood && (
-                    <div className="flex items-start gap-3 pb-2 border-b border-gray-100">
-                      <span className="text-sm text-gray-500 min-w-[90px] font-medium">Colonia:</span>
-                      <span className="text-sm text-gray-900 font-medium flex-1">{property.neighborhood}</span>
-                    </div>
-                  )}
-                  {property.municipality && (
-                    <div className="flex items-start gap-3 pb-2 border-b border-gray-100">
-                      <span className="text-sm text-gray-500 min-w-[90px] font-medium">Municipio:</span>
-                      <span className="text-sm text-gray-900 font-medium flex-1">{property.municipality}</span>
-                    </div>
-                  )}
-                  {property.state && (
-                    <div className="flex items-start gap-3 pb-2 border-b border-gray-100">
-                      <span className="text-sm text-gray-500 min-w-[90px] font-medium">Estado:</span>
-                      <span className="text-sm text-gray-900 font-medium flex-1">{property.state}</span>
-                    </div>
-                  )}
-                  {property.postal_code && (
-                    <div className="flex items-start gap-3">
-                      <span className="text-sm text-gray-500 min-w-[90px] font-medium">Código Postal:</span>
-                      <span className="text-sm text-gray-900 font-semibold flex-1">{property.postal_code}</span>
-                    </div>
-                  )}
-                </div>
-              </div>
-
               {/* Description Card */}
               {property.description && (
                 <div className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm">
@@ -284,38 +309,6 @@ export const PropertySidebar = ({
                   <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">
                     {property.description}
                   </p>
-                </div>
-              )}
-
-              {/* Google Maps Link */}
-              {property.google_maps_url && (
-                <div className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm">
-                  <h4 className="text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2 uppercase tracking-wide">
-                    <svg className="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                    </svg>
-                    Mapa
-                  </h4>
-                  <a
-                    href={property.google_maps_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center justify-between gap-3 bg-gray-50 border border-gray-200 rounded-lg px-4 py-3 hover:border-primary hover:bg-primary-light transition-all duration-200 group"
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="w-9 h-9 bg-primary-light rounded-lg flex items-center justify-center group-hover:bg-primary transition-colors">
-                        <svg className="w-5 h-5 text-primary group-hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                        </svg>
-                      </div>
-                      <span className="text-sm font-medium text-gray-900">Ver en Google Maps</span>
-                    </div>
-                    <svg className="w-4 h-4 text-gray-400 group-hover:text-primary transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                    </svg>
-                  </a>
                 </div>
               )}
             </div>

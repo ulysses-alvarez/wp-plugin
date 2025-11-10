@@ -3,6 +3,7 @@
  * Filter controls for properties with advanced search and action buttons
  */
 
+import { useCallback } from 'react';
 import { usePropertyStore } from '@/stores/usePropertyStore';
 import { AdvancedSearchBar } from '@/components/ui';
 import { Download, Plus, Upload } from 'lucide-react';
@@ -21,9 +22,9 @@ export const PropertyFilters = ({ onCreateNew, onExport, onImport }: PropertyFil
 
   const canCreate = canCreateProperty();
 
-  const handleSearch = (field: string, value: string) => {
+  const handleSearch = useCallback((field: string, value: string) => {
     setFieldSearch(field, value);
-  };
+  }, [setFieldSearch]);
 
   return (
     <div className="bg-white border-b border-gray-200 px-6 py-4">
