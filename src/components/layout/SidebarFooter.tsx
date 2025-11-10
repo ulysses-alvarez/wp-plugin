@@ -10,7 +10,7 @@ export const SidebarFooter = ({ onLinkClick }: SidebarFooterProps) => {
   const isActive = location.pathname === '/settings';
 
   return (
-    <div className="border-t border-gray-700 p-3">
+    <div className="border-t border-sidebar-border p-3">
       <Link
         to="/settings"
         onClick={onLinkClick}
@@ -20,7 +20,7 @@ export const SidebarFooter = ({ onLinkClick }: SidebarFooterProps) => {
           ${
             isActive
               ? 'bg-primary text-white'
-              : 'text-gray-300 hover:bg-gray-700 hover:text-white'
+              : 'text-sidebar-text hover:bg-sidebar-hover'
           }
         `}
       >

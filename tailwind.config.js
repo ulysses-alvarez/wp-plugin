@@ -8,10 +8,17 @@ export default {
     extend: {
       colors: {
         primary: {
-          DEFAULT: 'var(--color-primary, #216121)',
-          hover: 'var(--color-primary-hover, #1a4d1a)',
-          light: 'var(--color-primary-light, #e8f5e9)',
-          dark: '#0d3d0d'
+          DEFAULT: '#000000',
+          hover: '#1a1a1a',
+          light: '#f5f5f5',
+          dark: '#000000'
+        },
+        sidebar: {
+          DEFAULT: '#f3f4f6',
+          hover: '#e5e7eb',
+          border: '#d1d5db',
+          text: '#374151',
+          'text-light': '#6b7280'
         },
         secondary: {
           DEFAULT: '#64748b',

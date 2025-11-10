@@ -2,14 +2,17 @@ import { useState } from 'react';
 import { PropertyTable } from '@/components/properties/PropertyTable';
 import { PropertyFilters } from '@/components/properties/PropertyFilters';
 import { PropertySidebar } from '@/components/properties/PropertySidebar';
+import { ImportCSVModal } from '@/components/properties/ImportCSVModal';
 import type { PropertyFormData } from '@/components/properties/PropertyForm';
 import { usePropertyStore } from '@/stores/usePropertyStore';
 import type { Property } from '@/utils/permissions';
+import toast from 'react-hot-toast';
 
 export const PropertiesPage = () => {
   const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [sidebarMode, setSidebarMode] = useState<'view' | 'create' | 'edit'>('view');
+  const [isImportModalOpen, setIsImportModalOpen] = useState(false);
 
   const { createProperty, updateProperty, deleteProperty, loadProperties } = usePropertyStore();
   const loading = usePropertyStore(state => state.loading);
@@ -85,14 +88,68 @@ export const PropertiesPage = () => {
     }
   };
 
-  return (
-    <div className="h-full flex flex-col bg-gray-50">
-      <div className="flex-1 overflow-auto">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 h-full flex flex-col">
-          <div className="flex-shrink-0 mb-6">
-            <PropertyFilters />
-          </div>
+  const handleExport = () => {
+    // TODO: Implementar exportación
+    console.log('Exportar propiedades');
+  };
 
+  const handleImportCSV = async (file: File) => {
+    // Parse CSV file
+    const text = await file.text();
+    const lines = text.split('\n').filter(line => line.trim());
+
+    if (lines.length < 2) {
+      throw new Error('El archivo CSV está vacío o no tiene datos');
+    }
+
+    const headers = lines[0].split(',').map(h => h.trim().replace(/"/g, ''));
+    const properties = [];
+
+    for (let i = 1; i < lines.length; i++) {
+      const values = lines[i].split(',').map(v => v.trim().replace(/"/g, ''));
+      const property: any = {};
+
+      headers.forEach((header, index) => {
+        property[header] = values[index] || '';
+      });
+
+      properties.push(property);
+    }
+
+    // Import each property
+    let successCount = 0;
+    let errorCount = 0;
+
+    for (const propertyData of properties) {
+      try {
+        await createProperty(propertyData);
+        successCount++;
+      } catch (error) {
+        errorCount++;
+        console.error('Error importing property:', error);
+      }
+    }
+
+    if (successCount > 0) {
+      loadProperties();
+      toast.success(`${successCount} ${successCount === 1 ? 'propiedad importada' : 'propiedades importadas'} exitosamente`);
+    }
+
+    if (errorCount > 0) {
+      toast.error(`${errorCount} ${errorCount === 1 ? 'propiedad falló' : 'propiedades fallaron'} al importar`);
+    }
+  };
+
+  return (
+    <div className="h-full flex flex-col">
+      <PropertyFilters
+        onCreateNew={handleCreateNew}
+        onExport={handleExport}
+        onImport={() => setIsImportModalOpen(true)}
+      />
+
+      <div className="flex-1 overflow-auto">
+        <div className="px-4 sm:px-6 lg:px-8 py-6 h-full flex flex-col">
           <div className="flex-1 overflow-hidden">
             <PropertyTable
               onPropertySelect={handlePropertySelect}
@@ -113,6 +170,12 @@ export const PropertiesPage = () => {
         onDelete={handleDelete}
         onSubmit={handleFormSubmit}
         loading={loading}
+      />
+
+      <ImportCSVModal
+        isOpen={isImportModalOpen}
+        onClose={() => setIsImportModalOpen(false)}
+        onImport={handleImportCSV}
       />
     </div>
   );

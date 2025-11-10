@@ -64,36 +64,37 @@ function App() {
     <>
       {/* Toast Notifications */}
       <Toaster
-        position="top-right"
+        position="top-center"
         toastOptions={{
           duration: 3000,
           style: {
             fontSize: '14px',
-            background: '#fff',
-            color: '#1e293b'
+            background: '#000000',
+            color: '#ffffff',
+            fontWeight: '500'
           },
           success: {
             style: {
-              background: 'rgba(16, 185, 129, 0.3)',
-              color: '#059669',
+              background: '#10b981',
+              color: '#ffffff',
               fontSize: '14px',
               fontWeight: '500'
             },
             iconTheme: {
-              primary: '#10b981',
-              secondary: '#fff'
+              primary: '#ffffff',
+              secondary: '#10b981'
             }
           },
           error: {
             style: {
-              background: 'rgba(239, 68, 68, 0.3)',
-              color: '#dc2626',
+              background: '#ef4444',
+              color: '#ffffff',
               fontSize: '14px',
               fontWeight: '500'
             },
             iconTheme: {
-              primary: '#ef4444',
-              secondary: '#fff'
+              primary: '#ffffff',
+              secondary: '#ef4444'
             }
           }
         }}

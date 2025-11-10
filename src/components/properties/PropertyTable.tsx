@@ -152,29 +152,8 @@ export const PropertyTable = ({
 
   return (
     <div className="h-full flex flex-col">
-      {/* Header - Fixed */}
-      <div className="flex-shrink-0 flex items-center justify-between mb-4">
-        <div>
-          <h2 className="text-lg font-bold text-gray-900">Propiedades</h2>
-          <p className="text-sm text-gray-600 mt-1">
-            {total} {total === 1 ? 'propiedad encontrada' : 'propiedades encontradas'}
-          </p>
-        </div>
-        {canCreate && onCreateNew && (
-          <button
-            onClick={onCreateNew}
-            className="px-3 py-1.5 bg-primary text-white rounded-lg hover:bg-primary-hover transition-colors font-medium flex items-center gap-2 text-sm"
-          >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-            </svg>
-            Nueva Propiedad
-          </button>
-        )}
-      </div>
-
       {/* Table Container - Scrollable */}
-      <div className="flex-1 bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden flex flex-col">
+      <div className="flex-1 overflow-hidden flex flex-col">
         <div className="flex-1 overflow-auto">
           <table className="w-full">
             <thead>
@@ -292,6 +271,20 @@ export const PropertyTable = ({
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                           </svg>
                         </button>
+
+                        {property.attachment_url && (
+                          <a
+                            href={property.attachment_url}
+                            download
+                            onClick={(e) => e.stopPropagation()}
+                            className="p-2 text-gray-600 hover:text-success hover:bg-success-light rounded-lg transition-colors"
+                            title="Descargar ficha"
+                          >
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
+                          </a>
+                        )}
 
                         {canEdit && onPropertyEdit && (
                           <button

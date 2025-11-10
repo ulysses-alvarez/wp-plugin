@@ -28,12 +28,11 @@ export const AppSidebar = () => {
       {/* Sidebar */}
       <aside
         className={`
-          w-[260px] flex-shrink-0 bg-[#1e293b] flex flex-col h-screen sticky top-0 z-40
-          fixed lg:static inset-y-0 left-0
+          w-[260px] flex-shrink-0 bg-sidebar flex flex-col h-screen sticky top-0 z-40
+          fixed lg:static inset-y-0 left-0 border-r border-sidebar-border
           transform transition-transform duration-300 ease-in-out
           ${isMobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
         `}
-        style={{ backgroundColor: 'var(--color-sidebar-bg)' }}
       >
         <SidebarHeader />
         <SidebarNavigation onLinkClick={() => setIsMobileOpen(false)} />

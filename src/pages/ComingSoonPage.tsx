@@ -1,6 +1,6 @@
 export const ComingSoonPage = () => {
   return (
-    <div className="h-full flex items-center justify-center bg-gray-50">
+    <div className="h-full flex items-center justify-center">
       <div className="text-center">
         <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-primary-light mb-6">
           <svg

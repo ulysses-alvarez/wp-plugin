@@ -11,7 +11,7 @@ export const SettingsPage = () => {
   const [formData, setFormData] = useState({
     siteName: '',
     logoUrl: '',
-    primaryColor: '#216121'
+    primaryColor: '#000000'
   });
 
   const [isSaving, setIsSaving] = useState(false);
@@ -21,7 +21,7 @@ export const SettingsPage = () => {
       setFormData({
         siteName: settings.siteName || '',
         logoUrl: settings.logoUrl || '',
-        primaryColor: settings.primaryColor || '#216121'
+        primaryColor: settings.primaryColor || '#000000'
       });
     }
   }, [settings]);
@@ -37,7 +37,7 @@ export const SettingsPage = () => {
 
     // Validar color hex
     if (!/^#[0-9A-F]{6}$/i.test(formData.primaryColor)) {
-      toast.error('El color debe estar en formato hexadecimal válido (ej: #216121)');
+      toast.error('El color debe estar en formato hexadecimal válido (ej: #000000)');
       return;
     }
 
@@ -65,7 +65,7 @@ export const SettingsPage = () => {
   }
 
   return (
-    <div className="h-full overflow-auto bg-gray-50">
+    <div className="h-full overflow-auto">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8">
           <h1 className="text-2xl font-bold text-gray-900">Configuración</h1>
@@ -165,7 +165,7 @@ export const SettingsPage = () => {
                     type="text"
                     value={formData.primaryColor}
                     onChange={(e) => setFormData(prev => ({ ...prev, primaryColor: e.target.value }))}
-                    placeholder="#216121"
+                    placeholder="#000000"
                     pattern="^#[0-9A-Fa-f]{6}$"
                     className="flex-1"
                   />
@@ -221,7 +221,7 @@ export const SettingsPage = () => {
                   setFormData({
                     siteName: settings.siteName || '',
                     logoUrl: settings.logoUrl || '',
-                    primaryColor: settings.primaryColor || '#216121'
+                    primaryColor: settings.primaryColor || '#000000'
                   });
                 }
               }}

@@ -45,7 +45,7 @@ export const SidebarNavigation = ({ onLinkClick }: SidebarNavigationProps) => {
                   ${
                     active
                       ? 'bg-primary text-white'
-                      : 'text-gray-300 hover:bg-gray-700 hover:text-white'
+                      : 'text-sidebar-text hover:bg-sidebar-hover'
                   }
                 `}
               >
