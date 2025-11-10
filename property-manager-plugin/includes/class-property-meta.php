@@ -102,7 +102,7 @@ class Property_Meta {
             'description'       => __('Patente', 'property-dashboard'),
             'single'            => true,
             'show_in_rest'      => true,
-            'sanitize_callback' => 'sanitize_text_field',
+            'sanitize_callback' => [self::class, 'sanitize_patent'],
         ]);
 
         // Price (Precio en MXN)
@@ -166,6 +166,17 @@ class Property_Meta {
      */
     public static function sanitize_price($value) {
         return floatval($value);
+    }
+
+    /**
+     * Sanitize patent field (always uppercase)
+     *
+     * @param string $value
+     * @return string
+     */
+    public static function sanitize_patent($value) {
+        // Sanitize and convert to uppercase
+        return strtoupper(sanitize_text_field($value));
     }
 
     /**

@@ -310,12 +310,13 @@ export const PropertyForm = forwardRef<HTMLFormElement, PropertyFormProps>(({
         label="Patente"
         name="patent"
         value={formData.patent}
-        onChange={(e) => handleChange('patent', e.target.value)}
+        onChange={(e) => handleChange('patent', e.target.value.toUpperCase())}
         onBlur={() => handleBlur('patent')}
         error={errors.patent}
         required
         placeholder="Ej: ABC-123"
         disabled={loading}
+        helperText="La patente se guardará en mayúsculas automáticamente"
       />
 
       {/* Divider */}

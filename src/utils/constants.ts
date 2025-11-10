@@ -136,6 +136,12 @@ export const SEARCH_CONTEXTS: SearchContext[] = [
     placeholder: 'Buscar por título...'
   },
   {
+    value: 'patent',
+    label: 'Patente',
+    type: 'text',
+    placeholder: 'Buscar por patente...'
+  },
+  {
     value: 'status',
     label: 'Estado Propiedad',
     type: 'select',

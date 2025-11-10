@@ -97,6 +97,40 @@ export const PropertyTable = ({
     }
   };
 
+  const handleResetSort = () => {
+    setSortBy('date');
+    setSortOrder('desc');
+  };
+
+  // Check if current sort is different from default
+  const isCustomSort = sortBy !== 'date' || sortOrder !== 'desc';
+
+  // Get human-readable sort label
+  const getSortLabel = () => {
+    const labels: Record<string, string> = {
+      title: 'Propiedad',
+      state: 'Ubicación',
+      status: 'Estado',
+      price: 'Precio',
+      date: 'Fecha'
+    };
+
+    const columnLabel = labels[sortBy] || sortBy;
+    const direction = sortOrder === 'asc' ? 'Menor a mayor' : 'Mayor a menor';
+
+    // Customize direction based on sort key
+    let directionText = direction;
+    if (sortBy === 'price') {
+      directionText = sortOrder === 'asc' ? 'Menor a mayor' : 'Mayor a menor';
+    } else if (sortBy === 'date') {
+      directionText = sortOrder === 'asc' ? 'Más antiguo primero' : 'Más reciente primero';
+    } else {
+      directionText = sortOrder === 'asc' ? 'A → Z' : 'Z → A';
+    }
+
+    return `${columnLabel} (${directionText})`;
+  };
+
   if (initialLoad && loading) {
     return (
       <div className="flex justify-center items-center py-20">
@@ -152,6 +186,35 @@ export const PropertyTable = ({
 
   return (
     <div className="h-full flex flex-col">
+      {/* Sort Indicator Badge - Only shown when not default sort */}
+      {isCustomSort && (
+        <div className="bg-blue-50 border-b border-blue-200 px-6 py-3">
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex items-center gap-2 text-sm">
+              <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12" />
+              </svg>
+              <span className="text-gray-700 font-medium">
+                Ordenado por:
+              </span>
+              <span className="text-blue-700 font-semibold">
+                {getSortLabel()}
+              </span>
+            </div>
+            <button
+              onClick={handleResetSort}
+              className="flex items-center gap-2 px-3 py-1.5 text-sm text-blue-700 hover:text-blue-800 hover:bg-blue-100 rounded-lg transition-colors font-medium"
+              title="Volver al orden predeterminado (Fecha, más reciente primero)"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+              Restablecer orden
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Table Container - Scrollable */}
       <div className="flex-1 overflow-hidden flex flex-col">
         <div className="flex-1 overflow-auto">
