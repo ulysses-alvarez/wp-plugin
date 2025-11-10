@@ -17,8 +17,8 @@ export const ComingSoonPage = () => {
             />
           </svg>
         </div>
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">Coming Soon</h2>
-        <p className="text-gray-600 max-w-md">
+        <h2 className="text-xl font-semibold text-gray-900 mb-2">Próximamente</h2>
+        <p className="text-sm text-gray-600 max-w-md">
           Esta sección está en desarrollo. Pronto estará disponible con nuevas funcionalidades.
         </p>
       </div>

@@ -4,20 +4,35 @@ import type { SiteConfig } from '../types/settings';
  * Aplica los colores del tema dinámicamente al documento
  */
 export const applyTheme = (settings: SiteConfig): void => {
-  if (!settings) return;
+  console.log('[applyTheme] Applying theme with settings:', settings);
+
+  if (!settings) {
+    console.warn('[applyTheme] No settings provided');
+    return;
+  }
 
   const root = document.documentElement;
 
   // Aplicar color primario
   if (settings.primaryColor) {
+    console.log('[applyTheme] Setting primary color:', settings.primaryColor);
     root.style.setProperty('--color-primary', settings.primaryColor);
 
     // Calcular variantes del color primario
     const primaryHover = adjustColor(settings.primaryColor, -20);
     const primaryLight = adjustColor(settings.primaryColor, 90);
 
+    console.log('[applyTheme] Setting hover color:', primaryHover);
+    console.log('[applyTheme] Setting light color:', primaryLight);
+
     root.style.setProperty('--color-primary-hover', primaryHover);
     root.style.setProperty('--color-primary-light', primaryLight);
+
+    // Verify that the CSS variables were set
+    const verifyPrimary = getComputedStyle(root).getPropertyValue('--color-primary');
+    console.log('[applyTheme] Verified --color-primary value:', verifyPrimary);
+  } else {
+    console.warn('[applyTheme] No primaryColor in settings');
   }
 };
 

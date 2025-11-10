@@ -320,13 +320,14 @@ export const PropertyTable = ({
 
                     {/* Actions */}
                     <td className="px-6 py-4 text-right">
-                      <div className="flex items-center justify-end gap-2">
+                      <div className="flex items-center justify-end gap-1">
+                        {/* Ver */}
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
                             onPropertySelect(property);
                           }}
-                          className="p-2 text-gray-600 hover:text-primary hover:bg-primary-light rounded-lg transition-colors"
+                          className="p-1.5 text-gray-600 hover:text-primary hover:bg-primary-light rounded-lg transition-colors"
                           title="Ver detalles"
                         >
                           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -335,27 +336,14 @@ export const PropertyTable = ({
                           </svg>
                         </button>
 
-                        {property.attachment_url && (
-                          <a
-                            href={property.attachment_url}
-                            download
-                            onClick={(e) => e.stopPropagation()}
-                            className="p-2 text-gray-600 hover:text-success hover:bg-success-light rounded-lg transition-colors"
-                            title="Descargar ficha"
-                          >
-                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                            </svg>
-                          </a>
-                        )}
-
+                        {/* Editar */}
                         {canEdit && onPropertyEdit && (
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
                               onPropertyEdit(property);
                             }}
-                            className="p-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                            className="p-1.5 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
                             title="Editar"
                           >
                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -364,13 +352,29 @@ export const PropertyTable = ({
                           </button>
                         )}
 
+                        {/* Descargar ficha */}
+                        {property.attachment_url && (
+                          <a
+                            href={property.attachment_url}
+                            download
+                            onClick={(e) => e.stopPropagation()}
+                            className="p-1.5 text-gray-600 hover:text-success hover:bg-success-light rounded-lg transition-colors"
+                            title="Descargar ficha"
+                          >
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
+                          </a>
+                        )}
+
+                        {/* Eliminar */}
                         {canDelete && onPropertyDelete && (
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
                               onPropertyDelete(property);
                             }}
-                            className="p-2 text-gray-600 hover:text-danger hover:bg-danger-light rounded-lg transition-colors"
+                            className="p-1.5 text-gray-600 hover:text-danger hover:bg-danger-light rounded-lg transition-colors"
                             title="Eliminar"
                           >
                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

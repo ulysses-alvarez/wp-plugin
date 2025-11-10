@@ -35,16 +35,9 @@ class Property_Settings {
             'callback' => [__CLASS__, 'update_settings'],
             'permission_callback' => [__CLASS__, 'check_permissions'],
             'args' => [
-                'siteName' => [
-                    'type' => 'string',
-                    'sanitize_callback' => 'sanitize_text_field',
-                    'validate_callback' => function($value) {
-                        return strlen($value) >= 3 && strlen($value) <= 50;
-                    }
-                ],
-                'logoUrl' => [
-                    'type' => 'string',
-                    'sanitize_callback' => 'esc_url_raw'
+                'logoId' => [
+                    'type' => 'integer',
+                    'sanitize_callback' => 'absint'
                 ],
                 'primaryColor' => [
                     'type' => 'string',
@@ -53,6 +46,20 @@ class Property_Settings {
                 ]
             ]
         ]);
+
+        // POST /settings/upload-logo
+        register_rest_route('property-dashboard/v1', '/settings/upload-logo', [
+            'methods' => 'POST',
+            'callback' => [__CLASS__, 'upload_logo'],
+            'permission_callback' => [__CLASS__, 'check_permissions']
+        ]);
+
+        // DELETE /settings/delete-logo
+        register_rest_route('property-dashboard/v1', '/settings/delete-logo', [
+            'methods' => 'DELETE',
+            'callback' => [__CLASS__, 'delete_logo'],
+            'permission_callback' => [__CLASS__, 'check_permissions']
+        ]);
     }
 
     /**
@@ -60,8 +67,7 @@ class Property_Settings {
      */
     public static function get_settings($request) {
         $defaults = [
-            'siteName' => get_bloginfo('name'),
-            'logoUrl' => '',
+            'logoId' => 0,
             'primaryColor' => '#216121'
         ];
 
@@ -69,6 +75,19 @@ class Property_Settings {
 
         // Ensure all default keys exist
         $settings = wp_parse_args($settings, $defaults);
+
+        // Add WordPress site name (read-only)
+        $settings['wpSiteName'] = get_bloginfo('name');
+
+        // Calculate logo URL from logo ID
+        $settings['logoUrl'] = '';
+        if (!empty($settings['logoId'])) {
+            $logoUrl = wp_get_attachment_url($settings['logoId']);
+            if ($logoUrl) {
+                // Add timestamp to prevent caching issues
+                $settings['logoUrl'] = add_query_arg('v', time(), $logoUrl);
+            }
+        }
 
         return rest_ensure_response($settings);
     }
@@ -85,12 +104,8 @@ class Property_Settings {
         // Prepare updated settings
         $updated = $current;
 
-        if (isset($params['siteName'])) {
-            $updated['siteName'] = sanitize_text_field($params['siteName']);
-        }
-
-        if (isset($params['logoUrl'])) {
-            $updated['logoUrl'] = esc_url_raw($params['logoUrl']);
+        if (isset($params['logoId'])) {
+            $updated['logoId'] = absint($params['logoId']);
         }
 
         if (isset($params['primaryColor'])) {
@@ -109,7 +124,107 @@ class Property_Settings {
         // Save settings
         update_option('property_dashboard_settings', $updated);
 
-        return rest_ensure_response($updated);
+        // Return settings with calculated fields
+        return self::get_settings($request);
+    }
+
+    /**
+     * Upload logo
+     */
+    public static function upload_logo($request) {
+        require_once(ABSPATH . 'wp-admin/includes/file.php');
+        require_once(ABSPATH . 'wp-admin/includes/media.php');
+        require_once(ABSPATH . 'wp-admin/includes/image.php');
+
+        $files = $request->get_file_params();
+
+        if (empty($files['logo'])) {
+            return new WP_Error(
+                'no_file',
+                'No se ha proporcionado ningún archivo',
+                ['status' => 400]
+            );
+        }
+
+        // Validate file type
+        $file = $files['logo'];
+        $allowed_types = ['image/jpeg', 'image/png', 'image/gif', 'image/svg+xml', 'image/webp'];
+
+        if (!in_array($file['type'], $allowed_types)) {
+            return new WP_Error(
+                'invalid_file_type',
+                'Tipo de archivo no permitido. Solo se permiten imágenes (JPG, PNG, GIF, SVG, WEBP)',
+                ['status' => 400]
+            );
+        }
+
+        // Validate file size (max 2MB)
+        if ($file['size'] > 2 * 1024 * 1024) {
+            return new WP_Error(
+                'file_too_large',
+                'El archivo es demasiado grande. El tamaño máximo es 2MB',
+                ['status' => 400]
+            );
+        }
+
+        // Upload file
+        $upload = wp_handle_upload($file, ['test_form' => false]);
+
+        if (isset($upload['error'])) {
+            return new WP_Error(
+                'upload_failed',
+                $upload['error'],
+                ['status' => 500]
+            );
+        }
+
+        // Create attachment
+        $attachment_id = wp_insert_attachment([
+            'post_mime_type' => $upload['type'],
+            'post_title' => 'Dashboard Logo',
+            'post_content' => '',
+            'post_status' => 'inherit'
+        ], $upload['file']);
+
+        if (is_wp_error($attachment_id)) {
+            return $attachment_id;
+        }
+
+        // Generate metadata
+        $attach_data = wp_generate_attachment_metadata($attachment_id, $upload['file']);
+        wp_update_attachment_metadata($attachment_id, $attach_data);
+
+        // Delete old logo if exists
+        $settings = get_option('property_dashboard_settings', []);
+        if (!empty($settings['logoId'])) {
+            wp_delete_attachment($settings['logoId'], true);
+        }
+
+        // Update settings with new logo ID
+        $settings['logoId'] = $attachment_id;
+        update_option('property_dashboard_settings', $settings);
+
+        $logoUrl = wp_get_attachment_url($attachment_id);
+
+        return rest_ensure_response([
+            'id' => $attachment_id,
+            'url' => add_query_arg('v', time(), $logoUrl)
+        ]);
+    }
+
+    /**
+     * Delete logo
+     */
+    public static function delete_logo($request) {
+        $settings = get_option('property_dashboard_settings', []);
+
+        if (!empty($settings['logoId'])) {
+            wp_delete_attachment($settings['logoId'], true);
+            $settings['logoId'] = 0;
+            update_option('property_dashboard_settings', $settings);
+        }
+
+        return rest_ensure_response(['success' => true]);
     }
 
     /**

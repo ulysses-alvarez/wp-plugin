@@ -1,26 +1,45 @@
 import { useSettingsStore } from '../../stores/useSettingsStore';
+import { useEffect } from 'react';
 
 export const SidebarHeader = () => {
   const { settings } = useSettingsStore();
 
+  // Display name: wpSiteName
+  const displayName = settings?.wpSiteName || '';
+
+  // Debug: log settings on change
+  useEffect(() => {
+    console.log('[SidebarHeader] Settings updated:', settings);
+    console.log('[SidebarHeader] Logo URL:', settings?.logoUrl);
+    console.log('[SidebarHeader] Display name:', displayName);
+  }, [settings, displayName]);
+
   return (
     <div className="flex items-center gap-3 px-4 py-4 border-b border-sidebar-border">
       {settings?.logoUrl ? (
+        /* Si hay logo, solo mostrar el logo (reemplaza todo) */
         <img
           src={settings.logoUrl}
-          alt={settings.siteName || 'Logo'}
-          className="h-10 w-10 object-contain rounded"
+          alt={displayName}
+          className="h-10 w-auto max-w-full object-contain"
         />
       ) : (
-        <div className="h-10 w-10 bg-primary rounded flex items-center justify-center text-white font-bold text-xl">
-          {settings?.siteName?.charAt(0)?.toUpperCase() || 'P'}
-        </div>
+        /* Sin logo: mostrar inicial + nombre */
+        <>
+          {displayName && (
+            <div className="h-10 w-10 bg-primary rounded flex items-center justify-center text-white font-bold text-xl">
+              {displayName.charAt(0).toUpperCase()}
+            </div>
+          )}
+          {displayName && (
+            <div className="flex-1 min-w-0">
+              <h1 className="text-sidebar-text font-semibold text-base truncate">
+                {displayName}
+              </h1>
+            </div>
+          )}
+        </>
       )}
-      <div className="flex-1 min-w-0">
-        <h1 className="text-sidebar-text font-semibold text-base truncate">
-          {settings?.siteName || 'Property Dashboard'}
-        </h1>
-      </div>
     </div>
   );
 };

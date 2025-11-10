@@ -8,10 +8,10 @@ export default {
     extend: {
       colors: {
         primary: {
-          DEFAULT: '#000000',
-          hover: '#1a1a1a',
-          light: '#f5f5f5',
-          dark: '#000000'
+          DEFAULT: 'var(--color-primary, #216121)',
+          hover: 'var(--color-primary-hover, #194d19)',
+          light: 'var(--color-primary-light, #e8f5e8)',
+          dark: 'var(--color-primary, #216121)'
         },
         sidebar: {
           DEFAULT: '#f3f4f6',
