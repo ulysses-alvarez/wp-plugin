@@ -46,7 +46,7 @@ interface PropertyState {
   // Actions
   loadProperties: (params?: PropertyQueryParams) => Promise<void>;
   loadProperty: (id: number) => Promise<void>;
-  createProperty: (data: PropertyData) => Promise<Property | null>;
+  createProperty: (data: PropertyData, silent?: boolean) => Promise<Property | null>;
   updateProperty: (id: number, data: Partial<PropertyData>) => Promise<Property | null>;
   deleteProperty: (id: number) => Promise<boolean>;
 
@@ -168,7 +168,7 @@ export const usePropertyStore = create<PropertyState>((set, get) => ({
   /**
    * Create a new property
    */
-  createProperty: async (data: PropertyData) => {
+  createProperty: async (data: PropertyData, silent = false) => {
     set({ loading: true, error: null });
 
     try {
@@ -182,13 +182,17 @@ export const usePropertyStore = create<PropertyState>((set, get) => ({
         error: null
       }));
 
-      toast.success('Propiedad creada exitosamente');
+      if (!silent) {
+        toast.success('Propiedad creada exitosamente');
+      }
       return newProperty;
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Error al crear propiedad';
       set({ error: errorMessage, loading: false });
-      toast.error(errorMessage);
-      return null;
+      if (!silent) {
+        toast.error(errorMessage);
+      }
+      throw error; // Re-throw for CSV import error handling
     }
   },
 

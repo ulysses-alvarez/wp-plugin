@@ -118,7 +118,7 @@ class Property_CPT {
             'guerrero'            => 'Guerrero',
             'hidalgo'             => 'Hidalgo',
             'jalisco'             => 'Jalisco',
-            'mexico'              => 'México',
+            'mexico'              => 'Estado de México',
             'michoacan'           => 'Michoacán',
             'morelos'             => 'Morelos',
             'nayarit'             => 'Nayarit',

@@ -51,7 +51,7 @@ export const MEXICAN_STATES = [
   { value: 'guerrero', label: 'Guerrero' },
   { value: 'hidalgo', label: 'Hidalgo' },
   { value: 'jalisco', label: 'Jalisco' },
-  { value: 'mexico', label: 'México' },
+  { value: 'mexico', label: 'Estado de México' },
   { value: 'michoacan', label: 'Michoacán' },
   { value: 'morelos', label: 'Morelos' },
   { value: 'nayarit', label: 'Nayarit' },

@@ -2,11 +2,151 @@ import { useState } from 'react';
 import { PropertyTable } from '@/components/properties/PropertyTable';
 import { PropertyFilters } from '@/components/properties/PropertyFilters';
 import { PropertySidebar } from '@/components/properties/PropertySidebar';
-import { ImportCSVModal } from '@/components/properties/ImportCSVModal';
+import { ImportCSVModal, type ImportError, type ImportProgress } from '@/components/properties/ImportCSVModal';
 import type { PropertyFormData } from '@/components/properties/PropertyForm';
 import { usePropertyStore } from '@/stores/usePropertyStore';
 import type { Property } from '@/utils/permissions';
+import { MEXICAN_STATES } from '@/utils/constants';
 import toast from 'react-hot-toast';
+
+// Función para normalizar el nombre del estado al value esperado
+const normalizeStateName = (stateName: string): string => {
+  if (!stateName) return '';
+
+  // Try to find exact match by label (case insensitive)
+  const state = MEXICAN_STATES.find(
+    s => s.label.toLowerCase() === stateName.toLowerCase().trim()
+  );
+
+  if (state) {
+    return state.value;
+  }
+
+  // Try to find by value
+  const stateByValue = MEXICAN_STATES.find(
+    s => s.value.toLowerCase() === stateName.toLowerCase().trim()
+  );
+
+  if (stateByValue) {
+    return stateByValue.value;
+  }
+
+  // Return original value if no match found
+  return stateName.trim();
+};
+
+// Función de validación de propiedades
+const validateProperty = (property: any, rowNumber: number): ImportError[] => {
+  const errors: ImportError[] = [];
+  const title = property.title?.trim() || '[sin título]';
+
+  // Validar título (requerido)
+  if (!property.title?.trim()) {
+    errors.push({
+      row: rowNumber,
+      title,
+      field: 'title',
+      value: property.title || '',
+      error: 'El título es obligatorio',
+      type: 'validation'
+    });
+  }
+
+  // Validar status (requerido y valores específicos)
+  if (!property.status?.trim()) {
+    errors.push({
+      row: rowNumber,
+      title,
+      field: 'status',
+      value: property.status || '',
+      error: 'El status es obligatorio',
+      type: 'validation'
+    });
+  } else if (!['available', 'sold', 'rented', 'reserved'].includes(property.status)) {
+    errors.push({
+      row: rowNumber,
+      title,
+      field: 'status',
+      value: property.status,
+      error: 'Status debe ser: available, sold, rented o reserved',
+      type: 'validation'
+    });
+  }
+
+  // Validar state (requerido)
+  if (!property.state?.trim()) {
+    errors.push({
+      row: rowNumber,
+      title,
+      field: 'state',
+      value: property.state || '',
+      error: 'El estado es obligatorio',
+      type: 'validation'
+    });
+  }
+
+  // Validar municipality (requerido)
+  if (!property.municipality?.trim()) {
+    errors.push({
+      row: rowNumber,
+      title,
+      field: 'municipality',
+      value: property.municipality || '',
+      error: 'El municipio es obligatorio',
+      type: 'validation'
+    });
+  }
+
+  // Validar patent (requerido)
+  if (!property.patent?.trim()) {
+    errors.push({
+      row: rowNumber,
+      title,
+      field: 'patent',
+      value: property.patent || '',
+      error: 'La patente es obligatoria',
+      type: 'validation'
+    });
+  }
+
+  // Validar price (opcional pero debe ser número)
+  if (property.price && property.price.trim() && isNaN(Number(property.price))) {
+    errors.push({
+      row: rowNumber,
+      title,
+      field: 'price',
+      value: property.price,
+      error: 'El precio debe ser un número válido',
+      type: 'validation'
+    });
+  }
+
+  // Validar postal_code (opcional pero debe tener 5 dígitos)
+  if (property.postal_code && property.postal_code.trim() && !/^\d{5}$/.test(property.postal_code)) {
+    errors.push({
+      row: rowNumber,
+      title,
+      field: 'postal_code',
+      value: property.postal_code,
+      error: 'El código postal debe tener 5 dígitos',
+      type: 'validation'
+    });
+  }
+
+  // Validar google_maps (opcional pero debe ser URL)
+  if (property.google_maps && property.google_maps.trim() && !property.google_maps.startsWith('http')) {
+    errors.push({
+      row: rowNumber,
+      title,
+      field: 'google_maps',
+      value: property.google_maps,
+      error: 'La URL debe comenzar con http:// o https://',
+      type: 'validation'
+    });
+  }
+
+  return errors;
+};
 
 export const PropertiesPage = () => {
   const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
@@ -93,7 +233,44 @@ export const PropertiesPage = () => {
     console.log('Exportar propiedades');
   };
 
-  const handleImportCSV = async (file: File) => {
+  // Helper function to parse CSV line respecting quoted fields
+  const parseCSVLine = (line: string): string[] => {
+    const result: string[] = [];
+    let current = '';
+    let insideQuotes = false;
+
+    for (let i = 0; i < line.length; i++) {
+      const char = line[i];
+      const nextChar = line[i + 1];
+
+      if (char === '"') {
+        if (insideQuotes && nextChar === '"') {
+          // Escaped quote
+          current += '"';
+          i++; // Skip next quote
+        } else {
+          // Toggle quote state
+          insideQuotes = !insideQuotes;
+        }
+      } else if (char === ',' && !insideQuotes) {
+        // End of field
+        result.push(current.trim());
+        current = '';
+      } else {
+        current += char;
+      }
+    }
+
+    // Add last field
+    result.push(current.trim());
+    return result;
+  };
+
+  const handleImportCSV = async (
+    file: File,
+    onProgress: (progress: ImportProgress) => void,
+    signal: AbortSignal
+  ): Promise<{ success: number; errors: ImportError[] }> => {
     // Parse CSV file
     const text = await file.text();
     const lines = text.split('\n').filter(line => line.trim());
@@ -102,42 +279,108 @@ export const PropertiesPage = () => {
       throw new Error('El archivo CSV está vacío o no tiene datos');
     }
 
-    const headers = lines[0].split(',').map(h => h.trim().replace(/"/g, ''));
-    const properties = [];
+    // Parse headers using robust parser
+    const headers = parseCSVLine(lines[0]);
+    const properties: any[] = [];
 
+    // Parse all rows into property objects
     for (let i = 1; i < lines.length; i++) {
-      const values = lines[i].split(',').map(v => v.trim().replace(/"/g, ''));
+      const values = parseCSVLine(lines[i]);
       const property: any = {};
 
       headers.forEach((header, index) => {
         property[header] = values[index] || '';
       });
 
+      // Normalize state name from label to value (e.g., "Jalisco" -> "jalisco")
+      if (property.state) {
+        property.state = normalizeStateName(property.state);
+      }
+
       properties.push(property);
     }
 
-    // Import each property
-    let successCount = 0;
-    let errorCount = 0;
+    // Debug info
+    console.log('[CSV Import] Parsing complete:', {
+      totalLines: lines.length,
+      headers,
+      propertiesParsed: properties.length,
+      firstProperty: properties[0],
+      stateNormalization: properties[0]?.state ? {
+        original: 'shown in firstProperty above',
+        normalized: properties[0].state
+      } : 'N/A'
+    });
 
-    for (const propertyData of properties) {
-      try {
-        await createProperty(propertyData);
-        successCount++;
-      } catch (error) {
-        errorCount++;
-        console.error('Error importing property:', error);
+    // Import each property with validation and progress tracking
+    let successCount = 0;
+    const allErrors: ImportError[] = [];
+    const total = properties.length;
+
+    for (let i = 0; i < properties.length; i++) {
+      // Check if import was cancelled
+      if (signal.aborted) {
+        break;
       }
+
+      const propertyData = properties[i];
+      const rowNumber = i + 2; // +2 because: +1 for array index, +1 for header row
+
+      // Validate property
+      const validationErrors = validateProperty(propertyData, rowNumber);
+
+      if (validationErrors.length > 0) {
+        // Property has validation errors, skip it
+        allErrors.push(...validationErrors);
+      } else {
+        // Property is valid, attempt to import
+        try {
+          await createProperty(propertyData, true); // silent = true for bulk import
+          successCount++;
+        } catch (error: any) {
+          // API error during import
+          const title = propertyData.title?.trim() || '[sin título]';
+          allErrors.push({
+            row: rowNumber,
+            title,
+            field: 'general',
+            value: '',
+            error: error.message || 'Error al importar la propiedad',
+            type: 'api'
+          });
+        }
+      }
+
+      // Report progress after each row
+      onProgress({
+        current: i + 1,
+        total,
+        success: successCount,
+        errors: allErrors
+      });
     }
 
+    // Reload properties if any were imported successfully
     if (successCount > 0) {
       loadProperties();
-      toast.success(`${successCount} ${successCount === 1 ? 'propiedad importada' : 'propiedades importadas'} exitosamente`);
     }
 
-    if (errorCount > 0) {
-      toast.error(`${errorCount} ${errorCount === 1 ? 'propiedad falló' : 'propiedades fallaron'} al importar`);
+    // Count unique properties with errors (group by row)
+    const uniqueErrorRows = new Set(allErrors.map(e => e.row)).size;
+
+    // Show summary toast
+    if (successCount > 0 && uniqueErrorRows === 0) {
+      toast.success(`✓ ${successCount} ${successCount === 1 ? 'propiedad importada' : 'propiedades importadas'} exitosamente`);
+    } else if (successCount > 0 && uniqueErrorRows > 0) {
+      toast.success(`✓ ${successCount} importadas, ✗ ${uniqueErrorRows} ${uniqueErrorRows === 1 ? 'omitida' : 'omitidas'} por errores`);
+    } else if (uniqueErrorRows > 0) {
+      toast.error(`✗ ${uniqueErrorRows} ${uniqueErrorRows === 1 ? 'propiedad omitida' : 'propiedades omitidas'} por errores`);
     }
+
+    return {
+      success: successCount,
+      errors: allErrors
+    };
   };
 
   return (
