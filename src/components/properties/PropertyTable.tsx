@@ -98,12 +98,16 @@ export const PropertyTable = ({
         clearSelections();
       }
     }
-    // Explicitly check sessionStorage to detect external clears
+  }, [properties, selectedIds, clearSelections]);
+
+  // Explicitly check sessionStorage to detect external clears
+  // This runs on EVERY render to catch when parent clears sessionStorage
+  useEffect(() => {
     const stored = sessionStorage.getItem('propertySelection');
     if (!stored && selectedIds.size > 0) {
       clearSelections();
     }
-  }, [properties, selectedIds, clearSelections]);
+  });
 
   // Notify parent of selection changes
   useEffect(() => {

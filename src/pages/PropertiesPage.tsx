@@ -166,7 +166,7 @@ export const PropertiesPage = () => {
   const [isBulkStatusModalOpen, setIsBulkStatusModalOpen] = useState(false);
   const [isBulkPatentModalOpen, setIsBulkPatentModalOpen] = useState(false);
 
-  const { createProperty, updateProperty, deleteProperty, bulkDeleteProperties, bulkUpdateStatus, bulkUpdatePatent, loadProperties } = usePropertyStore();
+  const { createProperty, updateProperty, deleteProperty, bulkDeleteProperties, bulkUpdateStatus, bulkUpdatePatent, loadProperties, setPage } = usePropertyStore();
   const loading = usePropertyStore(state => state.loading);
   const total = usePropertyStore(state => state.total);
 
@@ -256,16 +256,21 @@ export const PropertiesPage = () => {
   };
 
   const handleBulkDeleteConfirm = async (propertyIds: number[]) => {
+    // Clear selections FIRST (before loadProperties re-renders)
+    handleDeselectAll();
+
     await bulkDeleteProperties(propertyIds);
-    setIsBulkDeleteModalOpen(false);
-
-    // Clear selections FIRST (before reload)
-    sessionStorage.removeItem('propertySelection');
-    setSelectedIds(new Set());
-    setSelectedProperties([]);
-
     // Reload properties from server to reflect changes and get remaining properties
     await loadProperties();
+
+    // Fix pagination: if current page is empty but there are previous pages, go to last valid page
+    const state = usePropertyStore.getState();
+    if (state.properties.length === 0 && state.currentPage > 1 && state.totalPages > 0) {
+      // Go to the last valid page
+      setPage(state.totalPages);
+      await loadProperties();
+    }
+    // Note: Modal closes via onClose() after this completes
   };
 
   const handleBulkStatusChange = () => {
@@ -273,16 +278,20 @@ export const PropertiesPage = () => {
   };
 
   const handleBulkStatusConfirm = async (propertyIds: number[], status: PropertyStatus) => {
+    // Clear selections FIRST (before loadProperties re-renders)
+    handleDeselectAll();
+
     await bulkUpdateStatus(propertyIds, status);
-    setIsBulkStatusModalOpen(false);
-
-    // Clear selections FIRST (before reload)
-    sessionStorage.removeItem('propertySelection');
-    setSelectedIds(new Set());
-    setSelectedProperties([]);
-
     // Reload properties from server to ensure changes are persisted
     await loadProperties();
+
+    // Fix pagination: if current page is empty but there are previous pages, go to last valid page
+    const state = usePropertyStore.getState();
+    if (state.properties.length === 0 && state.currentPage > 1 && state.totalPages > 0) {
+      setPage(state.totalPages);
+      await loadProperties();
+    }
+    // Note: Modal closes via onClose() after this completes
   };
 
   const handleBulkPatentChange = () => {
@@ -290,21 +299,29 @@ export const PropertiesPage = () => {
   };
 
   const handleBulkPatentConfirm = async (propertyIds: number[], patent: string) => {
+    // Clear selections FIRST (before bulkUpdatePatent calls loadProperties internally)
+    handleDeselectAll();
+
     await bulkUpdatePatent(propertyIds, patent);
-    setIsBulkPatentModalOpen(false);
-
-    // Clear selections FIRST (before reload)
-    sessionStorage.removeItem('propertySelection');
-    setSelectedIds(new Set());
-    setSelectedProperties([]);
-
     // Note: bulkUpdatePatent already calls loadProperties() internally
+
+    // Fix pagination: if current page is empty but there are previous pages, go to last valid page
+    const state = usePropertyStore.getState();
+    if (state.properties.length === 0 && state.currentPage > 1 && state.totalPages > 0) {
+      setPage(state.totalPages);
+      await loadProperties();
+    }
+    // Modal closes via onClose() after this completes
   };
 
   const handleBulkDownloadSheets = async () => {
     try {
       const { bulkDownloadSheets } = await import('@/services/api');
+      // Save property IDs before clearing selections
       const propertyIds = Array.from(selectedIds);
+
+      // Clear selections FIRST (before any operations)
+      handleDeselectAll();
 
       toast.loading('Preparando descarga...');
 
@@ -312,7 +329,7 @@ export const PropertiesPage = () => {
 
       toast.dismiss();
 
-      if (result.success) {
+      if (result.success && result.download_url && result.filename) {
         // Create a temporary link to download the file
         const link = document.createElement('a');
         link.href = result.download_url;
@@ -334,19 +351,33 @@ export const PropertiesPage = () => {
           }
         }
       } else {
-        toast.error('Error al descargar las fichas');
+        // success=false means no attachments available (not an error)
+        // Backend now returns { success: false, message: '...' } instead of throwing 404
+        const message = result.message || 'Ninguna propiedad tiene ficha técnica adjunta';
+        toast(message, {
+          icon: '⚠️',
+          duration: 4000
+        });
       }
     } catch (error) {
       toast.dismiss();
+      // Only real errors will reach here now
       toast.error(error instanceof Error ? error.message : 'Error al descargar fichas');
     }
   };
 
   const handleDeselectAll = () => {
-    // Clear session storage and local state
+    // Clear session storage FIRST
     sessionStorage.removeItem('propertySelection');
+
+    // Update local state immediately
     setSelectedIds(new Set());
     setSelectedProperties([]);
+
+    // Close all bulk action modals
+    setIsBulkDeleteModalOpen(false);
+    setIsBulkStatusModalOpen(false);
+    setIsBulkPatentModalOpen(false);
   };
 
   // Helper function to parse CSV line respecting quoted fields
@@ -524,7 +555,10 @@ export const PropertiesPage = () => {
       <BulkDeleteModal
         isOpen={isBulkDeleteModalOpen}
         properties={selectedProperties}
-        onClose={() => setIsBulkDeleteModalOpen(false)}
+        onClose={() => {
+          setIsBulkDeleteModalOpen(false);
+          handleDeselectAll();
+        }}
         onConfirm={handleBulkDeleteConfirm}
       />
 
@@ -532,7 +566,10 @@ export const PropertiesPage = () => {
       <BulkStatusModal
         isOpen={isBulkStatusModalOpen}
         properties={selectedProperties}
-        onClose={() => setIsBulkStatusModalOpen(false)}
+        onClose={() => {
+          setIsBulkStatusModalOpen(false);
+          handleDeselectAll();
+        }}
         onConfirm={handleBulkStatusConfirm}
       />
 
@@ -540,7 +577,10 @@ export const PropertiesPage = () => {
       <BulkPatentModal
         isOpen={isBulkPatentModalOpen}
         properties={selectedProperties}
-        onClose={() => setIsBulkPatentModalOpen(false)}
+        onClose={() => {
+          setIsBulkPatentModalOpen(false);
+          handleDeselectAll();
+        }}
         onConfirm={handleBulkPatentConfirm}
       />
 

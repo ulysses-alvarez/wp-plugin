@@ -6,7 +6,7 @@
 import { useState, useEffect } from 'react';
 import { Tag, X } from 'lucide-react';
 import type { Property } from '@/utils/permissions';
-import { LoadingSpinner } from '@/components/ui';
+import { LoadingSpinner, ComboBox } from '@/components/ui';
 import { fetchUniquePatents } from '@/services/api';
 import clsx from 'clsx';
 
@@ -116,10 +116,6 @@ export const BulkPatentModal = ({
           <div className="p-6">
             {/* Patent Selection */}
             <div className="mb-6">
-              <label htmlFor="patent-select" className="block text-sm font-medium text-gray-700 mb-2">
-                Selecciona la nueva patente
-              </label>
-
               {loadingPatents ? (
                 <div className="flex items-center justify-center py-8 bg-gray-50 rounded-lg border border-gray-200">
                   <LoadingSpinner size="sm" />
@@ -132,35 +128,17 @@ export const BulkPatentModal = ({
                   </p>
                 </div>
               ) : (
-                <div className="space-y-2 max-h-60 overflow-y-auto pr-1">
-                  {uniquePatents.map((patent) => (
-                    <label
-                      key={patent}
-                      className={clsx(
-                        'flex items-center p-3 border-2 rounded-lg cursor-pointer transition-all',
-                        selectedPatent === patent
-                          ? 'border-purple-500 bg-purple-50'
-                          : 'border-gray-200 hover:border-gray-300 bg-white'
-                      )}
-                    >
-                      <input
-                        type="radio"
-                        name="patent"
-                        value={patent}
-                        checked={selectedPatent === patent}
-                        onChange={(e) => setSelectedPatent(e.target.value)}
-                        className="w-4 h-4 text-purple-600 focus:ring-purple-500"
-                        disabled={isUpdating}
-                      />
-                      <span className={clsx(
-                        'ml-3 text-sm font-medium font-mono',
-                        selectedPatent === patent ? 'text-purple-900' : 'text-gray-700'
-                      )}>
-                        {patent}
-                      </span>
-                    </label>
-                  ))}
-                </div>
+                <ComboBox
+                  label="Selecciona la nueva patente"
+                  value={selectedPatent}
+                  options={uniquePatents}
+                  onChange={setSelectedPatent}
+                  placeholder="Buscar patente..."
+                  disabled={isUpdating}
+                  required
+                  helperText="Selecciona una patente existente para aplicar a todas las propiedades seleccionadas"
+                  emptyMessage="No hay patentes disponibles"
+                />
               )}
             </div>
 

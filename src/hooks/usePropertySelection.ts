@@ -75,10 +75,16 @@ export const usePropertySelection = (): UsePropertySelectionReturn => {
   // Persist to sessionStorage whenever selection changes
   useEffect(() => {
     try {
-      sessionStorage.setItem(
-        'propertySelection',
-        JSON.stringify(Array.from(selectedIds))
-      );
+      if (selectedIds.size === 0) {
+        // When selections are empty, remove from sessionStorage
+        // This prevents race condition when deselecting all
+        sessionStorage.removeItem('propertySelection');
+      } else {
+        sessionStorage.setItem(
+          'propertySelection',
+          JSON.stringify(Array.from(selectedIds))
+        );
+      }
     } catch {
       // Failed to save selection
     }

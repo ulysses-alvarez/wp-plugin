@@ -8,6 +8,7 @@ export type { ButtonVariant, ButtonSize } from './Button';
 
 export { Input } from './Input';
 export { Select } from './Select';
+export { ComboBox } from './ComboBox';
 export { Textarea } from './Textarea';
 export { SearchBar } from './SearchBar';
 export { AdvancedSearchBar } from './AdvancedSearchBar';

@@ -1360,11 +1360,14 @@ class Property_REST_API {
 
         // Check if we have any attachments
         if (empty($attachments)) {
-            return new WP_Error(
-                'no_attachments',
-                __('Ninguna propiedad tiene ficha técnica adjunta', 'property-dashboard'),
-                ['status' => 404]
-            );
+            // Return 200 with success=false instead of 404 error
+            // This way frontend doesn't log it as an error in console
+            return rest_ensure_response([
+                'success' => false,
+                'message' => __('Ninguna propiedad tiene ficha técnica adjunta', 'property-dashboard'),
+                'files_count' => 0,
+                'files_without_attachment' => $files_without_attachment
+            ]);
         }
 
         // If only 1 attachment, return direct download URL

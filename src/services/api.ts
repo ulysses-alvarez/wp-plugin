@@ -394,14 +394,16 @@ export const bulkUpdatePatent = async (
  * Bulk download property attachments (Fichas Técnicas)
  * If 1 file: returns direct download URL
  * If 2+ files: returns ZIP URL
+ * If no files: returns success=false with message
  */
 export interface BulkDownloadResult {
   success: boolean;
-  single_file: boolean;
-  download_url: string;
-  filename: string;
+  single_file?: boolean;
+  download_url?: string;
+  filename?: string;
   files_count: number;
   files_without_attachment: number;
+  message?: string; // Present when success=false (no attachments available)
 }
 
 export const bulkDownloadSheets = async (
