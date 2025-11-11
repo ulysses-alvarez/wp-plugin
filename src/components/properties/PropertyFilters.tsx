@@ -33,7 +33,7 @@ export const PropertyFilters = ({ onCreateNew, onExport, onImport }: PropertyFil
         <div className="flex-1 max-w-2xl">
           <AdvancedSearchBar
             onSearch={handleSearch}
-            debounceMs={500}
+            debounceMs={300}
           />
         </div>
 

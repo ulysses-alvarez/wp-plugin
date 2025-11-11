@@ -254,6 +254,32 @@ export const uploadFile = async (file: File): Promise<{ id: number; url: string 
 };
 
 /**
+ * Fetch price ranges (10 dynamic ranges based on min/max prices)
+ */
+export interface PriceRange {
+  value: string;
+  label: string;
+  min: number;
+  max: number;
+}
+
+export const fetchPriceRanges = async (): Promise<PriceRange[]> => {
+  const config = getAPIConfig();
+  const url = `${config.apiUrl}/price-ranges`;
+
+  const response = await fetch(url, {
+    method: 'GET',
+    headers: getHeaders()
+  });
+
+  if (!response.ok) {
+    await handleAPIError(response);
+  }
+
+  return response.json();
+};
+
+/**
  * Statistics API (if needed in future)
  */
 export const fetchStatistics = async (): Promise<any> => {
@@ -282,5 +308,6 @@ export default {
   updateProperty,
   deleteProperty,
   uploadFile,
+  fetchPriceRanges,
   fetchStatistics
 };

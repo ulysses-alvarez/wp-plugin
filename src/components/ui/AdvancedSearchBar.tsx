@@ -6,6 +6,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import clsx from 'clsx';
 import { SEARCH_CONTEXTS, type SearchContext } from '@/utils/constants';
+import { fetchPriceRanges, type PriceRange } from '@/services/api';
 
 interface AdvancedSearchBarProps {
   onSearch: (field: string, value: string) => void;
@@ -15,25 +16,33 @@ interface AdvancedSearchBarProps {
 
 export const AdvancedSearchBar = ({
   onSearch,
-  debounceMs = 500,
+  debounceMs = 300,
   className
 }: AdvancedSearchBarProps) => {
   const [selectedContext, setSelectedContext] = useState<SearchContext>(SEARCH_CONTEXTS[0]);
   const [searchValue, setSearchValue] = useState<string>('');
+  const [priceRanges, setPriceRanges] = useState<PriceRange[]>([]);
   const isInitialMount = useRef(true);
   const previousContextRef = useRef(selectedContext.value);
+
+  // Load price ranges on mount
+  useEffect(() => {
+    const loadPriceRanges = async () => {
+      try {
+        const ranges = await fetchPriceRanges();
+        setPriceRanges(ranges);
+      } catch (error) {
+        console.error('Error loading price ranges:', error);
+      }
+    };
+    loadPriceRanges();
+  }, []);
 
   // Debounced search effect
   useEffect(() => {
     // Skip the very first render to avoid calling onSearch on mount
     if (isInitialMount.current) {
       isInitialMount.current = false;
-      return;
-    }
-
-    // If context changed and value is empty, don't search (just reset)
-    if (previousContextRef.current !== selectedContext.value && !searchValue) {
-      previousContextRef.current = selectedContext.value;
       return;
     }
 
@@ -63,6 +72,7 @@ export const AdvancedSearchBar = ({
     if (newContext) {
       setSelectedContext(newContext);
       setSearchValue(''); // Reset search value when context changes
+      // The useEffect will handle calling onSearch with the new context and empty value
     }
   }, []);
 
@@ -121,7 +131,7 @@ export const AdvancedSearchBar = ({
 
             {/* Conditional Rendering based on field type */}
             {selectedContext.type === 'select' ? (
-              // SELECT dropdown for enum fields (Status, State)
+              // SELECT dropdown for enum fields (Status, State, Price)
               <select
                 value={searchValue}
                 onChange={(e) => handleValueChange(e.target.value)}
@@ -129,11 +139,19 @@ export const AdvancedSearchBar = ({
                 aria-label={selectedContext.label}
               >
                 <option value="">Todos</option>
-                {selectedContext.options?.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
+                {/* Use dynamic price ranges for price field, otherwise use static options */}
+                {selectedContext.value === 'price'
+                  ? priceRanges.map((option) => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))
+                  : selectedContext.options?.map((option) => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))
+                }
               </select>
             ) : selectedContext.type === 'number' ? (
               // NUMBER input for numeric fields (Price, Postal Code)
@@ -186,7 +204,9 @@ export const AdvancedSearchBar = ({
             Buscando en {selectedContext.label}:
           </span>{' '}
           {selectedContext.type === 'select'
-            ? selectedContext.options?.find(opt => opt.value === searchValue)?.label || searchValue
+            ? (selectedContext.value === 'price'
+                ? priceRanges.find(opt => opt.value === searchValue)?.label || searchValue
+                : selectedContext.options?.find(opt => opt.value === searchValue)?.label || searchValue)
             : searchValue}
         </div>
       )}

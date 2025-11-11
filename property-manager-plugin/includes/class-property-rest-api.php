@@ -68,6 +68,13 @@ class Property_REST_API {
             'callback'            => [$this, 'get_current_user'],
             'permission_callback' => '__return_true',
         ]);
+
+        // Get price ranges
+        register_rest_route($this->namespace, '/price-ranges', [
+            'methods'             => WP_REST_Server::READABLE,
+            'callback'            => [$this, 'get_price_ranges'],
+            'permission_callback' => [$this, 'check_read_permission'],
+        ]);
     }
 
     /**
@@ -130,8 +137,26 @@ class Property_REST_API {
                     break;
 
                 case 'title':
-                    // Search in post title only
+                    // Search in post title only (not content/description)
                     $args['s'] = sanitize_text_field($search_value);
+                    // Mark this query for title-only search filter
+                    $args['property_title_search'] = true;
+                    break;
+
+                case 'description':
+                    // Search in post content/description only (not title)
+                    $args['s'] = sanitize_text_field($search_value);
+                    // Mark this query for description-only search filter
+                    $args['property_description_search'] = true;
+                    break;
+
+                case 'patent':
+                    // Partial match for patent
+                    $args['meta_query'][] = [
+                        'key'     => '_property_patent',
+                        'value'   => sanitize_text_field($search_value),
+                        'compare' => 'LIKE'
+                    ];
                     break;
 
                 case 'status':
@@ -171,22 +196,25 @@ class Property_REST_API {
                     break;
 
                 case 'postal_code':
-                    // Exact match for postal code
-                    $args['meta_query'][] = [
-                        'key'     => '_property_postal_code',
-                        'value'   => sanitize_text_field($search_value),
-                        'compare' => '='
-                    ];
+                    // Mark for custom postal code filter
+                    $args['property_postal_code_search'] = sanitize_text_field($search_value);
                     break;
 
                 case 'price':
-                    // Exact match for price (numeric)
-                    $args['meta_query'][] = [
-                        'key'     => '_property_price',
-                        'value'   => floatval($search_value),
-                        'type'    => 'NUMERIC',
-                        'compare' => '='
-                    ];
+                    // Parse "min-max" format from the frontend
+                    if (strpos($search_value, '-') !== false) {
+                        $range_parts = explode('-', $search_value, 2);
+                        $range_min = floatval($range_parts[0]);
+                        $range_max = floatval($range_parts[1]);
+
+                        // Use the exact values from the frontend (already rounded)
+                        $args['meta_query'][] = [
+                            'key'     => '_property_price',
+                            'value'   => [$range_min, $range_max],
+                            'type'    => 'DECIMAL(10,2)',
+                            'compare' => 'BETWEEN'
+                        ];
+                    }
                     break;
             }
         } else {
@@ -230,10 +258,12 @@ class Property_REST_API {
                 }
 
                 // Build OR conditions for meta fields
+                // IMPORTANT: Include post_status check to ensure only published posts are included
                 $meta_where = $wpdb->prepare(
                     "OR EXISTS (
                         SELECT 1 FROM {$wpdb->postmeta} pm
                         WHERE pm.post_id = {$wpdb->posts}.ID
+                        AND {$wpdb->posts}.post_status = 'publish'
                         AND (
                             (pm.meta_key = '_property_status' AND pm.meta_value LIKE %s) OR
                             (pm.meta_key = '_property_state' AND pm.meta_value LIKE %s) OR
@@ -261,12 +291,104 @@ class Property_REST_API {
             add_filter('posts_where', $general_search_filter, 10, 2);
         }
 
+        // Add filter for title-only search if needed
+        $title_search_filter = null;
+        if (!empty($args['property_title_search'])) {
+            $search_term = $args['s'];
+            unset($args['property_title_search']); // Remove the marker as it's not a valid WP_Query arg
+
+            $title_search_filter = function($search, $wp_query) use ($search_term) {
+                global $wpdb;
+
+                if (empty($search_term)) {
+                    return $search;
+                }
+
+                // Override default search to only search in post_title (not post_content)
+                $search = $wpdb->prepare(
+                    " AND ({$wpdb->posts}.post_title LIKE %s) ",
+                    '%' . $wpdb->esc_like($search_term) . '%'
+                );
+
+                return $search;
+            };
+
+            add_filter('posts_search', $title_search_filter, 10, 2);
+        }
+
+        // Add filter for description-only search if needed
+        $description_search_filter = null;
+        if (!empty($args['property_description_search'])) {
+            $search_term = $args['s'];
+            unset($args['property_description_search']); // Remove the marker as it's not a valid WP_Query arg
+
+            $description_search_filter = function($search, $wp_query) use ($search_term) {
+                global $wpdb;
+
+                if (empty($search_term)) {
+                    return $search;
+                }
+
+                // Override default search to only search in post_content (not post_title)
+                $search = $wpdb->prepare(
+                    " AND ({$wpdb->posts}.post_content LIKE %s) ",
+                    '%' . $wpdb->esc_like($search_term) . '%'
+                );
+
+                return $search;
+            };
+
+            add_filter('posts_search', $description_search_filter, 10, 2);
+        }
+
+        // Add filter for postal code search if needed
+        $postal_code_filter = null;
+        if (!empty($args['property_postal_code_search'])) {
+            $postal_code_value = $args['property_postal_code_search'];
+            unset($args['property_postal_code_search']); // Remove the marker as it's not a valid WP_Query arg
+
+            $postal_code_filter = function($where, $wp_query) use ($postal_code_value) {
+                global $wpdb;
+
+                if (empty($postal_code_value)) {
+                    return $where;
+                }
+
+                // Search for postal codes starting with the input value
+                $pattern = $wpdb->esc_like($postal_code_value) . '%';
+
+                $postal_where = $wpdb->prepare(
+                    " AND EXISTS (
+                        SELECT 1 FROM {$wpdb->postmeta} pm
+                        WHERE pm.post_id = {$wpdb->posts}.ID
+                        AND pm.meta_key = '_property_postal_code'
+                        AND pm.meta_value LIKE %s
+                    )",
+                    $pattern
+                );
+
+                $where .= $postal_where;
+                return $where;
+            };
+
+            add_filter('posts_where', $postal_code_filter, 10, 2);
+        }
+
         // Execute query
         $query = new WP_Query($args);
 
-        // Remove the filter if it was added
+        // Remove the filters if they were added
         if ($general_search_filter !== null) {
             remove_filter('posts_where', $general_search_filter, 10);
+        }
+        if ($title_search_filter !== null) {
+            remove_filter('posts_search', $title_search_filter, 10);
+        }
+        if ($description_search_filter !== null) {
+            remove_filter('posts_search', $description_search_filter, 10);
+        }
+        if ($postal_code_filter !== null) {
+            remove_filter('posts_where', $postal_code_filter, 10);
         }
 
         $properties = [];
@@ -527,6 +649,78 @@ class Property_REST_API {
     }
 
     /**
+     * Smart rounding for price ranges based on magnitude
+     * Rounds to appropriate multiples for better UX
+     */
+    private function round_price_smart($price) {
+        if ($price < 100000) {
+            // Under 100k: round to nearest 10k
+            return round($price / 10000) * 10000;
+        } elseif ($price < 1000000) {
+            // 100k-1M: round to nearest 50k
+            return round($price / 50000) * 50000;
+        } elseif ($price < 5000000) {
+            // 1M-5M: round to nearest 100k
+            return round($price / 100000) * 100000;
+        } else {
+            // Over 5M: round to nearest 500k
+            return round($price / 500000) * 500000;
+        }
+    }
+
+    /**
+     * Get price ranges (10 dynamic ranges based on min/max prices)
+     */
+    public function get_price_ranges($request) {
+        global $wpdb;
+
+        // Get all published property prices
+        $prices = $wpdb->get_col("
+            SELECT DISTINCT CAST(pm.meta_value AS DECIMAL(10,2)) as price
+            FROM {$wpdb->postmeta} pm
+            INNER JOIN {$wpdb->posts} p ON pm.post_id = p.ID
+            WHERE pm.meta_key = '_property_price'
+            AND p.post_type = 'property'
+            AND p.post_status = 'publish'
+            AND pm.meta_value != ''
+            AND CAST(pm.meta_value AS DECIMAL(10,2)) > 0
+            ORDER BY price ASC
+        ");
+
+        if (empty($prices)) {
+            return rest_ensure_response([]);
+        }
+
+        $min_price = floatval($prices[0]);
+        $max_price = floatval($prices[count($prices) - 1]);
+
+        // Calculate 10 ranges
+        $range_size = ($max_price - $min_price) / 10;
+        $ranges = [];
+
+        for ($i = 0; $i < 10; $i++) {
+            $range_min = $min_price + ($range_size * $i);
+            $range_max = $min_price + ($range_size * ($i + 1));
+
+            // Apply smart rounding for better UX
+            $range_min = $this->round_price_smart($range_min);
+            $range_max = $this->round_price_smart($range_max);
+
+            // Format numbers for display
+            $label = '$' . number_format($range_min, 0, '.', ',') . ' - $' . number_format($range_max, 0, '.', ',');
+
+            $ranges[] = [
+                'value' => $range_min . '-' . $range_max,  // Use actual values instead of index
+                'label' => $label,
+                'min'   => $range_min,
+                'max'   => $range_max
+            ];
+        }
+
+        return rest_ensure_response($ranges);
+    }
+
+    /**
      * Validate required fields
      */
     private function validate_required_fields($request) {
@@ -587,8 +781,10 @@ class Property_REST_API {
                             break;
 
                         case '_property_postal_code':
-                            // Remove all non-numeric characters and limit to 5 digits
-                            $value = substr(preg_replace('/[^0-9]/', '', $value), 0, 5);
+                            // Remove all non-numeric characters, pad with leading zeros to 5 digits
+                            $value = preg_replace('/[^0-9]/', '', $value);
+                            $value = str_pad($value, 5, '0', STR_PAD_LEFT);
+                            $value = substr($value, 0, 5);
                             break;
 
                         case '_property_price':

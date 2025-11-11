@@ -9,6 +9,7 @@ import { LoadingSpinner, Pagination, Badge, SortableTableHeader } from '@/compon
 import type { SortKey } from '@/components/ui';
 import type { Property } from '@/utils/permissions';
 import { canCreateProperty, canEditProperty, canDeleteProperty, getStatusLabel } from '@/utils/permissions';
+import { getStateLabel } from '@/utils/constants';
 import clsx from 'clsx';
 
 interface PropertyTableProps {
@@ -293,12 +294,13 @@ export const PropertyTable = ({
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                         </svg>
                         <div className="flex flex-col max-w-xs">
-                          {property.neighborhood && (
-                            <span className="truncate">{property.neighborhood}</span>
+                          {property.state && (
+                            <span className="font-medium truncate">{getStateLabel(property.state)}</span>
                           )}
                           <span className="text-gray-600 text-sm truncate">
                             {property.municipality}
-                            {property.state && `, ${property.state}`}
+                            {property.neighborhood && `, ${property.neighborhood}`}
+                            {property.postal_code && `. C.P. ${property.postal_code}`}
                           </span>
                         </div>
                       </div>

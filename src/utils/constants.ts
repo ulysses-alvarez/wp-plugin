@@ -71,6 +71,15 @@ export const MEXICAN_STATES = [
   { value: 'zacatecas', label: 'Zacatecas' }
 ] as const;
 
+/**
+ * Get the display label for a state value
+ * Converts state values like 'baja_california_sur', 'cdmx', 'mexico' to readable labels
+ */
+export const getStateLabel = (stateValue: string): string => {
+  const state = MEXICAN_STATES.find(s => s.value === stateValue);
+  return state?.label || stateValue;
+};
+
 // Pagination Options
 export const PAGINATION_OPTIONS = [
   { value: 5, label: '5 por página' },
@@ -136,6 +145,12 @@ export const SEARCH_CONTEXTS: SearchContext[] = [
     placeholder: 'Buscar por título...'
   },
   {
+    value: 'description',
+    label: 'Descripción',
+    type: 'text',
+    placeholder: 'Buscar por descripción...'
+  },
+  {
     value: 'patent',
     label: 'Patente',
     type: 'text',
@@ -168,13 +183,13 @@ export const SEARCH_CONTEXTS: SearchContext[] = [
   {
     value: 'postal_code',
     label: 'Código Postal',
-    type: 'number',
-    placeholder: 'Ej: 44100'
+    type: 'text',
+    placeholder: 'Ej: 44100 o 01000'
   },
   {
     value: 'price',
     label: 'Precio',
-    type: 'number',
-    placeholder: 'Precio exacto'
+    type: 'select',
+    options: [] // Dynamic options loaded via usePriceRanges hook
   }
 ];
