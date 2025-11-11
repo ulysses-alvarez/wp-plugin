@@ -7,12 +7,15 @@ import { create } from 'zustand';
 import toast from 'react-hot-toast';
 import type { Property } from '../utils/permissions';
 import type { PropertyQueryParams, PropertyData } from '../services/api';
+import type { PropertyStatus, BulkResult } from '../types/bulk';
 import {
   fetchProperties,
   fetchProperty,
   createProperty as apiCreateProperty,
   updateProperty as apiUpdateProperty,
-  deleteProperty as apiDeleteProperty
+  deleteProperty as apiDeleteProperty,
+  bulkDeleteProperties as apiBulkDeleteProperties,
+  bulkUpdateStatus as apiBulkUpdateStatus
 } from '../services/api';
 
 // Store State Interface
@@ -49,6 +52,10 @@ interface PropertyState {
   createProperty: (data: PropertyData, silent?: boolean) => Promise<Property | null>;
   updateProperty: (id: number, data: Partial<PropertyData>) => Promise<Property | null>;
   deleteProperty: (id: number) => Promise<boolean>;
+
+  // Bulk Actions
+  bulkDeleteProperties: (propertyIds: number[]) => Promise<BulkResult>;
+  bulkUpdateStatus: (propertyIds: number[], status: PropertyStatus) => Promise<BulkResult>;
 
   // Filter Actions
   setSearch: (search: string) => void;
@@ -254,6 +261,85 @@ export const usePropertyStore = create<PropertyState>((set, get) => ({
       set({ error: errorMessage, loading: false });
       toast.error(errorMessage);
       return false;
+    }
+  },
+
+  /**
+   * Bulk delete properties
+   */
+  bulkDeleteProperties: async (propertyIds: number[]) => {
+    set({ loading: true, error: null });
+
+    try {
+      const result = await apiBulkDeleteProperties(propertyIds);
+
+      // Remove successfully deleted properties from store
+      set(state => ({
+        properties: state.properties.filter(p => !result.success.includes(p.id)),
+        total: state.total - result.success.length,
+        selectedProperty: result.success.includes(state.selectedProperty?.id || 0)
+          ? null
+          : state.selectedProperty,
+        loading: false,
+        error: null
+      }));
+
+      // Show result toast
+      if (result.failed.length === 0) {
+        toast.success(`✓ ${result.success.length} ${result.success.length === 1 ? 'propiedad eliminada' : 'propiedades eliminadas'} exitosamente`);
+      } else {
+        toast.error(`✓ ${result.success.length} eliminadas, ✗ ${result.failed.length} fallaron. Revisa los permisos.`, {
+          duration: 5000
+        });
+      }
+
+      return result;
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Error al eliminar propiedades';
+      set({ error: errorMessage, loading: false });
+      toast.error(errorMessage);
+      throw error;
+    }
+  },
+
+  /**
+   * Bulk update property status
+   */
+  bulkUpdateStatus: async (propertyIds: number[], status: PropertyStatus) => {
+    set({ loading: true, error: null });
+
+    try {
+      const result = await apiBulkUpdateStatus(propertyIds, status);
+
+      // Update successfully updated properties in store
+      set(state => ({
+        properties: state.properties.map(p =>
+          result.success.includes(p.id)
+            ? { ...p, status }
+            : p
+        ),
+        selectedProperty: result.success.includes(state.selectedProperty?.id || 0) && state.selectedProperty
+          ? { ...state.selectedProperty, status }
+          : state.selectedProperty,
+        loading: false,
+        error: null
+      }));
+
+      // Show result toast
+      if (result.failed.length === 0) {
+        toast.success(`✓ ${result.success.length} ${result.success.length === 1 ? 'propiedad actualizada' : 'propiedades actualizadas'} exitosamente`);
+      } else {
+        toast.error(`✓ ${result.success.length} actualizadas, ✗ ${result.failed.length} fallaron. Revisa los permisos.`, {
+          duration: 5000
+        });
+      }
+
+      return result;
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Error al actualizar estados';
+      set({ error: errorMessage, loading: false });
+      toast.error(errorMessage);
+      throw error;
     }
   },
 

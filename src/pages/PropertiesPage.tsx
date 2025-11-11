@@ -2,10 +2,14 @@ import { useState } from 'react';
 import { PropertyTable } from '@/components/properties/PropertyTable';
 import { PropertyFilters } from '@/components/properties/PropertyFilters';
 import { PropertySidebar } from '@/components/properties/PropertySidebar';
+import { BulkActionsBar } from '@/components/properties/BulkActionsBar';
+import { BulkDeleteModal } from '@/components/properties/BulkDeleteModal';
+import { BulkStatusModal } from '@/components/properties/BulkStatusModal';
 import { ImportCSVModal, type ImportError, type ImportProgress } from '@/components/properties/ImportCSVModal';
 import type { PropertyFormData } from '@/components/properties/PropertyForm';
 import { usePropertyStore } from '@/stores/usePropertyStore';
 import type { Property } from '@/utils/permissions';
+import type { PropertyStatus } from '@/types/bulk';
 import { MEXICAN_STATES } from '@/utils/constants';
 import toast from 'react-hot-toast';
 
@@ -154,8 +158,15 @@ export const PropertiesPage = () => {
   const [sidebarMode, setSidebarMode] = useState<'view' | 'create' | 'edit'>('view');
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
 
-  const { createProperty, updateProperty, deleteProperty, loadProperties } = usePropertyStore();
+  // Bulk actions state
+  const [selectedProperties, setSelectedProperties] = useState<Property[]>([]);
+  const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
+  const [isBulkDeleteModalOpen, setIsBulkDeleteModalOpen] = useState(false);
+  const [isBulkStatusModalOpen, setIsBulkStatusModalOpen] = useState(false);
+
+  const { createProperty, updateProperty, deleteProperty, bulkDeleteProperties, bulkUpdateStatus, loadProperties } = usePropertyStore();
   const loading = usePropertyStore(state => state.loading);
+  const total = usePropertyStore(state => state.total);
 
   const handlePropertySelect = (property: Property) => {
     setSelectedProperty(property);
@@ -231,6 +242,43 @@ export const PropertiesPage = () => {
   const handleExport = () => {
     // TODO: Implementar exportación
     console.log('Exportar propiedades');
+  };
+
+  // Bulk actions handlers
+  const handleSelectionChange = (ids: Set<number>, properties: Property[]) => {
+    setSelectedIds(ids);
+    setSelectedProperties(properties);
+  };
+
+  const handleBulkDelete = () => {
+    setIsBulkDeleteModalOpen(true);
+  };
+
+  const handleBulkDeleteConfirm = async (propertyIds: number[]) => {
+    await bulkDeleteProperties(propertyIds);
+    setIsBulkDeleteModalOpen(false);
+    // Clear selections and reload page to ensure sync
+    sessionStorage.removeItem('propertySelection');
+    window.location.reload();
+  };
+
+  const handleBulkStatusChange = () => {
+    setIsBulkStatusModalOpen(true);
+  };
+
+  const handleBulkStatusConfirm = async (propertyIds: number[], status: PropertyStatus) => {
+    await bulkUpdateStatus(propertyIds, status);
+    setIsBulkStatusModalOpen(false);
+    // Clear selections and reload page to ensure sync
+    sessionStorage.removeItem('propertySelection');
+    window.location.reload();
+  };
+
+  const handleDeselectAll = () => {
+    // Clear session storage
+    sessionStorage.removeItem('propertySelection');
+    // Force reload to clear selections
+    window.location.reload();
   };
 
   // Helper function to parse CSV line respecting quoted fields
@@ -399,10 +447,36 @@ export const PropertiesPage = () => {
               onPropertyEdit={handleEdit}
               onPropertyDelete={handleDelete}
               onCreateNew={handleCreateNew}
+              onSelectionChange={handleSelectionChange}
             />
           </div>
         </div>
       </div>
+
+      {/* Bulk Actions Bar */}
+      <BulkActionsBar
+        selectedCount={selectedIds.size}
+        totalCount={total}
+        onDeselectAll={handleDeselectAll}
+        onDelete={handleBulkDelete}
+        onStatusChange={handleBulkStatusChange}
+      />
+
+      {/* Bulk Delete Modal */}
+      <BulkDeleteModal
+        isOpen={isBulkDeleteModalOpen}
+        properties={selectedProperties}
+        onClose={() => setIsBulkDeleteModalOpen(false)}
+        onConfirm={handleBulkDeleteConfirm}
+      />
+
+      {/* Bulk Status Modal */}
+      <BulkStatusModal
+        isOpen={isBulkStatusModalOpen}
+        properties={selectedProperties}
+        onClose={() => setIsBulkStatusModalOpen(false)}
+        onConfirm={handleBulkStatusConfirm}
+      />
 
       <PropertySidebar
         property={selectedProperty}

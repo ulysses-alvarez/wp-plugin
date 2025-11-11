@@ -4,6 +4,7 @@
  */
 
 import type { Property } from '../utils/permissions';
+import type { BulkResult, PropertyStatus } from '../types/bulk';
 
 // API Response Types
 export interface APIResponse<T> {
@@ -299,6 +300,52 @@ export const fetchStatistics = async (): Promise<any> => {
 };
 
 /**
+ * Bulk delete properties
+ */
+export const bulkDeleteProperties = async (propertyIds: number[]): Promise<BulkResult> => {
+  const config = getAPIConfig();
+  const url = `${config.apiUrl}/properties/bulk-delete`;
+
+  const response = await fetch(url, {
+    method: 'DELETE',
+    headers: getHeaders(),
+    body: JSON.stringify({ property_ids: propertyIds })
+  });
+
+  if (!response.ok) {
+    await handleAPIError(response);
+  }
+
+  return response.json();
+};
+
+/**
+ * Bulk update property status
+ */
+export const bulkUpdateStatus = async (
+  propertyIds: number[],
+  status: PropertyStatus
+): Promise<BulkResult> => {
+  const config = getAPIConfig();
+  const url = `${config.apiUrl}/properties/bulk-update-status`;
+
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: getHeaders(),
+    body: JSON.stringify({
+      property_ids: propertyIds,
+      status
+    })
+  });
+
+  if (!response.ok) {
+    await handleAPIError(response);
+  }
+
+  return response.json();
+};
+
+/**
  * Export API methods as default
  */
 export default {
@@ -309,5 +356,7 @@ export default {
   deleteProperty,
   uploadFile,
   fetchPriceRanges,
-  fetchStatistics
+  fetchStatistics,
+  bulkDeleteProperties,
+  bulkUpdateStatus
 };

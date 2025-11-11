@@ -75,6 +75,45 @@ class Property_REST_API {
             'callback'            => [$this, 'get_price_ranges'],
             'permission_callback' => [$this, 'check_read_permission'],
         ]);
+
+        // Bulk delete properties
+        register_rest_route($this->namespace, '/properties/bulk-delete', [
+            'methods'             => WP_REST_Server::DELETABLE,
+            'callback'            => [$this, 'bulk_delete_properties'],
+            'permission_callback' => [$this, 'check_read_permission'],
+            'args'                => [
+                'property_ids' => [
+                    'required'          => true,
+                    'type'              => 'array',
+                    'items'             => ['type' => 'integer'],
+                    'sanitize_callback' => function($ids) {
+                        return array_map('absint', $ids);
+                    },
+                ],
+            ],
+        ]);
+
+        // Bulk update status
+        register_rest_route($this->namespace, '/properties/bulk-update-status', [
+            'methods'             => WP_REST_Server::EDITABLE,
+            'callback'            => [$this, 'bulk_update_status'],
+            'permission_callback' => [$this, 'check_read_permission'],
+            'args'                => [
+                'property_ids' => [
+                    'required'          => true,
+                    'type'              => 'array',
+                    'items'             => ['type' => 'integer'],
+                    'sanitize_callback' => function($ids) {
+                        return array_map('absint', $ids);
+                    },
+                ],
+                'status' => [
+                    'required' => true,
+                    'type'     => 'string',
+                    'enum'     => ['available', 'sold', 'rented', 'reserved'],
+                ],
+            ],
+        ]);
     }
 
     /**
@@ -606,7 +645,8 @@ class Property_REST_API {
             );
         }
 
-        $result = wp_delete_post($property_id, true);
+        // Move to trash instead of permanent delete
+        $result = wp_trash_post($property_id);
 
         if (!$result) {
             return new WP_Error(
@@ -956,5 +996,126 @@ class Property_REST_API {
             'google_maps_url' => ['required' => false],
             'attachment_id'   => ['required' => false],
         ];
+    }
+
+    /**
+     * Bulk delete properties
+     */
+    public function bulk_delete_properties($request) {
+        $property_ids = $request->get_param('property_ids');
+        $current_user_id = get_current_user_id();
+
+        $results = [
+            'success' => [],
+            'failed'  => [],
+            'total'   => count($property_ids),
+        ];
+
+        foreach ($property_ids as $property_id) {
+            $post = get_post($property_id);
+
+            // Validate property exists
+            if (!$post || $post->post_type !== 'property') {
+                $results['failed'][] = [
+                    'id'     => $property_id,
+                    'reason' => __('Propiedad no encontrada', 'property-dashboard'),
+                ];
+                continue;
+            }
+
+            // Check individual permissions
+            if (!Property_Roles::can_delete_property($current_user_id, $property_id)) {
+                $results['failed'][] = [
+                    'id'             => $property_id,
+                    'reason'         => __('Sin permisos para eliminar', 'property-dashboard'),
+                    'property_title' => $post->post_title,
+                ];
+                continue;
+            }
+
+            // Attempt to move to trash (soft delete)
+            $trashed = wp_trash_post($property_id);
+
+            if ($trashed) {
+                $results['success'][] = $property_id;
+            } else {
+                $results['failed'][] = [
+                    'id'             => $property_id,
+                    'reason'         => __('Error al eliminar', 'property-dashboard'),
+                    'property_title' => $post->post_title,
+                ];
+            }
+        }
+
+        return rest_ensure_response($results);
+    }
+
+    /**
+     * Bulk update property status
+     */
+    public function bulk_update_status($request) {
+        $property_ids = $request->get_param('property_ids');
+        $new_status = $request->get_param('status');
+        $current_user_id = get_current_user_id();
+
+        $results = [
+            'success' => [],
+            'failed'  => [],
+            'total'   => count($property_ids),
+        ];
+
+        // Validate status is allowed
+        $allowed_statuses = ['available', 'sold', 'rented', 'reserved'];
+        if (!in_array($new_status, $allowed_statuses, true)) {
+            return new WP_Error(
+                'invalid_status',
+                __('Estado inválido', 'property-dashboard'),
+                ['status' => 400]
+            );
+        }
+
+        foreach ($property_ids as $property_id) {
+            $post = get_post($property_id);
+
+            // Validate property exists
+            if (!$post || $post->post_type !== 'property') {
+                $results['failed'][] = [
+                    'id'     => $property_id,
+                    'reason' => __('Propiedad no encontrada', 'property-dashboard'),
+                ];
+                continue;
+            }
+
+            // Check individual permissions
+            if (!Property_Roles::can_edit_property($current_user_id, $property_id)) {
+                $results['failed'][] = [
+                    'id'             => $property_id,
+                    'reason'         => __('Sin permisos para editar', 'property-dashboard'),
+                    'property_title' => $post->post_title,
+                ];
+                continue;
+            }
+
+            // Attempt to update
+            $updated = update_post_meta($property_id, '_property_status', $new_status);
+
+            if ($updated !== false) {
+                $results['success'][] = $property_id;
+            } else {
+                // Check if it was already the same value (not an error)
+                $current_status = get_post_meta($property_id, '_property_status', true);
+                if ($current_status === $new_status) {
+                    $results['success'][] = $property_id;
+                } else {
+                    $results['failed'][] = [
+                        'id'             => $property_id,
+                        'reason'         => __('Error al actualizar', 'property-dashboard'),
+                        'property_title' => $post->post_title,
+                    ];
+                }
+            }
+        }
+
+        return rest_ensure_response($results);
     }
 }

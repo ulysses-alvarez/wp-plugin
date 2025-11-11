@@ -10,6 +10,7 @@ import type { SortKey } from '@/components/ui';
 import type { Property } from '@/utils/permissions';
 import { canCreateProperty, canEditProperty, canDeleteProperty, getStatusLabel } from '@/utils/permissions';
 import { getStateLabel } from '@/utils/constants';
+import { usePropertySelection } from '@/hooks/usePropertySelection';
 import clsx from 'clsx';
 
 interface PropertyTableProps {
@@ -17,6 +18,7 @@ interface PropertyTableProps {
   onPropertyEdit?: (property: Property) => void;
   onPropertyDelete?: (property: Property) => void;
   onCreateNew?: () => void;
+  onSelectionChange?: (selectedIds: Set<number>, selectedProperties: Property[]) => void;
 }
 
 const formatPrice = (price?: number): string => {
@@ -48,7 +50,8 @@ export const PropertyTable = ({
   onPropertySelect,
   onPropertyEdit,
   onPropertyDelete,
-  onCreateNew
+  onCreateNew,
+  onSelectionChange
 }: PropertyTableProps) => {
   const {
     properties,
@@ -72,6 +75,47 @@ export const PropertyTable = ({
   const [hoveredRow, setHoveredRow] = useState<number | null>(null);
 
   const canCreate = canCreateProperty();
+
+  // Bulk selection hook
+  const {
+    selectedIds,
+    toggleProperty,
+    selectAll,
+    isPropertySelected,
+    getSelectedProperties,
+  } = usePropertySelection();
+
+  // Notify parent of selection changes
+  useEffect(() => {
+    if (onSelectionChange) {
+      const selectedProperties = getSelectedProperties(properties);
+      onSelectionChange(selectedIds, selectedProperties);
+    }
+  }, [selectedIds, properties, onSelectionChange, getSelectedProperties]);
+
+  // Check if all properties on current page are selected
+  const currentPagePropertyIds = properties.map((p) => p.id);
+  const isAllCurrentPageSelected =
+    currentPagePropertyIds.length > 0 &&
+    currentPagePropertyIds.every((id) => selectedIds.has(id));
+  const isSomeCurrentPageSelected =
+    currentPagePropertyIds.some((id) => selectedIds.has(id)) &&
+    !isAllCurrentPageSelected;
+
+  // Handle select/deselect all on current page
+  const handleSelectAllCurrentPage = () => {
+    if (isAllCurrentPageSelected) {
+      // Deselect all on current page
+      currentPagePropertyIds.forEach((id) => {
+        if (selectedIds.has(id)) {
+          toggleProperty(id);
+        }
+      });
+    } else {
+      // Select all on current page
+      selectAll(currentPagePropertyIds);
+    }
+  };
 
   // Load properties on mount and when pagination, sorting, or filters change
   useEffect(() => {
@@ -222,6 +266,25 @@ export const PropertyTable = ({
           <table className="w-full">
             <thead>
               <tr className="bg-gray-50 border-b border-gray-200">
+                {/* Checkbox column */}
+                <th className="w-12 px-4 py-3">
+                  <input
+                    type="checkbox"
+                    checked={isAllCurrentPageSelected}
+                    ref={(input) => {
+                      if (input) {
+                        input.indeterminate = isSomeCurrentPageSelected;
+                      }
+                    }}
+                    onChange={handleSelectAllCurrentPage}
+                    className="w-4 h-4 text-primary bg-gray-100 border-gray-300 rounded focus:ring-primary focus:ring-2 cursor-pointer"
+                    title={
+                      isAllCurrentPageSelected
+                        ? 'Deseleccionar todas'
+                        : 'Seleccionar todas'
+                    }
+                  />
+                </th>
                 <SortableTableHeader
                   label="Propiedad"
                   sortKey="title"
@@ -260,18 +323,41 @@ export const PropertyTable = ({
                 const canEdit = canEditProperty(property);
                 const canDelete = canDeleteProperty(property);
                 const isHovered = hoveredRow === property.id;
+                const isSelected = isPropertySelected(property.id);
 
                 return (
                   <tr
                     key={property.id}
                     className={clsx(
                       'transition-colors cursor-pointer',
-                      isHovered ? 'bg-blue-50' : 'hover:bg-gray-50'
+                      isSelected
+                        ? 'bg-blue-50'
+                        : isHovered
+                        ? 'bg-gray-100'
+                        : 'hover:bg-gray-50'
                     )}
                     onMouseEnter={() => setHoveredRow(property.id)}
                     onMouseLeave={() => setHoveredRow(null)}
                     onClick={() => onPropertySelect(property)}
                   >
+                    {/* Checkbox */}
+                    <td
+                      className="w-12 px-4 py-4"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={isSelected}
+                        onChange={() => toggleProperty(property.id)}
+                        className="w-4 h-4 text-primary bg-gray-100 border-gray-300 rounded focus:ring-primary focus:ring-2 cursor-pointer"
+                        title={
+                          isSelected
+                            ? 'Deseleccionar propiedad'
+                            : 'Seleccionar propiedad'
+                        }
+                      />
+                    </td>
+
                     {/* Property Name & Patent */}
                     <td className="px-6 py-4">
                       <div className="flex flex-col">
