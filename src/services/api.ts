@@ -391,6 +391,38 @@ export const bulkUpdatePatent = async (
 };
 
 /**
+ * Bulk download property attachments (Fichas Técnicas)
+ * If 1 file: returns direct download URL
+ * If 2+ files: returns ZIP URL
+ */
+export interface BulkDownloadResult {
+  success: boolean;
+  single_file: boolean;
+  download_url: string;
+  filename: string;
+  files_count: number;
+  files_without_attachment: number;
+}
+
+export const bulkDownloadSheets = async (
+  propertyIds: number[]
+): Promise<BulkDownloadResult> => {
+  const config = getAPIConfig();
+  const url = `${config.apiUrl}/properties/bulk-download?property_ids=${propertyIds.join(',')}`;
+
+  const response = await fetch(url, {
+    method: 'GET',
+    headers: getHeaders()
+  });
+
+  if (!response.ok) {
+    await handleAPIError(response);
+  }
+
+  return response.json();
+};
+
+/**
  * Export API methods as default
  */
 export default {
@@ -405,5 +437,6 @@ export default {
   fetchStatistics,
   bulkDeleteProperties,
   bulkUpdateStatus,
-  bulkUpdatePatent
+  bulkUpdatePatent,
+  bulkDownloadSheets
 };

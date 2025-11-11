@@ -3,7 +3,7 @@
  * Floating action bar that appears when properties are selected
  */
 
-import { Trash2, RefreshCw, Tag } from 'lucide-react';
+import { Trash2, RefreshCw, Tag, Download, X } from 'lucide-react';
 import clsx from 'clsx';
 
 interface BulkActionsBarProps {
@@ -13,6 +13,7 @@ interface BulkActionsBarProps {
   onDelete: () => void;
   onStatusChange: () => void;
   onPatentChange: () => void;
+  onDownloadSheets: () => void;
   className?: string;
 }
 
@@ -23,6 +24,7 @@ export const BulkActionsBar = ({
   onDelete,
   onStatusChange,
   onPatentChange,
+  onDownloadSheets,
   className,
 }: BulkActionsBarProps) => {
   if (selectedCount === 0) {
@@ -81,6 +83,16 @@ export const BulkActionsBar = ({
             <span>Patente</span>
           </button>
 
+          {/* Download Sheets */}
+          <button
+            onClick={onDownloadSheets}
+            className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-green-700 bg-green-50 hover:bg-green-100 rounded-lg transition-colors"
+            title="Descargar fichas en ZIP"
+          >
+            <Download className="w-4 h-4" />
+            <span>Descargar</span>
+          </button>
+
           {/* Delete */}
           <button
             onClick={onDelete}
@@ -97,10 +109,10 @@ export const BulkActionsBar = ({
           {/* Deselect All */}
           <button
             onClick={onDeselectAll}
-            className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
+            className="flex items-center justify-center w-8 h-8 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
             title="Deseleccionar todas"
           >
-            Deseleccionar
+            <X className="w-5 h-5" />
           </button>
         </div>
       </div>

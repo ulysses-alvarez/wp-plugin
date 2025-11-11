@@ -143,6 +143,20 @@ class Property_REST_API {
                 ],
             ],
         ]);
+
+        // Bulk download property sheets as ZIP
+        register_rest_route($this->namespace, '/properties/bulk-download', [
+            'methods'             => WP_REST_Server::READABLE,
+            'callback'            => [$this, 'bulk_download_sheets'],
+            'permission_callback' => [$this, 'check_read_permission'],
+            'args'                => [
+                'property_ids' => [
+                    'required'          => true,
+                    'type'              => 'string',
+                    'sanitize_callback' => 'sanitize_text_field',
+                ],
+            ],
+        ]);
     }
 
     /**
@@ -1113,6 +1127,9 @@ class Property_REST_API {
         $new_status = $request->get_param('status');
         $current_user_id = get_current_user_id();
 
+        // Log the request for debugging
+        error_log('Bulk update status - IDs: ' . json_encode($property_ids) . ', Status: ' . $new_status);
+
         $results = [
             'success' => [],
             'failed'  => [],
@@ -1122,6 +1139,7 @@ class Property_REST_API {
         // Validate status is allowed
         $allowed_statuses = ['available', 'sold', 'rented', 'reserved'];
         if (!in_array($new_status, $allowed_statuses, true)) {
+            error_log('Bulk update status - Invalid status: ' . $new_status);
             return new WP_Error(
                 'invalid_status',
                 __('Estado inválido', 'property-dashboard'),
@@ -1134,6 +1152,7 @@ class Property_REST_API {
 
             // Validate property exists
             if (!$post || $post->post_type !== 'property') {
+                error_log('Bulk update status - Property not found: ' . $property_id);
                 $results['failed'][] = [
                     'id'     => $property_id,
                     'reason' => __('Propiedad no encontrada', 'property-dashboard'),
@@ -1143,6 +1162,7 @@ class Property_REST_API {
 
             // Check individual permissions
             if (!Property_Roles::can_edit_property($current_user_id, $property_id)) {
+                error_log('Bulk update status - Permission denied for property: ' . $property_id);
                 $results['failed'][] = [
                     'id'             => $property_id,
                     'reason'         => __('Sin permisos para editar', 'property-dashboard'),
@@ -1151,17 +1171,27 @@ class Property_REST_API {
                 continue;
             }
 
+            // Get current status for comparison
+            $current_status = get_post_meta($property_id, '_property_status', true);
+            error_log('Bulk update status - Property ' . $property_id . ': ' . $current_status . ' -> ' . $new_status);
+
             // Attempt to update
             $updated = update_post_meta($property_id, '_property_status', $new_status);
 
+            // CRITICAL: Clear post cache to ensure fresh data is read immediately
+            clean_post_cache($property_id);
+
             if ($updated !== false) {
+                error_log('Bulk update status - Property ' . $property_id . ' updated successfully');
                 $results['success'][] = $property_id;
             } else {
                 // Check if it was already the same value (not an error)
-                $current_status = get_post_meta($property_id, '_property_status', true);
-                if ($current_status === $new_status) {
+                $current_status_check = get_post_meta($property_id, '_property_status', true);
+                if ($current_status_check === $new_status) {
+                    error_log('Bulk update status - Property ' . $property_id . ' already had status: ' . $new_status);
                     $results['success'][] = $property_id;
                 } else {
+                    error_log('Bulk update status - Failed to update property ' . $property_id);
                     $results['failed'][] = [
                         'id'             => $property_id,
                         'reason'         => __('Error al actualizar', 'property-dashboard'),
@@ -1171,6 +1201,7 @@ class Property_REST_API {
             }
         }
 
+        error_log('Bulk update status - Results: ' . json_encode($results));
         return rest_ensure_response($results);
     }
 
@@ -1186,6 +1217,9 @@ class Property_REST_API {
         $new_patent = strtoupper(trim($request->get_param('patent')));
         $current_user_id = get_current_user_id();
 
+        // Log the request for debugging
+        error_log('Bulk update patent - IDs: ' . json_encode($property_ids) . ', Patent: ' . $new_patent);
+
         $results = [
             'success' => [],
             'failed'  => [],
@@ -1194,6 +1228,7 @@ class Property_REST_API {
 
         // Validate patent is not empty
         if (empty($new_patent)) {
+            error_log('Bulk update patent - Empty patent provided');
             return new WP_Error(
                 'empty_patent',
                 __('La patente no puede estar vacía', 'property-dashboard'),
@@ -1207,6 +1242,7 @@ class Property_REST_API {
 
             // Validate property exists
             if (!$post || $post->post_type !== 'property') {
+                error_log('Bulk update patent - Property not found: ' . $property_id);
                 $results['failed'][] = [
                     'id'     => $property_id,
                     'reason' => __('Propiedad no encontrada', 'property-dashboard'),
@@ -1216,6 +1252,7 @@ class Property_REST_API {
 
             // Check individual permissions
             if (!Property_Roles::can_edit_property($current_user_id, $property_id)) {
+                error_log('Bulk update patent - Permission denied for property: ' . $property_id);
                 $results['failed'][] = [
                     'id'             => $property_id,
                     'reason'         => __('Sin permisos para editar', 'property-dashboard'),
@@ -1224,11 +1261,167 @@ class Property_REST_API {
                 continue;
             }
 
+            // Get current patent for logging
+            $current_patent = get_post_meta($property_id, '_property_patent', true);
+            error_log('Bulk update patent - Property ' . $property_id . ': ' . $current_patent . ' -> ' . $new_patent);
+
             // Update patent (idempotent - will update even if same value)
-            update_post_meta($property_id, '_property_patent', $new_patent);
-            $results['success'][] = $property_id;
+            $updated = update_post_meta($property_id, '_property_patent', $new_patent);
+
+            // CRITICAL: Clear post cache to ensure fresh data is read immediately
+            clean_post_cache($property_id);
+
+            if ($updated !== false) {
+                error_log('Bulk update patent - Property ' . $property_id . ' updated successfully');
+                $results['success'][] = $property_id;
+            } else {
+                // Check if it was already the same value
+                $current_patent_check = get_post_meta($property_id, '_property_patent', true);
+                if ($current_patent_check === $new_patent) {
+                    error_log('Bulk update patent - Property ' . $property_id . ' already had patent: ' . $new_patent);
+                    $results['success'][] = $property_id;
+                } else {
+                    error_log('Bulk update patent - Failed to update property ' . $property_id);
+                    $results['failed'][] = [
+                        'id'             => $property_id,
+                        'reason'         => __('Error al actualizar', 'property-dashboard'),
+                        'property_title' => $post->post_title,
+                    ];
+                }
+            }
         }
 
+        error_log('Bulk update patent - Results: ' . json_encode($results));
         return rest_ensure_response($results);
+    }
+
+    /**
+     * Bulk download property attachments
+     * Downloads the "Ficha Técnica" files attached to properties
+     * If 1 file: returns direct download URL
+     * If 2+ files: creates a ZIP and returns ZIP URL
+     */
+    public function bulk_download_sheets($request) {
+        $property_ids_param = $request->get_param('property_ids');
+        $property_ids = array_map('absint', explode(',', $property_ids_param));
+        $current_user_id = get_current_user_id();
+
+        error_log('Bulk download attachments - IDs: ' . json_encode($property_ids));
+
+        // Validate we have IDs
+        if (empty($property_ids)) {
+            return new WP_Error(
+                'no_properties',
+                __('No se proporcionaron propiedades para descargar', 'property-dashboard'),
+                ['status' => 400]
+            );
+        }
+
+        $attachments = [];
+        $files_without_attachment = 0;
+
+        // Collect all attachment IDs
+        foreach ($property_ids as $property_id) {
+            $post = get_post($property_id);
+
+            // Validate property exists and user can view it
+            if (!$post || $post->post_type !== 'property') {
+                $files_without_attachment++;
+                continue;
+            }
+
+            if (!Property_Roles::can_view_property($current_user_id, $property_id)) {
+                error_log('Bulk download - Permission denied for property: ' . $property_id);
+                $files_without_attachment++;
+                continue;
+            }
+
+            // Get attachment ID
+            $attachment_id = get_post_meta($property_id, '_property_attachment_id', true);
+
+            if (empty($attachment_id)) {
+                error_log('Bulk download - Property ' . $property_id . ' has no attachment');
+                $files_without_attachment++;
+                continue;
+            }
+
+            // Get attachment file path and URL
+            $file_path = get_attached_file($attachment_id);
+            $file_url = wp_get_attachment_url($attachment_id);
+
+            if (!$file_path || !file_exists($file_path)) {
+                error_log('Bulk download - Attachment file not found for property ' . $property_id);
+                $files_without_attachment++;
+                continue;
+            }
+
+            $attachments[] = [
+                'property_id' => $property_id,
+                'attachment_id' => $attachment_id,
+                'file_path' => $file_path,
+                'file_url' => $file_url,
+                'filename' => basename($file_path)
+            ];
+        }
+
+        // Check if we have any attachments
+        if (empty($attachments)) {
+            return new WP_Error(
+                'no_attachments',
+                __('Ninguna propiedad tiene ficha técnica adjunta', 'property-dashboard'),
+                ['status' => 404]
+            );
+        }
+
+        // If only 1 attachment, return direct download URL
+        if (count($attachments) === 1) {
+            error_log('Bulk download - Single file, returning direct URL');
+            return rest_ensure_response([
+                'success' => true,
+                'single_file' => true,
+                'download_url' => $attachments[0]['file_url'],
+                'filename' => $attachments[0]['filename'],
+                'files_count' => 1,
+                'files_without_attachment' => $files_without_attachment
+            ]);
+        }
+
+        // Multiple attachments: create ZIP
+        $upload_dir = wp_upload_dir();
+        $zip_filename = 'fichas-tecnicas-' . date('Y-m-d-His') . '.zip';
+        $zip_filepath = $upload_dir['basedir'] . '/' . $zip_filename;
+
+        $zip = new ZipArchive();
+        if ($zip->open($zip_filepath, ZipArchive::CREATE) !== true) {
+            error_log('Bulk download - Failed to create ZIP: ' . $zip_filepath);
+            return new WP_Error(
+                'zip_failed',
+                __('Error al crear archivo ZIP', 'property-dashboard'),
+                ['status' => 500]
+            );
+        }
+
+        // Add files to ZIP
+        foreach ($attachments as $attachment) {
+            // Use unique filename with property ID to avoid conflicts
+            $zip_entry_name = $attachment['property_id'] . '-' . $attachment['filename'];
+            $zip->addFile($attachment['file_path'], $zip_entry_name);
+            error_log('Bulk download - Added to ZIP: ' . $zip_entry_name);
+        }
+
+        $zip->close();
+        error_log('Bulk download - ZIP created with ' . count($attachments) . ' files');
+
+        // Return ZIP download URL
+        $zip_url = $upload_dir['baseurl'] . '/' . $zip_filename;
+
+        return rest_ensure_response([
+            'success' => true,
+            'single_file' => false,
+            'download_url' => $zip_url,
+            'filename' => $zip_filename,
+            'files_count' => count($attachments),
+            'files_without_attachment' => $files_without_attachment
+        ]);
     }
 }

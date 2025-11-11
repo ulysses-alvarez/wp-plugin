@@ -83,7 +83,27 @@ export const PropertyTable = ({
     selectAll,
     isPropertySelected,
     getSelectedProperties,
+    clearSelections,
   } = usePropertySelection();
+
+  // Clean up invalid selections when properties change (after bulk operations)
+  useEffect(() => {
+    if (selectedIds.size > 0 && properties.length > 0) {
+      const currentPropertyIds = new Set(properties.map((p) => p.id));
+      const hasInvalidSelections = Array.from(selectedIds).some(
+        (id) => !currentPropertyIds.has(id)
+      );
+
+      if (hasInvalidSelections) {
+        clearSelections();
+      }
+    }
+    // Explicitly check sessionStorage to detect external clears
+    const stored = sessionStorage.getItem('propertySelection');
+    if (!stored && selectedIds.size > 0) {
+      clearSelections();
+    }
+  }, [properties, selectedIds, clearSelections]);
 
   // Notify parent of selection changes
   useEffect(() => {

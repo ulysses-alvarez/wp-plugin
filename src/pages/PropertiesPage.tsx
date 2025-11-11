@@ -13,6 +13,7 @@ import type { Property } from '@/utils/permissions';
 import type { PropertyStatus } from '@/types/bulk';
 import { MEXICAN_STATES } from '@/utils/constants';
 import toast from 'react-hot-toast';
+import { PersistentLogger } from '@/utils/persistentLogger';
 
 // Función para normalizar el nombre del estado al value esperado
 const normalizeStateName = (stateName: string): string => {
@@ -259,9 +260,14 @@ export const PropertiesPage = () => {
   const handleBulkDeleteConfirm = async (propertyIds: number[]) => {
     await bulkDeleteProperties(propertyIds);
     setIsBulkDeleteModalOpen(false);
-    // Clear selections and reload page to ensure sync
+
+    // Clear selections FIRST (before reload)
     sessionStorage.removeItem('propertySelection');
-    window.location.reload();
+    setSelectedIds(new Set());
+    setSelectedProperties([]);
+
+    // Reload properties from server to reflect changes and get remaining properties
+    await loadProperties();
   };
 
   const handleBulkStatusChange = () => {
@@ -271,9 +277,16 @@ export const PropertiesPage = () => {
   const handleBulkStatusConfirm = async (propertyIds: number[], status: PropertyStatus) => {
     await bulkUpdateStatus(propertyIds, status);
     setIsBulkStatusModalOpen(false);
-    // Clear selections and reload page to ensure sync
+
+    // Clear selections FIRST (before reload)
     sessionStorage.removeItem('propertySelection');
-    window.location.reload();
+    setSelectedIds(new Set());
+    setSelectedProperties([]);
+
+    // Reload properties from server to ensure changes are persisted
+    PersistentLogger.log('status', 'reload', { message: 'PropertiesPage: About to call loadProperties' });
+    await loadProperties();
+    PersistentLogger.log('status', 'reload', { message: 'PropertiesPage: loadProperties completed' });
   };
 
   const handleBulkPatentChange = () => {
@@ -283,16 +296,64 @@ export const PropertiesPage = () => {
   const handleBulkPatentConfirm = async (propertyIds: number[], patent: string) => {
     await bulkUpdatePatent(propertyIds, patent);
     setIsBulkPatentModalOpen(false);
-    // Clear selections and reload page to ensure sync
+
+    // Clear selections FIRST (before reload)
     sessionStorage.removeItem('propertySelection');
-    window.location.reload();
+    setSelectedIds(new Set());
+    setSelectedProperties([]);
+
+    // Note: bulkUpdatePatent already calls loadProperties() internally
+  };
+
+  const handleBulkDownloadSheets = async () => {
+    try {
+      const { bulkDownloadSheets } = await import('@/services/api');
+      const propertyIds = Array.from(selectedIds);
+
+      console.log('[Bulk Download] Starting download for IDs:', propertyIds);
+      toast.loading('Preparando descarga...');
+
+      const result = await bulkDownloadSheets(propertyIds);
+
+      console.log('[Bulk Download] Result:', result);
+      toast.dismiss();
+
+      if (result.success) {
+        // Create a temporary link to download the file
+        const link = document.createElement('a');
+        link.href = result.download_url;
+        link.download = result.filename;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+
+        // Show appropriate message
+        if (result.single_file) {
+          toast.success(`✓ Descargando ficha técnica`);
+        } else {
+          if (result.files_without_attachment > 0) {
+            toast.success(`✓ ${result.files_count} fichas descargadas en ZIP. ${result.files_without_attachment} propiedades sin ficha.`, {
+              duration: 5000
+            });
+          } else {
+            toast.success(`✓ ${result.files_count} fichas descargadas en ZIP`);
+          }
+        }
+      } else {
+        toast.error('Error al descargar las fichas');
+      }
+    } catch (error) {
+      console.error('[Bulk Download] Error:', error);
+      toast.dismiss();
+      toast.error(error instanceof Error ? error.message : 'Error al descargar fichas');
+    }
   };
 
   const handleDeselectAll = () => {
-    // Clear session storage
+    // Clear session storage and local state
     sessionStorage.removeItem('propertySelection');
-    // Force reload to clear selections
-    window.location.reload();
+    setSelectedIds(new Set());
+    setSelectedProperties([]);
   };
 
   // Helper function to parse CSV line respecting quoted fields
@@ -475,6 +536,7 @@ export const PropertiesPage = () => {
         onDelete={handleBulkDelete}
         onStatusChange={handleBulkStatusChange}
         onPatentChange={handleBulkPatentChange}
+        onDownloadSheets={handleBulkDownloadSheets}
       />
 
       {/* Bulk Delete Modal */}

@@ -29,10 +29,37 @@ export interface UsePropertySelectionReturn {
 /**
  * Hook to manage property selection for bulk operations
  * Uses sessionStorage to persist selections across page changes
+ * Clears selections on page reload (F5/refresh)
  */
 export const usePropertySelection = (): UsePropertySelectionReturn => {
-  // Initialize from sessionStorage if available
+  // Initialize from sessionStorage if available, but clear on page reload
   const [selectedIds, setSelectedIds] = useState<Set<number>>(() => {
+    // Detect if this is a page reload (F5/refresh)
+    const isPageReload = (() => {
+      try {
+        // Modern API
+        const navEntries = performance.getEntriesByType('navigation') as PerformanceNavigationTiming[];
+        if (navEntries.length > 0) {
+          return navEntries[0].type === 'reload';
+        }
+        // Fallback for older browsers
+        return performance.navigation && performance.navigation.type === 1;
+      } catch {
+        return false;
+      }
+    })();
+
+    // If page was reloaded, clear sessionStorage and start fresh
+    if (isPageReload) {
+      try {
+        sessionStorage.removeItem('propertySelection');
+      } catch (error) {
+        console.error('Failed to clear selection from sessionStorage:', error);
+      }
+      return new Set();
+    }
+
+    // Otherwise, load from sessionStorage
     try {
       const stored = sessionStorage.getItem('propertySelection');
       if (stored) {

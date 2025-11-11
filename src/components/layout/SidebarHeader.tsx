@@ -1,18 +1,10 @@
 import { useSettingsStore } from '../../stores/useSettingsStore';
-import { useEffect } from 'react';
 
 export const SidebarHeader = () => {
   const { settings } = useSettingsStore();
 
   // Display name: wpSiteName
   const displayName = settings?.wpSiteName || '';
-
-  // Debug: log settings on change
-  useEffect(() => {
-    console.log('[SidebarHeader] Settings updated:', settings);
-    console.log('[SidebarHeader] Logo URL:', settings?.logoUrl);
-    console.log('[SidebarHeader] Display name:', displayName);
-  }, [settings, displayName]);
 
   return (
     <div className="flex items-center gap-3 px-4 py-4 border-b border-sidebar-border">
