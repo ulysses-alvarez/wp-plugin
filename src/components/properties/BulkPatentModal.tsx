@@ -38,8 +38,7 @@ export const BulkPatentModal = ({
           setUniquePatents(patents);
           setLoadingPatents(false);
         })
-        .catch(err => {
-          console.error('Error loading patents:', err);
+        .catch(() => {
           setLoadingPatents(false);
         });
     }
@@ -55,8 +54,8 @@ export const BulkPatentModal = ({
       const propertyIds = properties.map(p => p.id);
       await onConfirm(propertyIds, selectedPatent);
       onClose();
-    } catch (error) {
-      console.error('Error updating patents:', error);
+    } catch {
+      // Error is handled by the store
     } finally {
       setIsUpdating(false);
     }

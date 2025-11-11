@@ -32,8 +32,8 @@ export const BulkDeleteModal = ({
       const propertyIds = properties.map((p) => p.id);
       await onConfirm(propertyIds);
       onClose();
-    } catch (error) {
-      console.error('Error deleting properties:', error);
+    } catch {
+      // Error is handled by the store
     } finally {
       setIsDeleting(false);
     }

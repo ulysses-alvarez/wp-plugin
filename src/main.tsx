@@ -12,6 +12,4 @@ if (rootElement) {
       <App />
     </StrictMode>,
   );
-} else {
-  console.error('Property Dashboard: Root element not found. Make sure to use the [property_dashboard] shortcode.');
 }

@@ -1127,9 +1127,6 @@ class Property_REST_API {
         $new_status = $request->get_param('status');
         $current_user_id = get_current_user_id();
 
-        // Log the request for debugging
-        error_log('Bulk update status - IDs: ' . json_encode($property_ids) . ', Status: ' . $new_status);
-
         $results = [
             'success' => [],
             'failed'  => [],
@@ -1171,24 +1168,20 @@ class Property_REST_API {
                 continue;
             }
 
-            // Get current status for comparison
-            $current_status = get_post_meta($property_id, '_property_status', true);
-            error_log('Bulk update status - Property ' . $property_id . ': ' . $current_status . ' -> ' . $new_status);
-
             // Attempt to update
             $updated = update_post_meta($property_id, '_property_status', $new_status);
 
-            // CRITICAL: Clear post cache to ensure fresh data is read immediately
+            // CRITICAL: Clear ALL caches to ensure fresh data is read immediately
             clean_post_cache($property_id);
+            wp_cache_delete($property_id, 'post_meta');
+            wp_cache_delete($property_id, 'posts');
 
             if ($updated !== false) {
-                error_log('Bulk update status - Property ' . $property_id . ' updated successfully');
                 $results['success'][] = $property_id;
             } else {
                 // Check if it was already the same value (not an error)
                 $current_status_check = get_post_meta($property_id, '_property_status', true);
                 if ($current_status_check === $new_status) {
-                    error_log('Bulk update status - Property ' . $property_id . ' already had status: ' . $new_status);
                     $results['success'][] = $property_id;
                 } else {
                     error_log('Bulk update status - Failed to update property ' . $property_id);
@@ -1201,8 +1194,12 @@ class Property_REST_API {
             }
         }
 
-        error_log('Bulk update status - Results: ' . json_encode($results));
-        return rest_ensure_response($results);
+        // Prevent caching of this response
+        $response = rest_ensure_response($results);
+        $response->header('Cache-Control', 'no-cache, must-revalidate, max-age=0');
+        $response->header('Pragma', 'no-cache');
+
+        return $response;
     }
 
     /**
@@ -1216,9 +1213,6 @@ class Property_REST_API {
         $property_ids = $request->get_param('property_ids');
         $new_patent = strtoupper(trim($request->get_param('patent')));
         $current_user_id = get_current_user_id();
-
-        // Log the request for debugging
-        error_log('Bulk update patent - IDs: ' . json_encode($property_ids) . ', Patent: ' . $new_patent);
 
         $results = [
             'success' => [],
@@ -1261,24 +1255,20 @@ class Property_REST_API {
                 continue;
             }
 
-            // Get current patent for logging
-            $current_patent = get_post_meta($property_id, '_property_patent', true);
-            error_log('Bulk update patent - Property ' . $property_id . ': ' . $current_patent . ' -> ' . $new_patent);
-
             // Update patent (idempotent - will update even if same value)
             $updated = update_post_meta($property_id, '_property_patent', $new_patent);
 
-            // CRITICAL: Clear post cache to ensure fresh data is read immediately
+            // CRITICAL: Clear ALL caches to ensure fresh data is read immediately
             clean_post_cache($property_id);
+            wp_cache_delete($property_id, 'post_meta');
+            wp_cache_delete($property_id, 'posts');
 
             if ($updated !== false) {
-                error_log('Bulk update patent - Property ' . $property_id . ' updated successfully');
                 $results['success'][] = $property_id;
             } else {
                 // Check if it was already the same value
                 $current_patent_check = get_post_meta($property_id, '_property_patent', true);
                 if ($current_patent_check === $new_patent) {
-                    error_log('Bulk update patent - Property ' . $property_id . ' already had patent: ' . $new_patent);
                     $results['success'][] = $property_id;
                 } else {
                     error_log('Bulk update patent - Failed to update property ' . $property_id);
@@ -1291,8 +1281,12 @@ class Property_REST_API {
             }
         }
 
-        error_log('Bulk update patent - Results: ' . json_encode($results));
-        return rest_ensure_response($results);
+        // Prevent caching of this response
+        $response = rest_ensure_response($results);
+        $response->header('Cache-Control', 'no-cache, must-revalidate, max-age=0');
+        $response->header('Pragma', 'no-cache');
+
+        return $response;
     }
 
     /**

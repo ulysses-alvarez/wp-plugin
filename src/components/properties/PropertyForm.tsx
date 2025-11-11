@@ -66,7 +66,9 @@ export const PropertyForm = forwardRef<HTMLFormElement, PropertyFormProps>(({
     if (mode === 'edit') {
       fetchUniquePatents()
         .then(patents => setUniquePatents(patents))
-        .catch(err => console.error('Error loading patents:', err));
+        .catch(() => {
+          // Failed to load patents
+        });
     }
   }, [mode]);
 

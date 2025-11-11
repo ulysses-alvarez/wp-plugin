@@ -18,7 +18,6 @@ import {
   bulkUpdateStatus as apiBulkUpdateStatus,
   bulkUpdatePatent as apiBulkUpdatePatent
 } from '../services/api';
-import { PersistentLogger } from '../utils/persistentLogger';
 
 // Store State Interface
 interface PropertyState {
@@ -117,7 +116,6 @@ export const usePropertyStore = create<PropertyState>((set, get) => ({
    * Load properties with filters and pagination
    */
   loadProperties: async (params?: PropertyQueryParams) => {
-    PersistentLogger.log('status', 'reload', { message: 'loadProperties called', params });
     set({ loading: true, error: null });
 
     try {
@@ -143,16 +141,7 @@ export const usePropertyStore = create<PropertyState>((set, get) => ({
         queryParams.municipality = params?.municipality ?? filters.municipality;
       }
 
-      PersistentLogger.log('status', 'reload', { message: 'Fetching properties from server', queryParams });
       const response = await fetchProperties(queryParams);
-
-      // Log first 3 properties to check their status
-      const sampleProperties = response.data.slice(0, 3).map(p => ({ id: p.id, title: p.title, status: p.status }));
-      PersistentLogger.log('status', 'reload', {
-        message: 'Server returned properties',
-        total: response.data.length,
-        sampleProperties
-      });
 
       set({
         properties: response.data,
@@ -162,11 +151,8 @@ export const usePropertyStore = create<PropertyState>((set, get) => ({
         loading: false,
         error: null
       });
-
-      PersistentLogger.log('status', 'reload', { message: 'Store updated with server data' });
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Error al cargar propiedades';
-      PersistentLogger.log('status', 'error', { error: errorMessage, context: 'loadProperties' });
       set({ error: errorMessage, loading: false });
       toast.error(errorMessage);
     }
@@ -322,28 +308,14 @@ export const usePropertyStore = create<PropertyState>((set, get) => ({
    * Bulk update property status
    */
   bulkUpdateStatus: async (propertyIds: number[], status: PropertyStatus) => {
-    PersistentLogger.log('status', 'start', { propertyIds, status });
     set({ loading: true, error: null });
 
     try {
-      PersistentLogger.log('status', 'api_call', { propertyIds, status });
       const result = await apiBulkUpdateStatus(propertyIds, status);
-      PersistentLogger.log('status', 'api_response', result);
 
-      // Update successfully updated properties in store
-      PersistentLogger.log('status', 'store_update', { updatingProperties: result.success });
-      set(state => ({
-        properties: state.properties.map(p =>
-          result.success.includes(p.id)
-            ? { ...p, status }
-            : p
-        ),
-        selectedProperty: result.success.includes(state.selectedProperty?.id || 0) && state.selectedProperty
-          ? { ...state.selectedProperty, status }
-          : state.selectedProperty,
-        loading: false,
-        error: null
-      }));
+      // DON'T update store optimistically - let loadProperties() do it with real server data
+      // This prevents race conditions where optimistic update conflicts with server data
+      set({ loading: false, error: null });
 
       // Show result toast
       if (result.failed.length === 0) {
@@ -354,11 +326,9 @@ export const usePropertyStore = create<PropertyState>((set, get) => ({
         });
       }
 
-      PersistentLogger.log('status', 'complete', { success: result.success.length, failed: result.failed.length });
       return result;
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Error al actualizar estados';
-      PersistentLogger.log('status', 'error', { error: errorMessage });
       set({ error: errorMessage, loading: false });
       toast.error(errorMessage);
       throw error;
@@ -369,18 +339,13 @@ export const usePropertyStore = create<PropertyState>((set, get) => ({
    * Bulk update property patents (simplified version)
    */
   bulkUpdatePatent: async (propertyIds: number[], patent: string) => {
-    PersistentLogger.log('patent', 'start', { propertyIds, patent });
     set({ loading: true, error: null });
 
     try {
-      PersistentLogger.log('patent', 'api_call', { propertyIds, patent });
       const result = await apiBulkUpdatePatent(propertyIds, patent);
-      PersistentLogger.log('patent', 'api_response', result);
 
       // After successful update, reload properties to get the updated patents from server
-      PersistentLogger.log('patent', 'reload', { message: 'Reloading properties from server' });
       await get().loadProperties();
-      PersistentLogger.log('patent', 'reload', { message: 'Properties reloaded successfully' });
 
       // Show result toast
       if (result.failed.length === 0) {
@@ -391,11 +356,9 @@ export const usePropertyStore = create<PropertyState>((set, get) => ({
         });
       }
 
-      PersistentLogger.log('patent', 'complete', { success: result.success.length, failed: result.failed.length });
       return result;
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Error al actualizar patentes';
-      PersistentLogger.log('patent', 'error', { error: errorMessage });
       set({ error: errorMessage, loading: false });
       toast.error(errorMessage);
       throw error;

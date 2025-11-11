@@ -13,7 +13,6 @@ import type { Property } from '@/utils/permissions';
 import type { PropertyStatus } from '@/types/bulk';
 import { MEXICAN_STATES } from '@/utils/constants';
 import toast from 'react-hot-toast';
-import { PersistentLogger } from '@/utils/persistentLogger';
 
 // Función para normalizar el nombre del estado al value esperado
 const normalizeStateName = (stateName: string): string => {
@@ -216,7 +215,7 @@ export const PropertiesPage = () => {
         const uploadResult = await uploadFile(data.attachment);
         attachmentId = uploadResult.id;
       } catch (error) {
-        console.error('Error uploading file:', error);
+        // Upload error handled silently
       }
     }
 
@@ -244,7 +243,6 @@ export const PropertiesPage = () => {
 
   const handleExport = () => {
     // TODO: Implementar exportación
-    console.log('Exportar propiedades');
   };
 
   // Bulk actions handlers
@@ -284,9 +282,7 @@ export const PropertiesPage = () => {
     setSelectedProperties([]);
 
     // Reload properties from server to ensure changes are persisted
-    PersistentLogger.log('status', 'reload', { message: 'PropertiesPage: About to call loadProperties' });
     await loadProperties();
-    PersistentLogger.log('status', 'reload', { message: 'PropertiesPage: loadProperties completed' });
   };
 
   const handleBulkPatentChange = () => {
@@ -310,12 +306,10 @@ export const PropertiesPage = () => {
       const { bulkDownloadSheets } = await import('@/services/api');
       const propertyIds = Array.from(selectedIds);
 
-      console.log('[Bulk Download] Starting download for IDs:', propertyIds);
       toast.loading('Preparando descarga...');
 
       const result = await bulkDownloadSheets(propertyIds);
 
-      console.log('[Bulk Download] Result:', result);
       toast.dismiss();
 
       if (result.success) {
@@ -343,7 +337,6 @@ export const PropertiesPage = () => {
         toast.error('Error al descargar las fichas');
       }
     } catch (error) {
-      console.error('[Bulk Download] Error:', error);
       toast.dismiss();
       toast.error(error instanceof Error ? error.message : 'Error al descargar fichas');
     }
@@ -422,18 +415,6 @@ export const PropertiesPage = () => {
 
       properties.push(property);
     }
-
-    // Debug info
-    console.log('[CSV Import] Parsing complete:', {
-      totalLines: lines.length,
-      headers,
-      propertiesParsed: properties.length,
-      firstProperty: properties[0],
-      stateNormalization: properties[0]?.state ? {
-        original: 'shown in firstProperty above',
-        normalized: properties[0].state
-      } : 'N/A'
-    });
 
     // Import each property with validation and progress tracking
     let successCount = 0;

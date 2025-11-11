@@ -53,8 +53,8 @@ export const usePropertySelection = (): UsePropertySelectionReturn => {
     if (isPageReload) {
       try {
         sessionStorage.removeItem('propertySelection');
-      } catch (error) {
-        console.error('Failed to clear selection from sessionStorage:', error);
+      } catch {
+        // Failed to clear selection
       }
       return new Set();
     }
@@ -66,8 +66,8 @@ export const usePropertySelection = (): UsePropertySelectionReturn => {
         const ids = JSON.parse(stored);
         return new Set(ids);
       }
-    } catch (error) {
-      console.error('Failed to load selection from sessionStorage:', error);
+    } catch {
+      // Failed to load selection
     }
     return new Set();
   });
@@ -79,8 +79,8 @@ export const usePropertySelection = (): UsePropertySelectionReturn => {
         'propertySelection',
         JSON.stringify(Array.from(selectedIds))
       );
-    } catch (error) {
-      console.error('Failed to save selection to sessionStorage:', error);
+    } catch {
+      // Failed to save selection
     }
   }, [selectedIds]);
 
@@ -147,8 +147,8 @@ export const usePropertySelection = (): UsePropertySelectionReturn => {
     setSelectedIds(new Set());
     try {
       sessionStorage.removeItem('propertySelection');
-    } catch (error) {
-      console.error('Failed to clear selection from sessionStorage:', error);
+    } catch {
+      // Failed to clear selection
     }
   }, []);
 

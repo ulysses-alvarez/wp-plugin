@@ -36,7 +36,6 @@ export const useSettingsStore = create<SettingsState>((set) => ({
       // Aplicar tema al cargar
       applyTheme(data);
     } catch (error) {
-      console.error('[loadSettings] Error:', error);
       set({
         error: error instanceof Error ? error.message : 'Error desconocido',
         isLoading: false
@@ -60,8 +59,6 @@ export const useSettingsStore = create<SettingsState>((set) => ({
       );
 
       if (!response.ok) {
-        const errorData = await response.json();
-        console.error('[updateSettings] Error response:', errorData);
         throw new Error('Error al guardar configuración');
       }
 
@@ -71,7 +68,6 @@ export const useSettingsStore = create<SettingsState>((set) => ({
       // Aplicar nuevo tema
       applyTheme(data);
     } catch (error) {
-      console.error('[updateSettings] Error:', error);
       set({
         error: error instanceof Error ? error.message : 'Error desconocido',
         isLoading: false
@@ -98,7 +94,6 @@ export const useSettingsStore = create<SettingsState>((set) => ({
 
       if (!response.ok) {
         const errorData = await response.json();
-        console.error('[uploadLogo] Error response:', errorData);
         throw new Error(errorData.message || 'Error al subir el logo');
       }
 
@@ -109,7 +104,6 @@ export const useSettingsStore = create<SettingsState>((set) => ({
 
       return data;
     } catch (error) {
-      console.error('[uploadLogo] Error:', error);
       set({
         error: error instanceof Error ? error.message : 'Error desconocido'
       });

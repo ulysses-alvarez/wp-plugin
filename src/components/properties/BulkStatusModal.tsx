@@ -82,8 +82,8 @@ export const BulkStatusModal = ({
       const propertyIds = properties.map((p) => p.id);
       await onConfirm(propertyIds, selectedStatus);
       onClose();
-    } catch (error) {
-      console.error('Error updating property statuses:', error);
+    } catch {
+      // Error is handled by the store
     } finally {
       setIsUpdating(false);
     }

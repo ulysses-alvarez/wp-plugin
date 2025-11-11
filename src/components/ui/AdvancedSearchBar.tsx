@@ -31,8 +31,8 @@ export const AdvancedSearchBar = ({
       try {
         const ranges = await fetchPriceRanges();
         setPriceRanges(ranges);
-      } catch (error) {
-        console.error('Error loading price ranges:', error);
+      } catch {
+        // Failed to load price ranges
       }
     };
     loadPriceRanges();

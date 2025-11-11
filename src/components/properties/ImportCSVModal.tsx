@@ -83,7 +83,6 @@ export const ImportCSVModal = ({ isOpen, onClose, onImport }: ImportCSVModalProp
 
       setState('completed');
     } catch (error: any) {
-      console.error('Error importing CSV:', error);
       alert(error.message || 'Error al importar el archivo CSV');
       setState('selecting');
     }
