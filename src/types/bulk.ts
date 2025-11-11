@@ -42,47 +42,11 @@ export interface BulkDeleteRequest {
 }
 
 /**
- * Patent modification modes for Phase 2
- */
-export type PatentModificationMode = 'prefix' | 'suffix' | 'replace' | 'sequential';
-
-/**
- * Patent modification request (for Phase 2)
- */
-export interface PatentModification {
-  mode: PatentModificationMode;
-  prefix?: string;
-  suffix?: string;
-  search?: string;
-  replace?: string;
-  pattern?: string;
-  start?: number;
-}
-
-/**
- * Patent validation response (for Phase 2)
- */
-export interface PatentValidation {
-  valid: boolean;
-  conflicts: PatentConflict[];
-}
-
-/**
- * Patent conflict information (for Phase 2)
- */
-export interface PatentConflict {
-  property_id: number;
-  old_patent: string;
-  new_patent: string;
-  conflict_with_id?: number;
-}
-
-/**
- * Bulk patent update request (for Phase 2)
+ * Bulk patent update request (simplified version)
  */
 export interface BulkPatentUpdateRequest {
   property_ids: number[];
-  modification: PatentModification;
+  patent: string;
 }
 
 /**

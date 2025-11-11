@@ -3,7 +3,7 @@
  * Floating action bar that appears when properties are selected
  */
 
-import { Trash2, RefreshCw } from 'lucide-react';
+import { Trash2, RefreshCw, Tag } from 'lucide-react';
 import clsx from 'clsx';
 
 interface BulkActionsBarProps {
@@ -12,6 +12,7 @@ interface BulkActionsBarProps {
   onDeselectAll: () => void;
   onDelete: () => void;
   onStatusChange: () => void;
+  onPatentChange: () => void;
   className?: string;
 }
 
@@ -21,6 +22,7 @@ export const BulkActionsBar = ({
   onDeselectAll,
   onDelete,
   onStatusChange,
+  onPatentChange,
   className,
 }: BulkActionsBarProps) => {
   if (selectedCount === 0) {
@@ -66,7 +68,17 @@ export const BulkActionsBar = ({
             title="Cambiar estado"
           >
             <RefreshCw className="w-4 h-4" />
-            <span>Cambiar estado</span>
+            <span>Estado</span>
+          </button>
+
+          {/* Change Patent */}
+          <button
+            onClick={onPatentChange}
+            className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-purple-700 bg-purple-50 hover:bg-purple-100 rounded-lg transition-colors"
+            title="Modificar patentes"
+          >
+            <Tag className="w-4 h-4" />
+            <span>Patente</span>
           </button>
 
           {/* Delete */}

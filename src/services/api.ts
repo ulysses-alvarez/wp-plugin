@@ -281,6 +281,25 @@ export const fetchPriceRanges = async (): Promise<PriceRange[]> => {
 };
 
 /**
+ * Fetch unique patents from all properties
+ */
+export const fetchUniquePatents = async (): Promise<string[]> => {
+  const config = getAPIConfig();
+  const url = `${config.apiUrl}/properties/patents`;
+
+  const response = await fetch(url, {
+    method: 'GET',
+    headers: getHeaders()
+  });
+
+  if (!response.ok) {
+    await handleAPIError(response);
+  }
+
+  return response.json();
+};
+
+/**
  * Statistics API (if needed in future)
  */
 export const fetchStatistics = async (): Promise<any> => {
@@ -346,6 +365,32 @@ export const bulkUpdateStatus = async (
 };
 
 /**
+ * Bulk update property patents (simplified version)
+ */
+export const bulkUpdatePatent = async (
+  propertyIds: number[],
+  patent: string
+): Promise<BulkResult> => {
+  const config = getAPIConfig();
+  const url = `${config.apiUrl}/properties/bulk-update-patent`;
+
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: getHeaders(),
+    body: JSON.stringify({
+      property_ids: propertyIds,
+      patent
+    })
+  });
+
+  if (!response.ok) {
+    await handleAPIError(response);
+  }
+
+  return response.json();
+};
+
+/**
  * Export API methods as default
  */
 export default {
@@ -356,7 +401,9 @@ export default {
   deleteProperty,
   uploadFile,
   fetchPriceRanges,
+  fetchUniquePatents,
   fetchStatistics,
   bulkDeleteProperties,
-  bulkUpdateStatus
+  bulkUpdateStatus,
+  bulkUpdatePatent
 };

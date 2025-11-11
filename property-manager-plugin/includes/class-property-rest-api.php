@@ -76,6 +76,13 @@ class Property_REST_API {
             'permission_callback' => [$this, 'check_read_permission'],
         ]);
 
+        // Get unique patents
+        register_rest_route($this->namespace, '/properties/patents', [
+            'methods'             => WP_REST_Server::READABLE,
+            'callback'            => [$this, 'get_unique_patents'],
+            'permission_callback' => [$this, 'check_read_permission'],
+        ]);
+
         // Bulk delete properties
         register_rest_route($this->namespace, '/properties/bulk-delete', [
             'methods'             => WP_REST_Server::DELETABLE,
@@ -111,6 +118,28 @@ class Property_REST_API {
                     'required' => true,
                     'type'     => 'string',
                     'enum'     => ['available', 'sold', 'rented', 'reserved'],
+                ],
+            ],
+        ]);
+
+        // Bulk update patent
+        register_rest_route($this->namespace, '/properties/bulk-update-patent', [
+            'methods'             => WP_REST_Server::EDITABLE,
+            'callback'            => [$this, 'bulk_update_patent'],
+            'permission_callback' => [$this, 'check_read_permission'],
+            'args'                => [
+                'property_ids' => [
+                    'required'          => true,
+                    'type'              => 'array',
+                    'items'             => ['type' => 'integer'],
+                    'sanitize_callback' => function($ids) {
+                        return array_map('absint', $ids);
+                    },
+                ],
+                'patent' => [
+                    'required'          => true,
+                    'type'              => 'string',
+                    'sanitize_callback' => 'sanitize_text_field',
                 ],
             ],
         ]);
@@ -761,6 +790,32 @@ class Property_REST_API {
     }
 
     /**
+     * Get unique patents from all properties
+     */
+    public function get_unique_patents($request) {
+        global $wpdb;
+
+        // Get all unique patents from published properties
+        $patents = $wpdb->get_col("
+            SELECT DISTINCT meta_value
+            FROM {$wpdb->postmeta} pm
+            INNER JOIN {$wpdb->posts} p ON pm.post_id = p.ID
+            WHERE pm.meta_key = '_property_patent'
+            AND p.post_type = 'property'
+            AND p.post_status = 'publish'
+            AND pm.meta_value != ''
+            ORDER BY meta_value ASC
+        ");
+
+        // Return empty array if no patents found
+        if (empty($patents)) {
+            return rest_ensure_response([]);
+        }
+
+        return rest_ensure_response($patents);
+    }
+
+    /**
      * Validate required fields
      */
     private function validate_required_fields($request) {
@@ -1114,6 +1169,64 @@ class Property_REST_API {
                     ];
                 }
             }
+        }
+
+        return rest_ensure_response($results);
+    }
+
+    /**
+     * Bulk update property patents
+     */
+    /**
+     * Bulk update patent (simplified version)
+     * Changes all selected properties to the same patent value
+     */
+    public function bulk_update_patent($request) {
+        $property_ids = $request->get_param('property_ids');
+        $new_patent = strtoupper(trim($request->get_param('patent')));
+        $current_user_id = get_current_user_id();
+
+        $results = [
+            'success' => [],
+            'failed'  => [],
+            'total'   => count($property_ids),
+        ];
+
+        // Validate patent is not empty
+        if (empty($new_patent)) {
+            return new WP_Error(
+                'empty_patent',
+                __('La patente no puede estar vacía', 'property-dashboard'),
+                ['status' => 400]
+            );
+        }
+
+        // Update each property
+        foreach ($property_ids as $property_id) {
+            $post = get_post($property_id);
+
+            // Validate property exists
+            if (!$post || $post->post_type !== 'property') {
+                $results['failed'][] = [
+                    'id'     => $property_id,
+                    'reason' => __('Propiedad no encontrada', 'property-dashboard'),
+                ];
+                continue;
+            }
+
+            // Check individual permissions
+            if (!Property_Roles::can_edit_property($current_user_id, $property_id)) {
+                $results['failed'][] = [
+                    'id'             => $property_id,
+                    'reason'         => __('Sin permisos para editar', 'property-dashboard'),
+                    'property_title' => $post->post_title,
+                ];
+                continue;
+            }
+
+            // Update patent (idempotent - will update even if same value)
+            update_post_meta($property_id, '_property_patent', $new_patent);
+            $results['success'][] = $property_id;
         }
 
         return rest_ensure_response($results);

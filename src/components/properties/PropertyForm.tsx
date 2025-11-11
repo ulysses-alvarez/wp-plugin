@@ -7,6 +7,7 @@ import { useState, useEffect, forwardRef } from 'react';
 import { Input, Select, Textarea, FileUpload } from '@/components/ui';
 import { PROPERTY_STATUS_OPTIONS, MEXICAN_STATES } from '@/utils/constants';
 import type { Property } from '@/utils/permissions';
+import { fetchUniquePatents } from '@/services/api';
 
 interface PropertyFormProps {
   property?: Property | null;
@@ -58,6 +59,16 @@ export const PropertyForm = forwardRef<HTMLFormElement, PropertyFormProps>(({
 
   const [errors, setErrors] = useState<FormErrors>({});
   const [touched, setTouched] = useState<{ [key: string]: boolean }>({});
+  const [uniquePatents, setUniquePatents] = useState<string[]>([]);
+
+  // Load unique patents when in edit mode
+  useEffect(() => {
+    if (mode === 'edit') {
+      fetchUniquePatents()
+        .then(patents => setUniquePatents(patents))
+        .catch(err => console.error('Error loading patents:', err));
+    }
+  }, [mode]);
 
   // Load property data in edit mode
   useEffect(() => {
@@ -305,19 +316,88 @@ export const PropertyForm = forwardRef<HTMLFormElement, PropertyFormProps>(({
         disabled={loading}
       />
 
-      {/* Patent */}
-      <Input
-        label="Patente"
-        name="patent"
-        value={formData.patent}
-        onChange={(e) => handleChange('patent', e.target.value.toUpperCase())}
-        onBlur={() => handleBlur('patent')}
-        error={errors.patent}
-        required
-        placeholder="Ej: ABC-123"
-        disabled={loading}
-        helperText="La patente se guardará en mayúsculas automáticamente"
-      />
+      {/* Patent - Conditional rendering based on mode */}
+      {mode === 'create' ? (
+        <Input
+          label="Patente"
+          name="patent"
+          value={formData.patent}
+          onChange={(e) => handleChange('patent', e.target.value.toUpperCase())}
+          onBlur={() => handleBlur('patent')}
+          error={errors.patent}
+          required
+          placeholder="Ej: ABC-123"
+          disabled={loading}
+          helperText="La patente se guardará en mayúsculas automáticamente"
+        />
+      ) : (
+        <div className="space-y-2">
+          <label htmlFor="patent" className="block text-sm font-medium text-gray-700">
+            Patente <span className="text-red-500">*</span>
+          </label>
+
+          {uniquePatents.length > 0 ? (
+            <div className="space-y-2 max-h-40 overflow-y-auto border border-gray-200 rounded-lg p-2 bg-gray-50">
+              {uniquePatents.map((patent) => (
+                <label
+                  key={patent}
+                  className={`flex items-center p-2 border rounded-lg cursor-pointer transition-all ${
+                    formData.patent === patent
+                      ? 'border-purple-500 bg-purple-50'
+                      : 'border-gray-200 hover:border-gray-300 bg-white'
+                  }`}
+                >
+                  <input
+                    type="radio"
+                    name="patent"
+                    value={patent}
+                    checked={formData.patent === patent}
+                    onChange={(e) => handleChange('patent', e.target.value)}
+                    onBlur={() => handleBlur('patent')}
+                    className="w-4 h-4 text-purple-600 focus:ring-purple-500"
+                    disabled={loading}
+                  />
+                  <span className={`ml-2 text-sm font-medium font-mono ${
+                    formData.patent === patent ? 'text-purple-900' : 'text-gray-700'
+                  }`}>
+                    {patent}
+                  </span>
+                </label>
+              ))}
+            </div>
+          ) : (
+            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
+              <p className="text-sm text-yellow-800">
+                No hay patentes disponibles para seleccionar.
+              </p>
+            </div>
+          )}
+
+          <div className="pt-1">
+            <label className="text-xs text-gray-600 font-medium mb-1 block">
+              O escribe una nueva patente:
+            </label>
+            <input
+              type="text"
+              value={formData.patent && !uniquePatents.includes(formData.patent) ? formData.patent : ''}
+              onChange={(e) => handleChange('patent', e.target.value.toUpperCase())}
+              onBlur={() => handleBlur('patent')}
+              disabled={loading}
+              placeholder="Ej: ABC-123"
+              className={`w-full px-3 py-2 border rounded-lg shadow-sm text-sm focus:ring-2 focus:ring-purple-500 focus:border-purple-500 disabled:bg-gray-100 disabled:cursor-not-allowed ${
+                errors.patent ? 'border-red-500' : 'border-gray-300'
+              }`}
+            />
+          </div>
+
+          {errors.patent && (
+            <p className="text-sm text-red-600">{errors.patent}</p>
+          )}
+          <p className="text-xs text-gray-500">
+            Selecciona una patente existente o escribe una nueva (se guardará en mayúsculas)
+          </p>
+        </div>
+      )}
 
       {/* Divider */}
       <div className="border-t border-gray-200 my-6"></div>

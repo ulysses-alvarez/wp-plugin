@@ -15,7 +15,8 @@ import {
   updateProperty as apiUpdateProperty,
   deleteProperty as apiDeleteProperty,
   bulkDeleteProperties as apiBulkDeleteProperties,
-  bulkUpdateStatus as apiBulkUpdateStatus
+  bulkUpdateStatus as apiBulkUpdateStatus,
+  bulkUpdatePatent as apiBulkUpdatePatent
 } from '../services/api';
 
 // Store State Interface
@@ -56,6 +57,7 @@ interface PropertyState {
   // Bulk Actions
   bulkDeleteProperties: (propertyIds: number[]) => Promise<BulkResult>;
   bulkUpdateStatus: (propertyIds: number[], status: PropertyStatus) => Promise<BulkResult>;
+  bulkUpdatePatent: (propertyIds: number[], patent: string) => Promise<BulkResult>;
 
   // Filter Actions
   setSearch: (search: string) => void;
@@ -337,6 +339,36 @@ export const usePropertyStore = create<PropertyState>((set, get) => ({
       return result;
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Error al actualizar estados';
+      set({ error: errorMessage, loading: false });
+      toast.error(errorMessage);
+      throw error;
+    }
+  },
+
+  /**
+   * Bulk update property patents (simplified version)
+   */
+  bulkUpdatePatent: async (propertyIds: number[], patent: string) => {
+    set({ loading: true, error: null });
+
+    try {
+      const result = await apiBulkUpdatePatent(propertyIds, patent);
+
+      // After successful update, reload properties to get the updated patents from server
+      await get().loadProperties();
+
+      // Show result toast
+      if (result.failed.length === 0) {
+        toast.success(`✓ ${result.success.length} ${result.success.length === 1 ? 'patente actualizada' : 'patentes actualizadas'} exitosamente`);
+      } else {
+        toast.error(`✓ ${result.success.length} actualizadas, ✗ ${result.failed.length} fallaron. Revisa los errores.`, {
+          duration: 5000
+        });
+      }
+
+      return result;
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Error al actualizar patentes';
       set({ error: errorMessage, loading: false });
       toast.error(errorMessage);
       throw error;

@@ -5,6 +5,7 @@ import { PropertySidebar } from '@/components/properties/PropertySidebar';
 import { BulkActionsBar } from '@/components/properties/BulkActionsBar';
 import { BulkDeleteModal } from '@/components/properties/BulkDeleteModal';
 import { BulkStatusModal } from '@/components/properties/BulkStatusModal';
+import { BulkPatentModal } from '@/components/properties/BulkPatentModal';
 import { ImportCSVModal, type ImportError, type ImportProgress } from '@/components/properties/ImportCSVModal';
 import type { PropertyFormData } from '@/components/properties/PropertyForm';
 import { usePropertyStore } from '@/stores/usePropertyStore';
@@ -163,8 +164,9 @@ export const PropertiesPage = () => {
   const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
   const [isBulkDeleteModalOpen, setIsBulkDeleteModalOpen] = useState(false);
   const [isBulkStatusModalOpen, setIsBulkStatusModalOpen] = useState(false);
+  const [isBulkPatentModalOpen, setIsBulkPatentModalOpen] = useState(false);
 
-  const { createProperty, updateProperty, deleteProperty, bulkDeleteProperties, bulkUpdateStatus, loadProperties } = usePropertyStore();
+  const { createProperty, updateProperty, deleteProperty, bulkDeleteProperties, bulkUpdateStatus, bulkUpdatePatent, loadProperties } = usePropertyStore();
   const loading = usePropertyStore(state => state.loading);
   const total = usePropertyStore(state => state.total);
 
@@ -269,6 +271,18 @@ export const PropertiesPage = () => {
   const handleBulkStatusConfirm = async (propertyIds: number[], status: PropertyStatus) => {
     await bulkUpdateStatus(propertyIds, status);
     setIsBulkStatusModalOpen(false);
+    // Clear selections and reload page to ensure sync
+    sessionStorage.removeItem('propertySelection');
+    window.location.reload();
+  };
+
+  const handleBulkPatentChange = () => {
+    setIsBulkPatentModalOpen(true);
+  };
+
+  const handleBulkPatentConfirm = async (propertyIds: number[], patent: string) => {
+    await bulkUpdatePatent(propertyIds, patent);
+    setIsBulkPatentModalOpen(false);
     // Clear selections and reload page to ensure sync
     sessionStorage.removeItem('propertySelection');
     window.location.reload();
@@ -460,6 +474,7 @@ export const PropertiesPage = () => {
         onDeselectAll={handleDeselectAll}
         onDelete={handleBulkDelete}
         onStatusChange={handleBulkStatusChange}
+        onPatentChange={handleBulkPatentChange}
       />
 
       {/* Bulk Delete Modal */}
@@ -476,6 +491,14 @@ export const PropertiesPage = () => {
         properties={selectedProperties}
         onClose={() => setIsBulkStatusModalOpen(false)}
         onConfirm={handleBulkStatusConfirm}
+      />
+
+      {/* Bulk Patent Modal */}
+      <BulkPatentModal
+        isOpen={isBulkPatentModalOpen}
+        properties={selectedProperties}
+        onClose={() => setIsBulkPatentModalOpen(false)}
+        onConfirm={handleBulkPatentConfirm}
       />
 
       <PropertySidebar
