@@ -5,10 +5,10 @@
 
 import { Trash2, RefreshCw, Tag, Download, X } from 'lucide-react';
 import clsx from 'clsx';
+import { BulkActionSelect, type BulkActionOption } from '@/components/ui';
 
 interface BulkActionsBarProps {
   selectedCount: number;
-  totalCount: number;
   onDeselectAll: () => void;
   onDelete: () => void;
   onStatusChange: () => void;
@@ -19,7 +19,6 @@ interface BulkActionsBarProps {
 
 export const BulkActionsBar = ({
   selectedCount,
-  totalCount,
   onDeselectAll,
   onDelete,
   onStatusChange,
@@ -31,12 +30,41 @@ export const BulkActionsBar = ({
     return null;
   }
 
+  // Define bulk action options
+  const bulkActions: BulkActionOption[] = [
+    {
+      id: 'status',
+      label: 'Estado',
+      icon: RefreshCw,
+      action: onStatusChange,
+    },
+    {
+      id: 'patent',
+      label: 'Patente',
+      icon: Tag,
+      action: onPatentChange,
+    },
+    {
+      id: 'download',
+      label: 'Descargar',
+      icon: Download,
+      action: onDownloadSheets,
+    },
+    {
+      id: 'delete',
+      label: 'Eliminar',
+      icon: Trash2,
+      color: 'danger' as const,
+      action: onDelete,
+    },
+  ];
+
   return (
     <div
       className={clsx(
         'fixed bottom-6 left-1/2 -translate-x-1/2 z-50',
         'bg-white rounded-xl shadow-2xl border border-gray-200',
-        'px-6 py-4 min-w-[600px] max-w-4xl',
+        'px-6 py-4 min-w-[500px] max-w-4xl',
         'animate-in slide-in-from-bottom-4 duration-300',
         className
       )}
@@ -50,61 +78,22 @@ export const BulkActionsBar = ({
           <div className="flex flex-col">
             <span className="text-sm font-semibold text-gray-900">
               {selectedCount === 1
-                ? '1 propiedad seleccionada'
-                : `${selectedCount} propiedades seleccionadas`}
+                ? 'propiedad seleccionada'
+                : 'propiedades seleccionadas'}
             </span>
-            {selectedCount < totalCount && (
-              <span className="text-xs text-gray-500">
-                de {totalCount} totales
-              </span>
-            )}
           </div>
         </div>
 
-        {/* Action buttons */}
-        <div className="flex items-center gap-2">
-          {/* Change Status */}
-          <button
-            onClick={onStatusChange}
-            className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-primary bg-primary-light hover:bg-primary/10 rounded-lg transition-colors"
-            title="Cambiar estado"
-          >
-            <RefreshCw className="w-4 h-4" />
-            <span>Estado</span>
-          </button>
-
-          {/* Change Patent */}
-          <button
-            onClick={onPatentChange}
-            className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-primary bg-primary-light hover:bg-primary/10 rounded-lg transition-colors"
-            title="Modificar patentes"
-          >
-            <Tag className="w-4 h-4" />
-            <span>Patente</span>
-          </button>
-
-          {/* Download Sheets */}
-          <button
-            onClick={onDownloadSheets}
-            className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-primary bg-primary-light hover:bg-primary/10 rounded-lg transition-colors"
-            title="Descargar fichas en ZIP"
-          >
-            <Download className="w-4 h-4" />
-            <span>Descargar</span>
-          </button>
-
-          {/* Delete */}
-          <button
-            onClick={onDelete}
-            className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-red-700 bg-red-50 hover:bg-red-100 rounded-lg transition-colors"
-            title="Eliminar seleccionadas"
-          >
-            <Trash2 className="w-4 h-4" />
-            <span>Eliminar</span>
-          </button>
+        {/* Actions */}
+        <div className="flex items-center gap-3">
+          {/* Bulk Action Select */}
+          <BulkActionSelect
+            options={bulkActions}
+            placeholder="Seleccionar acción"
+          />
 
           {/* Divider */}
-          <div className="w-px h-8 bg-gray-300 mx-2" />
+          <div className="w-px h-8 bg-gray-300" />
 
           {/* Deselect All */}
           <button

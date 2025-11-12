@@ -105,12 +105,21 @@ export const PropertyTable = ({
 
   // Explicitly check sessionStorage to detect external clears
   useEffect(() => {
-    const stored = sessionStorage.getItem('propertySelection');
-    if (!stored && selectedIds.size > 0) {
-      clearSelections();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedIds.size]);
+    const checkSessionStorage = () => {
+      const stored = sessionStorage.getItem('propertySelection');
+      if (!stored && selectedIds.size > 0) {
+        clearSelections();
+      }
+    };
+
+    // Check immediately
+    checkSessionStorage();
+
+    // Also check periodically to catch external clears
+    const interval = setInterval(checkSessionStorage, 100);
+
+    return () => clearInterval(interval);
+  }, [selectedIds.size, clearSelections]);
 
   // Notify parent of selection changes
   useEffect(() => {

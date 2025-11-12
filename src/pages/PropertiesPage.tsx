@@ -179,7 +179,6 @@ export const PropertiesPage = () => {
   const loadProperties = usePropertyStore(state => state.loadProperties);
   const setPage = usePropertyStore(state => state.setPage);
   const loading = usePropertyStore(state => state.loading);
-  const total = usePropertyStore(state => state.total);
 
   // Close all modals when component unmounts or route changes
   useEffect(() => {
@@ -572,7 +571,6 @@ export const PropertiesPage = () => {
       {/* Bulk Actions Bar */}
       <BulkActionsBar
         selectedCount={selectedIds.size}
-        totalCount={total}
         onDeselectAll={handleDeselectAll}
         onDelete={handleBulkDelete}
         onStatusChange={handleBulkStatusChange}
