@@ -11,6 +11,7 @@ import type { Property } from '@/utils/permissions';
 import { canCreateProperty, canEditProperty, canDeleteProperty, getStatusLabel } from '@/utils/permissions';
 import { getStateLabel } from '@/utils/constants';
 import { usePropertySelection } from '@/hooks/usePropertySelection';
+import { PropertyActionMenu } from './PropertyActionMenu';
 import clsx from 'clsx';
 
 interface PropertyTableProps {
@@ -369,6 +370,7 @@ export const PropertyTable = ({
                   currentSortBy={sortBy}
                   currentSortOrder={sortOrder}
                   onSort={handleSort}
+                  className="hidden md:table-cell"
                 />
                 <SortableTableHeader
                   label="Estado"
@@ -383,8 +385,9 @@ export const PropertyTable = ({
                   currentSortBy={sortBy}
                   currentSortOrder={sortOrder}
                   onSort={handleSort}
+                  className="hidden md:table-cell"
                 />
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="sticky right-0 z-20 bg-gray-50 px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider shadow-sticky-column">
                   Acciones
                 </th>
               </tr>
@@ -442,7 +445,7 @@ export const PropertyTable = ({
                     </td>
 
                     {/* Location */}
-                    <td className="px-6 py-4">
+                    <td className="hidden md:table-cell px-6 py-4">
                       <div className="text-sm text-gray-900 flex items-start gap-1.5">
                         <svg className="w-4 h-4 text-gray-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
@@ -469,15 +472,34 @@ export const PropertyTable = ({
                     </td>
 
                     {/* Price */}
-                    <td className="px-6 py-4">
+                    <td className="hidden md:table-cell px-6 py-4">
                       <div className="text-sm font-semibold text-gray-900">
                         {formatPrice(property.price)}
                       </div>
                     </td>
 
-                    {/* Actions */}
-                    <td className="px-6 py-4 text-right">
-                      <div className="flex items-center justify-end gap-1">
+                    {/* Actions - Sticky Column */}
+                    <td 
+                      className={clsx(
+                        'sticky right-0 z-10 px-6 py-4 text-right shadow-sticky-column',
+                        isHovered ? 'bg-gray-100' : 'bg-white'
+                      )}
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      {/* Mobile/Tablet: Action Menu (< 1024px) */}
+                      <div className="lg:hidden flex items-center justify-end">
+                        <PropertyActionMenu
+                          property={property}
+                          canEdit={canEdit}
+                          canDelete={canDelete}
+                          onView={onPropertySelect}
+                          onEdit={onPropertyEdit}
+                          onDelete={onPropertyDelete}
+                        />
+                      </div>
+
+                      {/* Desktop: Individual Action Buttons (>= 1024px) */}
+                      <div className="hidden lg:flex items-center justify-end gap-1">
                         {/* Ver */}
                         <button
                           onClick={(e) => {
