@@ -70,10 +70,10 @@ export const BulkActionSelect = ({
         onClick={handleToggle}
         className={clsx(
           'flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg transition-all',
-          'bg-white text-gray-700',
-          'hover:text-primary hover:bg-primary-light/30',
+          'bg-white text-gray-700 border border-gray-300',
+          'hover:bg-gray-50',
           'focus:outline-none',
-          isOpen && 'bg-primary-light/30 text-primary'
+          isOpen && 'bg-gray-50 border-gray-400'
         )}
       >
         <span>{placeholder}</span>
@@ -101,7 +101,7 @@ export const BulkActionSelect = ({
                   'w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium transition-colors',
                   isDanger
                     ? 'text-red-700 hover:bg-red-50'
-                    : 'text-gray-700 hover:bg-primary-light/50'
+                    : 'text-gray-700 hover:bg-gray-50'
                 )}
               >
                 <Icon className={clsx(

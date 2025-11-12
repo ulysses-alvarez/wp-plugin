@@ -223,7 +223,7 @@ export const PropertyForm = forwardRef<HTMLFormElement, PropertyFormProps>(({
   };
 
   return (
-    <form ref={ref} onSubmit={handleSubmit} className="space-y-6">
+    <form ref={ref} onSubmit={handleSubmit} className="space-y-6" noValidate>
       {/* Title */}
       <Input
         label="Título de la Propiedad"
