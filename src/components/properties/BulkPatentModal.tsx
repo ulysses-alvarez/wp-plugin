@@ -67,10 +67,6 @@ export const BulkPatentModal = ({
     }
   };
 
-  // Show first 5 properties
-  const displayProperties = properties.slice(0, 5);
-  const remainingCount = properties.length - displayProperties.length;
-
   return (
     <>
       {/* Backdrop */}
@@ -141,40 +137,6 @@ export const BulkPatentModal = ({
                 />
               )}
             </div>
-
-            {/* Property List Preview */}
-            {selectedPatent && (
-              <div className="mb-4">
-                <h3 className="text-sm font-medium text-gray-700 mb-2">
-                  Propiedades que se actualizarán:
-                </h3>
-                <div className="bg-gray-50 rounded-lg border border-gray-200 divide-y divide-gray-200 max-h-48 overflow-y-auto">
-                  {displayProperties.map((property) => (
-                    <div key={property.id} className="px-4 py-3">
-                      <p className="text-sm font-medium text-gray-900 truncate">
-                        {property.title}
-                      </p>
-                      <div className="flex items-center gap-2 mt-1">
-                        <span className="text-xs text-gray-500 font-mono">
-                          {property.patent || '[sin patente]'}
-                        </span>
-                        <span className="text-xs text-gray-400">→</span>
-                        <span className="text-xs text-purple-600 font-mono font-medium">
-                          {selectedPatent}
-                        </span>
-                      </div>
-                    </div>
-                  ))}
-                  {remainingCount > 0 && (
-                    <div className="px-4 py-3 bg-gray-100">
-                      <p className="text-sm text-gray-600 text-center">
-                        ... y {remainingCount} más
-                      </p>
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
 
             {/* Warning */}
             {selectedPatent && (

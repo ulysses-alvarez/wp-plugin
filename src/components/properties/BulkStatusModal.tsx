@@ -7,8 +7,7 @@ import { useState } from 'react';
 import { RefreshCw, X, CheckCircle2 } from 'lucide-react';
 import type { Property } from '@/utils/permissions';
 import type { PropertyStatus } from '@/types/bulk';
-import { LoadingSpinner, Badge } from '@/components/ui';
-import { getStatusLabel } from '@/utils/permissions';
+import { LoadingSpinner } from '@/components/ui';
 import clsx from 'clsx';
 
 interface BulkStatusModalProps {
@@ -50,21 +49,6 @@ const STATUS_OPTIONS: Array<{
   },
 ];
 
-const getStatusVariant = (status: string) => {
-  switch (status) {
-    case 'available':
-      return 'success';
-    case 'sold':
-      return 'danger';
-    case 'rented':
-      return 'warning';
-    case 'reserved':
-      return 'info';
-    default:
-      return 'default';
-  }
-};
-
 export const BulkStatusModal = ({
   isOpen,
   properties,
@@ -94,16 +78,6 @@ export const BulkStatusModal = ({
       onClose();
     }
   };
-
-  // Show first 5 properties
-  const displayProperties = properties.slice(0, 5);
-  const remainingCount = properties.length - displayProperties.length;
-
-  // Count properties by current status
-  const statusCounts = properties.reduce((acc, prop) => {
-    acc[prop.status] = (acc[prop.status] || 0) + 1;
-    return acc;
-  }, {} as Record<string, number>);
 
   return (
     <>
@@ -147,28 +121,8 @@ export const BulkStatusModal = ({
 
           {/* Content */}
           <div className="p-6">
-            {/* Current status summary */}
-            <div className="mb-6 bg-gray-50 rounded-lg p-4">
-              <h3 className="text-sm font-semibold text-gray-700 mb-3">
-                Estados actuales:
-              </h3>
-              <div className="flex flex-wrap gap-2">
-                {Object.entries(statusCounts).map(([status, count]) => (
-                  <div
-                    key={status}
-                    className="flex items-center gap-2 text-sm"
-                  >
-                    <Badge variant={getStatusVariant(status)}>
-                      {getStatusLabel(status as PropertyStatus)}
-                    </Badge>
-                    <span className="text-gray-600">×{count}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
             {/* Status selection */}
-            <div className="mb-6">
+            <div className="mb-4">
               <h3 className="text-sm font-semibold text-gray-700 mb-3">
                 Nuevo estado:
               </h3>
@@ -208,36 +162,6 @@ export const BulkStatusModal = ({
                     </div>
                   </label>
                 ))}
-              </div>
-            </div>
-
-            {/* Property preview */}
-            <div className="mb-4">
-              <h3 className="text-sm font-semibold text-gray-700 mb-3">
-                Propiedades afectadas:
-              </h3>
-              <div className="bg-gray-50 rounded-lg p-4 max-h-32 overflow-y-auto">
-                <ul className="space-y-1.5">
-                  {displayProperties.map((property) => (
-                    <li
-                      key={property.id}
-                      className="flex items-center gap-2 text-sm"
-                    >
-                      <span className="text-gray-400">•</span>
-                      <span className="text-gray-900">{property.title}</span>
-                      {property.patent && (
-                        <span className="text-gray-500 text-xs">
-                          ({property.patent})
-                        </span>
-                      )}
-                    </li>
-                  ))}
-                  {remainingCount > 0 && (
-                    <li className="text-sm text-gray-500 font-medium">
-                      ... y {remainingCount} más
-                    </li>
-                  )}
-                </ul>
               </div>
             </div>
           </div>

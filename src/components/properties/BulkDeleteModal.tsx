@@ -45,10 +45,6 @@ export const BulkDeleteModal = ({
     }
   };
 
-  // Show first 5 properties, then count
-  const displayProperties = properties.slice(0, 5);
-  const remainingCount = properties.length - displayProperties.length;
-
   return (
     <>
       {/* Backdrop */}
@@ -90,46 +86,15 @@ export const BulkDeleteModal = ({
 
           {/* Content */}
           <div className="p-6">
-            <div className="mb-4">
-              <p className="text-sm text-gray-700 mb-3">
-                Vas a eliminar{' '}
-                <span className="font-semibold text-red-600">
-                  {properties.length === 1
-                    ? '1 propiedad'
-                    : `${properties.length} propiedades`}
-                </span>
-                :
-              </p>
-
-              {/* Property list */}
-              <div className="bg-gray-50 rounded-lg p-4 max-h-48 overflow-y-auto">
-                <ul className="space-y-2">
-                  {displayProperties.map((property) => (
-                    <li
-                      key={property.id}
-                      className="flex items-start gap-2 text-sm"
-                    >
-                      <span className="text-gray-400 mt-0.5">•</span>
-                      <div className="flex-1 min-w-0">
-                        <span className="font-medium text-gray-900">
-                          {property.title}
-                        </span>
-                        {property.patent && (
-                          <span className="text-gray-500 ml-2">
-                            (Patente: {property.patent})
-                          </span>
-                        )}
-                      </div>
-                    </li>
-                  ))}
-                  {remainingCount > 0 && (
-                    <li className="text-sm text-gray-500 font-medium">
-                      ... y {remainingCount} más
-                    </li>
-                  )}
-                </ul>
-              </div>
-            </div>
+            <p className="text-sm text-gray-700 mb-4">
+              Vas a eliminar{' '}
+              <span className="font-semibold text-red-600">
+                {properties.length === 1
+                  ? '1 propiedad'
+                  : `${properties.length} propiedades`}
+              </span>
+              .
+            </p>
 
             {/* Warning */}
             <div className="bg-red-50 border border-red-200 rounded-lg p-3">
