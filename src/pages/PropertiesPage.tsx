@@ -355,8 +355,12 @@ export const PropertiesPage = () => {
         // Backend now returns { success: false, message: '...' } instead of throwing 404
         const message = result.message || 'Ninguna propiedad tiene ficha técnica adjunta';
         toast(message, {
-          icon: '⚠️',
-          duration: 4000
+          icon: 'ℹ️',
+          duration: 4000,
+          style: {
+            background: '#3b82f6', // Azul info - mejor contraste
+            color: '#ffffff',
+          }
         });
       }
     } catch (error) {

@@ -11,6 +11,9 @@ declare const window: Window & {
 
 const wpData = window.wpPropertyDashboard;
 
+// Constante para la clave de localStorage
+const THEME_STORAGE_KEY = 'property_dashboard_theme';
+
 export const useSettingsStore = create<SettingsState>((set) => ({
   settings: null,
   isLoading: false,
@@ -35,6 +38,9 @@ export const useSettingsStore = create<SettingsState>((set) => ({
 
       // Aplicar tema al cargar
       applyTheme(data);
+      
+      // Guardar en localStorage para evitar flash en próximas cargas
+      localStorage.setItem(THEME_STORAGE_KEY, JSON.stringify(data));
     } catch (error) {
       set({
         error: error instanceof Error ? error.message : 'Error desconocido',
@@ -67,6 +73,9 @@ export const useSettingsStore = create<SettingsState>((set) => ({
 
       // Aplicar nuevo tema
       applyTheme(data);
+      
+      // Actualizar localStorage inmediatamente
+      localStorage.setItem(THEME_STORAGE_KEY, JSON.stringify(data));
     } catch (error) {
       set({
         error: error instanceof Error ? error.message : 'Error desconocido',

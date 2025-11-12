@@ -114,7 +114,7 @@ export const ComboBox = ({
         >
           <span className={clsx(
             'text-sm truncate',
-            value ? 'text-gray-900 font-medium font-mono' : 'text-gray-400'
+            value ? 'text-gray-900' : 'text-gray-400'
           )}>
             {value || placeholder}
           </span>
@@ -170,13 +170,13 @@ export const ComboBox = ({
                       className={clsx(
                         'w-full px-4 py-2.5 text-left text-sm transition-colors flex items-center justify-between gap-2',
                         value === option
-                          ? 'bg-purple-50 text-purple-900 font-medium'
+                          ? 'bg-primary-light text-primary'
                           : 'text-gray-700 hover:bg-gray-50'
                       )}
                     >
-                      <span className="font-mono truncate">{option}</span>
+                      <span className="truncate">{option}</span>
                       {value === option && (
-                        <Check className="w-4 h-4 text-purple-600 flex-shrink-0" />
+                        <Check className="w-4 h-4 text-primary flex-shrink-0" />
                       )}
                     </button>
                   ))}

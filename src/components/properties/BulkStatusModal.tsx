@@ -96,8 +96,8 @@ export const BulkStatusModal = ({
           {/* Header */}
           <div className="flex items-start justify-between p-6 border-b border-gray-200">
             <div className="flex items-center gap-3">
-              <div className="flex items-center justify-center w-12 h-12 bg-blue-100 rounded-full">
-                <RefreshCw className="w-6 h-6 text-blue-600" />
+              <div className="flex items-center justify-center w-12 h-12 bg-primary-light rounded-full">
+                <RefreshCw className="w-6 h-6 text-primary" />
               </div>
               <div>
                 <h2 className="text-xl font-semibold text-gray-900">

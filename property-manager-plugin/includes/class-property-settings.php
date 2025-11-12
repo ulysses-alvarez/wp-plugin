@@ -68,7 +68,7 @@ class Property_Settings {
     public static function get_settings($request) {
         $defaults = [
             'logoId' => 0,
-            'primaryColor' => '#216121'
+            'primaryColor' => '#000000'
         ];
 
         $settings = get_option('property_dashboard_settings', $defaults);

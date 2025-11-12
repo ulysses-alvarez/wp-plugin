@@ -69,7 +69,7 @@ function App() {
           duration: 3000,
           style: {
             fontSize: '14px',
-            background: '#000000',
+            background: '#3b82f6', // Azul info por defecto para consistencia
             color: '#ffffff',
             fontWeight: '500'
           },

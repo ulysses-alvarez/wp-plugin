@@ -3,11 +3,24 @@ import { AppSidebar } from './AppSidebar';
 import { AppHeader } from './AppHeader';
 import { useEffect } from 'react';
 import { useSettingsStore } from '../../stores/useSettingsStore';
+import { applyTheme } from '../../services/themeService';
+import type { SiteConfig } from '../../types/settings';
+
+// Aplicar tema desde localStorage inmediatamente (antes del primer render)
+const cachedTheme = localStorage.getItem('property_dashboard_theme');
+if (cachedTheme) {
+  try {
+    const settings: SiteConfig = JSON.parse(cachedTheme);
+    applyTheme(settings);
+  } catch (error) {
+    console.error('Error al aplicar tema desde cache:', error);
+  }
+}
 
 export const AppLayout = () => {
   const { loadSettings } = useSettingsStore();
 
-  // Cargar configuración al montar
+  // Cargar configuración al montar (actualiza desde API)
   useEffect(() => {
     loadSettings();
   }, [loadSettings]);

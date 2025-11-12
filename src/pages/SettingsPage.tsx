@@ -5,6 +5,7 @@ import { Input } from '../components/ui/Input';
 import { LoadingSpinner } from '../components/ui/LoadingSpinner';
 import { Upload, X } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { adjustColor, getContrastTextColor } from '../services/themeService';
 
 export const SettingsPage = () => {
   const { settings, isLoading, updateSettings, uploadLogo, deleteLogo } = useSettingsStore();
@@ -215,7 +216,7 @@ export const SettingsPage = () => {
                   />
                   <button
                     type="button"
-                    onClick={() => setFormData(prev => ({ ...prev, primaryColor: '#216121' }))}
+                    onClick={() => setFormData(prev => ({ ...prev, primaryColor: '#000000' }))}
                     className="px-3 py-2 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors whitespace-nowrap"
                     title="Resetear al color por defecto"
                   >
@@ -227,38 +228,61 @@ export const SettingsPage = () => {
                 </p>
               </div>
 
-              {/* Preview del color */}
+              {/* Preview del color con variantes reales */}
               <div className="mt-4">
-                <p className="text-sm font-medium text-gray-700 mb-2">Preview:</p>
-                <div className="flex items-center gap-3">
-                  <button
-                    type="button"
-                    className="px-3 py-1.5 rounded-lg text-white text-sm font-medium"
-                    style={{ backgroundColor: formData.primaryColor }}
-                  >
-                    Ejemplo
-                  </button>
-                  <div className="flex gap-2">
+                <p className="text-sm font-medium text-gray-700 mb-3">Preview de colores:</p>
+                <div className="flex gap-3">
+                  {/* Color Principal */}
+                  <div className="flex-1">
                     <div
-                      className="h-6 w-6 rounded"
-                      style={{ backgroundColor: formData.primaryColor }}
-                    />
-                    <div
-                      className="h-6 w-6 rounded"
+                      className="h-20 rounded-lg flex flex-col items-center justify-center gap-1 shadow-sm border border-gray-200"
                       style={{
                         backgroundColor: formData.primaryColor,
-                        opacity: 0.7
+                        color: getContrastTextColor(formData.primaryColor)
                       }}
-                    />
+                    >
+                      <span className="text-xs font-semibold">Primary</span>
+                      <span className="text-[10px] font-mono opacity-80">
+                        {formData.primaryColor}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Color Hover */}
+                  <div className="flex-1">
                     <div
-                      className="h-6 w-6 rounded"
+                      className="h-20 rounded-lg flex flex-col items-center justify-center gap-1 shadow-sm border border-gray-200"
                       style={{
-                        backgroundColor: formData.primaryColor,
-                        opacity: 0.4
+                        backgroundColor: adjustColor(formData.primaryColor, -20),
+                        color: getContrastTextColor(adjustColor(formData.primaryColor, -20))
                       }}
-                    />
+                    >
+                      <span className="text-xs font-semibold">Hover</span>
+                      <span className="text-[10px] font-mono opacity-80">
+                        -20% brillo
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Color Light */}
+                  <div className="flex-1">
+                    <div
+                      className="h-20 rounded-lg flex flex-col items-center justify-center gap-1 shadow-sm border border-gray-200"
+                      style={{
+                        backgroundColor: adjustColor(formData.primaryColor, 97),
+                        color: getContrastTextColor(adjustColor(formData.primaryColor, 97))
+                      }}
+                    >
+                      <span className="text-xs font-semibold">Light</span>
+                      <span className="text-[10px] font-mono opacity-80">
+                        +97% brillo
+                      </span>
+                    </div>
                   </div>
                 </div>
+                <p className="text-xs text-gray-500 mt-2">
+                  Los textos se ajustan automáticamente para mantener el contraste
+                </p>
               </div>
             </div>
           </div>

@@ -84,8 +84,8 @@ export const BulkPatentModal = ({
           {/* Header */}
           <div className="flex items-start justify-between p-6 border-b border-gray-200">
             <div className="flex items-center gap-3">
-              <div className="flex items-center justify-center w-12 h-12 bg-purple-100 rounded-full">
-                <Tag className="w-6 h-6 text-purple-600" />
+              <div className="flex items-center justify-center w-12 h-12 bg-primary-light rounded-full">
+                <Tag className="w-6 h-6 text-primary" />
               </div>
               <div>
                 <h2 className="text-xl font-semibold text-gray-900">
@@ -140,9 +140,9 @@ export const BulkPatentModal = ({
 
             {/* Warning */}
             {selectedPatent && (
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                <p className="text-sm text-blue-900">
-                  <span className="font-semibold">Nota:</span> Todas las propiedades seleccionadas tendrán la patente <span className="font-mono font-bold">{selectedPatent}</span>
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                <p className="text-sm text-blue-800">
+                  <strong>ℹ️ Nota:</strong> Todas las propiedades seleccionadas tendrán la patente <span className="font-mono font-bold">{selectedPatent}</span>
                 </p>
               </div>
             )}
@@ -161,8 +161,8 @@ export const BulkPatentModal = ({
               onClick={handleConfirm}
               disabled={isUpdating || !selectedPatent || loadingPatents}
               className={clsx(
-                'px-4 py-2 text-sm font-medium text-white rounded-lg transition-colors',
-                'bg-purple-600 hover:bg-purple-700',
+                'px-4 py-2 text-sm font-medium rounded-lg transition-colors',
+                'bg-primary text-primary-text hover:bg-primary-hover',
                 'disabled:opacity-50 disabled:cursor-not-allowed',
                 'flex items-center gap-2'
               )}

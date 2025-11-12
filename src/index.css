@@ -8,15 +8,17 @@
 /* CSS Variables for theming */
 :root {
   /* Colores dinámicos (actualizables desde configuración) */
-  --color-primary: #216121;
-  --color-primary-hover: #1a4d1a;
-  --color-primary-light: #e8f5e9;
+  --color-primary: #000000;
+  --color-primary-hover: #1a1a1a;
+  --color-primary-light: #fbfbfb;
+  --color-primary-text: #ffffff;
+  --color-primary-light-text: #000000;
 
   /* Sidebar */
   --color-sidebar-bg: #1e293b;
   --color-sidebar-text: #f1f5f9;
   --color-sidebar-hover: #334155;
-  --color-sidebar-active: #216121;
+  --color-sidebar-active: #000000;
 
   /* Dimensiones */
   --sidebar-width: 260px;
@@ -73,10 +75,27 @@
   }
 
   .input {
-    @apply w-full px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent;
+    @apply w-full px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent font-normal;
   }
 
   .label {
     @apply block text-sm font-medium text-gray-700 mb-1;
+  }
+
+  /* Custom checkbox con color primario */
+  .checkbox-primary {
+    @apply w-4 h-4 rounded cursor-pointer transition-colors;
+    accent-color: var(--color-primary);
+    border: none;
+  }
+
+  .checkbox-primary:checked {
+    background-color: var(--color-primary);
+    border-color: var(--color-primary);
+  }
+
+  .checkbox-primary:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.1);
   }
 }

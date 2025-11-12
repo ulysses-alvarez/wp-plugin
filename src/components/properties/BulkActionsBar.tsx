@@ -66,7 +66,7 @@ export const BulkActionsBar = ({
           {/* Change Status */}
           <button
             onClick={onStatusChange}
-            className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-blue-700 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors"
+            className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-primary bg-primary-light hover:bg-primary/10 rounded-lg transition-colors"
             title="Cambiar estado"
           >
             <RefreshCw className="w-4 h-4" />
@@ -76,7 +76,7 @@ export const BulkActionsBar = ({
           {/* Change Patent */}
           <button
             onClick={onPatentChange}
-            className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-purple-700 bg-purple-50 hover:bg-purple-100 rounded-lg transition-colors"
+            className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-primary bg-primary-light hover:bg-primary/10 rounded-lg transition-colors"
             title="Modificar patentes"
           >
             <Tag className="w-4 h-4" />
@@ -86,7 +86,7 @@ export const BulkActionsBar = ({
           {/* Download Sheets */}
           <button
             onClick={onDownloadSheets}
-            className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-green-700 bg-green-50 hover:bg-green-100 rounded-lg transition-colors"
+            className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-primary bg-primary-light hover:bg-primary/10 rounded-lg transition-colors"
             title="Descargar fichas en ZIP"
           >
             <Download className="w-4 h-4" />

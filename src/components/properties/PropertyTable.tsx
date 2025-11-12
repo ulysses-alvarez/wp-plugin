@@ -295,22 +295,22 @@ export const PropertyTable = ({
     <div ref={tableContainerRef} className="h-full flex flex-col">
       {/* Sort Indicator Badge - Only shown when not default sort */}
       {isCustomSort && (
-        <div className="bg-blue-50 border-b border-blue-200 px-6 py-3">
+        <div className="bg-primary-light border-b border-primary/20 px-6 py-3">
           <div className="flex items-center justify-between gap-4">
             <div className="flex items-center gap-2 text-sm">
-              <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12" />
               </svg>
               <span className="text-gray-700 font-medium">
                 Ordenado por:
               </span>
-              <span className="text-blue-700 font-semibold">
+              <span className="text-primary font-semibold">
                 {getSortLabel()}
               </span>
             </div>
             <button
               onClick={handleResetSort}
-              className="flex items-center gap-2 px-3 py-1.5 text-sm text-blue-700 hover:text-blue-800 hover:bg-blue-100 rounded-lg transition-colors font-medium"
+              className="flex items-center gap-2 px-3 py-1.5 text-sm text-primary hover:text-primary-hover hover:bg-primary/10 rounded-lg transition-colors font-medium"
               title="Volver al orden predeterminado (Fecha, más reciente primero)"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -339,7 +339,7 @@ export const PropertyTable = ({
                       }
                     }}
                     onChange={handleSelectAllCurrentPage}
-                    className="w-4 h-4 text-primary bg-gray-100 border-gray-300 rounded focus:ring-primary focus:ring-2 cursor-pointer"
+                    className="checkbox-primary"
                     title={
                       isAllCurrentPageSelected
                         ? 'Deseleccionar todas'
@@ -392,9 +392,7 @@ export const PropertyTable = ({
                     key={property.id}
                     className={clsx(
                       'transition-colors cursor-pointer',
-                      isSelected
-                        ? 'bg-blue-50'
-                        : isHovered
+                      isHovered
                         ? 'bg-gray-100'
                         : 'hover:bg-gray-50'
                     )}
@@ -411,7 +409,7 @@ export const PropertyTable = ({
                         type="checkbox"
                         checked={isSelected}
                         onChange={() => toggleProperty(property.id)}
-                        className="w-4 h-4 text-primary bg-gray-100 border-gray-300 rounded focus:ring-primary focus:ring-2 cursor-pointer"
+                        className="checkbox-primary"
                         title={
                           isSelected
                             ? 'Deseleccionar propiedad'
@@ -493,7 +491,7 @@ export const PropertyTable = ({
                               e.stopPropagation();
                               onPropertyEdit(property);
                             }}
-                            className="p-1.5 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                            className="p-1.5 text-gray-600 hover:text-primary hover:bg-primary-light rounded-lg transition-colors"
                             title="Editar"
                           >
                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
