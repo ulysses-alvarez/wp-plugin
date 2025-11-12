@@ -38,9 +38,12 @@ export const Button = ({
   };
 
   const sizeStyles = {
+    // Compacto - para casos especiales (34px siempre)
     sm: 'px-3 py-1.5 text-sm',
-    md: 'px-4 py-2 text-sm',
-    lg: 'px-6 py-3 text-sm'
+    // Estándar - basado en Importar/Exportar (36px mobile, 38px desktop)
+    md: 'px-3 py-1.5 sm:px-4 sm:py-2 text-sm',
+    // Grande - para CTAs principales (38px mobile, 46px desktop)
+    lg: 'px-4 py-2 sm:px-6 sm:py-3 text-sm'
   };
 
   return (

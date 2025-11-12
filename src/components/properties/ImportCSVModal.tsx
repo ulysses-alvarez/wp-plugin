@@ -431,20 +431,20 @@ export const ImportCSVModal = ({ isOpen, onClose, onImport }: ImportCSVModalProp
           })()}
         </div>
 
-        {/* Footer */}
-        <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-gray-200 bg-gray-50 flex-shrink-0">
+        {/* Footer - Botones responsive estandarizados */}
+        <div className="flex items-center justify-end gap-3 px-4 sm:px-6 py-4 sm:py-5 border-t border-gray-200 bg-gray-50 flex-shrink-0">
           {state === 'selecting' && (
             <>
               <button
                 onClick={handleClose}
-                className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-100 transition-colors font-medium text-sm"
+                className="px-3 py-1.5 sm:px-4 sm:py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-100 transition-colors font-medium text-sm"
               >
                 Cancelar
               </button>
               <button
                 onClick={handleImport}
                 disabled={!selectedFile}
-                className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-hover transition-colors font-medium text-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                className="px-3 py-1.5 sm:px-4 sm:py-2 bg-primary text-white rounded-lg hover:bg-primary-hover transition-colors font-medium text-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
               >
                 <Upload size={16} />
                 Importar
@@ -455,7 +455,7 @@ export const ImportCSVModal = ({ isOpen, onClose, onImport }: ImportCSVModalProp
           {state === 'importing' && (
             <button
               onClick={handleCancel}
-              className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium text-sm flex items-center gap-2"
+              className="px-3 py-1.5 sm:px-4 sm:py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium text-sm flex items-center gap-2"
             >
               <X size={16} />
               Cancelar Importación
@@ -465,7 +465,7 @@ export const ImportCSVModal = ({ isOpen, onClose, onImport }: ImportCSVModalProp
           {state === 'completed' && (
             <button
               onClick={handleClose}
-              className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-hover transition-colors font-medium text-sm"
+              className="px-3 py-1.5 sm:px-4 sm:py-2 bg-primary text-white rounded-lg hover:bg-primary-hover transition-colors font-medium text-sm"
             >
               Cerrar
             </button>

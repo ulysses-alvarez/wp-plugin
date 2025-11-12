@@ -354,7 +354,7 @@ export const PropertySidebar = ({
             <Button
               type="button"
               variant="secondary"
-              size="sm"
+              size="md"
               onClick={onClose}
               disabled={loading}
             >
@@ -363,7 +363,7 @@ export const PropertySidebar = ({
             <Button
               type="button"
               variant="primary"
-              size="sm"
+              size="md"
               onClick={handleFooterSubmit}
               disabled={loading}
               loading={loading}

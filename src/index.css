@@ -54,8 +54,9 @@
 
 /* Custom components */
 @layer components {
+  /* SISTEMA DE BOTONES UNIFICADO - Base: Importar/Exportar (38px desktop, 36px mobile) */
   .btn {
-    @apply px-4 py-2 rounded-lg font-medium transition-colors duration-200;
+    @apply px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg font-medium transition-colors duration-200 text-sm;
   }
 
   .btn-primary {
@@ -74,8 +75,14 @@
     @apply bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow;
   }
 
+  /* SISTEMA DE INPUTS UNIFICADO - Altura consistente con botones (38px desktop, 36px mobile) */
   .input {
-    @apply w-full px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent font-normal;
+    @apply w-full px-3 py-1.5 sm:py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent font-normal;
+  }
+
+  /* SISTEMA DE SELECT UNIFICADO - Más compacto en mobile (38px desktop, 36px mobile) */
+  .select {
+    @apply px-2 py-1.5 sm:px-3 sm:py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent;
   }
 
   .label {

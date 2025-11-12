@@ -106,13 +106,13 @@ export const BulkDeleteModal = ({
             </div>
           </div>
 
-          {/* Footer */}
-          <div className="flex items-center justify-end gap-3 p-6 border-t border-gray-200 bg-gray-50 rounded-b-xl">
+          {/* Footer - Botones responsive estandarizados */}
+          <div className="flex items-center justify-end gap-3 px-4 sm:px-6 py-4 sm:py-5 border-t border-gray-200 bg-gray-50 rounded-b-xl">
             <button
               onClick={handleClose}
               disabled={isDeleting}
               className={clsx(
-                'px-4 py-2 text-sm font-medium rounded-lg transition-colors',
+                'px-3 py-1.5 sm:px-4 sm:py-2 text-sm font-medium border border-gray-300 rounded-lg transition-colors',
                 isDeleting
                   ? 'text-gray-400 cursor-not-allowed'
                   : 'text-gray-700 hover:bg-gray-200'
@@ -124,7 +124,7 @@ export const BulkDeleteModal = ({
               onClick={handleConfirm}
               disabled={isDeleting}
               className={clsx(
-                'px-4 py-2 text-sm font-medium text-white rounded-lg transition-colors flex items-center gap-2',
+                'px-3 py-1.5 sm:px-4 sm:py-2 text-sm font-medium text-white rounded-lg transition-colors flex items-center gap-2',
                 isDeleting
                   ? 'bg-red-400 cursor-not-allowed'
                   : 'bg-red-600 hover:bg-red-700'

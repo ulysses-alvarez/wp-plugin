@@ -31,3 +31,5 @@ export { FileUpload } from './FileUpload';
 
 export { BulkActionSelect } from './BulkActionSelect';
 export type { BulkActionOption } from './BulkActionSelect';
+
+export { DropdownMenu, DropdownMenuItem } from './DropdownMenu';

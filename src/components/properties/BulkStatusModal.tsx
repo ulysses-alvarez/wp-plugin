@@ -133,12 +133,12 @@ export const BulkStatusModal = ({
             )}
           </div>
 
-          {/* Footer */}
-          <div className="flex items-center justify-end gap-3 px-6 py-4 bg-gray-50 border-t border-gray-200 rounded-b-xl">
+          {/* Footer - Botones responsive estandarizados */}
+          <div className="flex items-center justify-end gap-3 px-4 sm:px-6 py-4 sm:py-5 bg-gray-50 border-t border-gray-200 rounded-b-xl">
             <button
               onClick={handleClose}
               disabled={isUpdating}
-              className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-3 py-1.5 sm:px-4 sm:py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Cancelar
             </button>
@@ -146,7 +146,7 @@ export const BulkStatusModal = ({
               onClick={handleConfirm}
               disabled={isUpdating || !selectedStatusLabel}
               className={clsx(
-                'px-4 py-2 text-sm font-medium rounded-lg transition-colors flex items-center gap-2',
+                'px-3 py-1.5 sm:px-4 sm:py-2 text-sm font-medium rounded-lg transition-colors flex items-center gap-2',
                 isUpdating || !selectedStatusLabel
                   ? 'bg-gray-400 cursor-not-allowed text-white'
                   : 'bg-primary text-primary-text hover:bg-primary-hover'
