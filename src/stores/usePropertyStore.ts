@@ -44,7 +44,7 @@ interface PropertyState {
   };
 
   // Sort
-  sortBy: 'date' | 'title' | 'price' | 'status' | 'state' | 'municipality';
+  sortBy: 'ID' | 'date' | 'title' | 'price' | 'status' | 'state' | 'municipality';
   sortOrder: 'asc' | 'desc';
 
   // Actions
@@ -74,7 +74,7 @@ interface PropertyState {
   prevPage: () => void;
 
   // Sort Actions
-  setSortBy: (sortBy: 'date' | 'title' | 'price' | 'status' | 'state' | 'municipality') => void;
+  setSortBy: (sortBy: 'ID' | 'date' | 'title' | 'price' | 'status' | 'state' | 'municipality') => void;
   setSortOrder: (order: 'asc' | 'desc') => void;
 
   // Selection Actions
@@ -288,9 +288,9 @@ export const usePropertyStore = create<PropertyState>((set, get) => ({
 
       // Show result toast
       if (result.failed.length === 0) {
-        toast.success(`✓ ${result.success.length} ${result.success.length === 1 ? 'propiedad eliminada' : 'propiedades eliminadas'} exitosamente`);
+        toast.success(`${result.success.length} ${result.success.length === 1 ? 'propiedad eliminada' : 'propiedades eliminadas'} exitosamente`);
       } else {
-        toast.error(`✓ ${result.success.length} eliminadas, ✗ ${result.failed.length} fallaron. Revisa los permisos.`, {
+        toast.error(`${result.success.length} eliminadas, ${result.failed.length} fallaron. Revisa los permisos.`, {
           duration: 5000
         });
       }
@@ -319,9 +319,9 @@ export const usePropertyStore = create<PropertyState>((set, get) => ({
 
       // Show result toast
       if (result.failed.length === 0) {
-        toast.success(`✓ ${result.success.length} ${result.success.length === 1 ? 'propiedad actualizada' : 'propiedades actualizadas'} exitosamente`);
+        toast.success(`${result.success.length} ${result.success.length === 1 ? 'propiedad actualizada' : 'propiedades actualizadas'} exitosamente`);
       } else {
-        toast.error(`✓ ${result.success.length} actualizadas, ✗ ${result.failed.length} fallaron. Revisa los permisos.`, {
+        toast.error(`${result.success.length} actualizadas, ${result.failed.length} fallaron. Revisa los permisos.`, {
           duration: 5000
         });
       }
@@ -349,9 +349,9 @@ export const usePropertyStore = create<PropertyState>((set, get) => ({
 
       // Show result toast
       if (result.failed.length === 0) {
-        toast.success(`✓ ${result.success.length} ${result.success.length === 1 ? 'patente actualizada' : 'patentes actualizadas'} exitosamente`);
+        toast.success(`${result.success.length} ${result.success.length === 1 ? 'patente actualizada' : 'patentes actualizadas'} exitosamente`);
       } else {
-        toast.error(`✓ ${result.success.length} actualizadas, ✗ ${result.failed.length} fallaron. Revisa los errores.`, {
+        toast.error(`${result.success.length} actualizadas, ${result.failed.length} fallaron. Revisa los errores.`, {
           duration: 5000
         });
       }
@@ -454,7 +454,7 @@ export const usePropertyStore = create<PropertyState>((set, get) => ({
   /**
    * Sort Actions
    */
-  setSortBy: (sortBy: 'date' | 'title' | 'price' | 'status' | 'state' | 'municipality') => {
+  setSortBy: (sortBy: 'ID' | 'date' | 'title' | 'price' | 'status' | 'state' | 'municipality') => {
     set({ sortBy, currentPage: 1 });
   },
 

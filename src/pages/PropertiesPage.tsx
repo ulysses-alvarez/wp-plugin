@@ -340,14 +340,14 @@ export const PropertiesPage = () => {
 
         // Show appropriate message
         if (result.single_file) {
-          toast.success(`✓ Descargando ficha técnica`);
+          toast.success(`Descargando ficha técnica`);
         } else {
           if (result.files_without_attachment > 0) {
-            toast.success(`✓ ${result.files_count} fichas descargadas en ZIP. ${result.files_without_attachment} propiedades sin ficha.`, {
+            toast.success(`${result.files_count} fichas descargadas en ZIP. ${result.files_without_attachment} propiedades sin ficha.`, {
               duration: 5000
             });
           } else {
-            toast.success(`✓ ${result.files_count} fichas descargadas en ZIP`);
+            toast.success(`${result.files_count} fichas descargadas en ZIP`);
           }
         }
       } else {
@@ -505,11 +505,11 @@ export const PropertiesPage = () => {
 
     // Show summary toast
     if (successCount > 0 && uniqueErrorRows === 0) {
-      toast.success(`✓ ${successCount} ${successCount === 1 ? 'propiedad importada' : 'propiedades importadas'} exitosamente`);
+      toast.success(`${successCount} ${successCount === 1 ? 'propiedad importada' : 'propiedades importadas'} exitosamente`);
     } else if (successCount > 0 && uniqueErrorRows > 0) {
-      toast.success(`✓ ${successCount} importadas, ✗ ${uniqueErrorRows} ${uniqueErrorRows === 1 ? 'omitida' : 'omitidas'} por errores`);
+      toast.success(`${successCount} importadas, ${uniqueErrorRows} ${uniqueErrorRows === 1 ? 'omitida' : 'omitidas'} por errores`);
     } else if (uniqueErrorRows > 0) {
-      toast.error(`✗ ${uniqueErrorRows} ${uniqueErrorRows === 1 ? 'propiedad omitida' : 'propiedades omitidas'} por errores`);
+      toast.error(`${uniqueErrorRows} ${uniqueErrorRows === 1 ? 'propiedad omitida' : 'propiedades omitidas'} por errores`);
     }
 
     return {

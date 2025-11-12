@@ -5,7 +5,7 @@
 
 import clsx from 'clsx';
 
-export type SortKey = 'title' | 'state' | 'municipality' | 'status' | 'price' | 'date';
+export type SortKey = 'ID' | 'title' | 'state' | 'municipality' | 'status' | 'price' | 'date';
 
 interface SortableTableHeaderProps {
   label: string;
@@ -63,6 +63,7 @@ export const SortableTableHeader = ({
       case 'price':
         return isAscending ? 'Menor' : 'Mayor';
       case 'date':
+      case 'ID':
         return isAscending ? 'Antiguo' : 'Reciente';
       default:
         return isAscending ? 'A-Z' : 'Z-A';

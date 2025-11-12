@@ -3,7 +3,7 @@
  * Displays properties in a grid layout with pagination
  */
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { usePropertyStore } from '@/stores/usePropertyStore';
 import { PropertyCard } from './PropertyCard';
 import { LoadingSpinner, Pagination } from '@/components/ui';
@@ -38,6 +38,9 @@ export const PropertyGrid = ({
   } = usePropertyStore();
 
   const [initialLoad, setInitialLoad] = useState(true);
+  
+  // Ref to grid container for scrolling
+  const gridContainerRef = useRef<HTMLDivElement>(null);
 
   const canCreate = canCreateProperty();
 
@@ -49,6 +52,17 @@ export const PropertyGrid = ({
 
   const handlePageChange = (page: number) => {
     setPage(page);
+
+    // Scroll to top after page change
+    requestAnimationFrame(() => {
+      if (gridContainerRef.current) {
+        const scrollableParent = gridContainerRef.current.closest('.overflow-auto');
+        
+        if (scrollableParent) {
+          scrollableParent.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+      }
+    });
   };
 
   const handlePerPageChange = (newPerPage: number) => {
@@ -82,34 +96,53 @@ export const PropertyGrid = ({
   }
 
   if (properties.length === 0) {
+    // Determinar si hay búsqueda activa
+    const hasActiveSearch = filters.searchValue && filters.searchValue.trim() !== '';
+
     return (
       <div className="bg-white rounded-lg shadow-sm p-12 text-center">
         <svg className="w-20 h-20 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
         </svg>
-        <h3 className="text-xl font-semibold text-gray-700 mb-2">
-          No hay propiedades disponibles
-        </h3>
-        <p className="text-gray-500 mb-6">
-          {canCreate
-            ? 'Comienza agregando tu primera propiedad'
-            : 'No tienes propiedades asignadas en este momento'
-          }
-        </p>
-        {canCreate && onCreateNew && (
-          <button
-            onClick={onCreateNew}
-            className="px-6 py-3 bg-primary text-white rounded-lg hover:bg-primary-hover transition-colors font-medium"
-          >
-            + Agregar Primera Propiedad
-          </button>
+        
+        {hasActiveSearch ? (
+          // Búsqueda sin resultados
+          <>
+            <h3 className="text-xl font-semibold text-gray-700 mb-2">
+              No se encontraron propiedades
+            </h3>
+            <p className="text-gray-500 mb-6">
+              No hay propiedades que coincidan con tu búsqueda. Intenta con otros criterios.
+            </p>
+          </>
+        ) : (
+          // Sistema completamente vacío
+          <>
+            <h3 className="text-xl font-semibold text-gray-700 mb-2">
+              No hay propiedades disponibles
+            </h3>
+            <p className="text-gray-500 mb-6">
+              {canCreate
+                ? 'Comienza agregando tu primera propiedad'
+                : 'No tienes propiedades asignadas en este momento'
+              }
+            </p>
+            {canCreate && onCreateNew && (
+              <button
+                onClick={onCreateNew}
+                className="px-6 py-3 bg-primary text-white rounded-lg hover:bg-primary-hover transition-colors font-medium"
+              >
+                + Agregar Primera Propiedad
+              </button>
+            )}
+          </>
         )}
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
+    <div ref={gridContainerRef} className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>

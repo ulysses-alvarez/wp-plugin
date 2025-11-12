@@ -165,6 +165,8 @@ class Property_REST_API {
     public function get_properties($request) {
         $current_user = wp_get_current_user();
 
+        // Use date as default orderby to match WordPress admin default behavior
+        // This orders by post_date (publication date) in descending order (newest first)
         $orderby = $request->get_param('orderby') ?: 'date';
         $order = strtoupper($request->get_param('order') ?: 'DESC');
 
@@ -528,6 +530,7 @@ class Property_REST_API {
 
             $title = $request->get_param('title');
             $description = $request->get_param('description');
+            $post_date = $request->get_param('post_date');
 
             // Create post
             $post_data = [
@@ -537,6 +540,12 @@ class Property_REST_API {
                 'post_status'  => 'publish',
                 'post_author'  => get_current_user_id(),
             ];
+
+            // If post_date is provided (for CSV import), use it
+            if (!empty($post_date)) {
+                $post_data['post_date'] = sanitize_text_field($post_date);
+                $post_data['post_date_gmt'] = get_gmt_from_date($post_date);
+            }
 
             $property_id = wp_insert_post($post_data, true);
 

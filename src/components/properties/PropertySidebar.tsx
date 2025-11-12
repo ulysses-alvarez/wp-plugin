@@ -8,6 +8,7 @@ import { useEffect, useRef } from 'react';
 import type { Property } from '@/utils/permissions';
 import { Badge, Button } from '@/components/ui';
 import { getStatusLabel, canEditProperty, canDeleteProperty } from '@/utils/permissions';
+import { getStateLabel } from '@/utils/constants';
 import { PropertyForm } from './PropertyForm';
 import type { PropertyFormData } from './PropertyForm';
 import clsx from 'clsx';
@@ -27,10 +28,13 @@ interface PropertySidebarProps {
 
 const formatPrice = (price?: number): string => {
   if (!price) return 'Sin precio';
-  return new Intl.NumberFormat('es-MX', {
+  const formatted = new Intl.NumberFormat('es-MX', {
     style: 'currency',
-    currency: 'MXN'
+    currency: 'MXN',
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0
   }).format(price);
+  return `${formatted} MXN`;
 };
 
 const getStatusVariant = (status: string) => {
@@ -216,7 +220,7 @@ export const PropertySidebar = ({
                   {property.state && (
                     <div className="flex items-start gap-3 pb-2 border-b border-gray-100">
                       <span className="text-sm text-gray-500 min-w-[90px] font-medium">Estado:</span>
-                      <span className="text-sm text-gray-900 font-medium flex-1">{property.state}</span>
+                      <span className="text-sm text-gray-900 font-medium flex-1">{getStateLabel(property.state)}</span>
                     </div>
                   )}
                   {property.postal_code && (

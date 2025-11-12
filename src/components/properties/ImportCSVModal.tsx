@@ -119,8 +119,13 @@ export const ImportCSVModal = ({ isOpen, onClose, onImport }: ImportCSVModalProp
       'patent',
       'price',
       'google_maps',
-      'description'
+      'description',
+      'post_date'
     ];
+
+    // Generate current date in WordPress format: YYYY-MM-DD HH:MM:SS
+    const now = new Date();
+    const exampleDate = now.toISOString().slice(0, 19).replace('T', ' ');
 
     const exampleRow = [
       'Propiedad de Ejemplo',
@@ -133,7 +138,8 @@ export const ImportCSVModal = ({ isOpen, onClose, onImport }: ImportCSVModalProp
       'PAT-001',
       '2500000',
       'https://maps.google.com/?q=20.6736,-103.3925',
-      'Descripción de la propiedad de ejemplo'
+      'Descripción de la propiedad de ejemplo',
+      exampleDate // Formato: 2025-01-15 10:30:00
     ];
 
     const csvContent = [

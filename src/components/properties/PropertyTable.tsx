@@ -3,7 +3,7 @@
  * Displays properties in a table layout (Dashlane-style)
  */
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { usePropertyStore } from '@/stores/usePropertyStore';
 import { LoadingSpinner, Pagination, Badge, SortableTableHeader } from '@/components/ui';
 import type { SortKey } from '@/components/ui';
@@ -23,12 +23,13 @@ interface PropertyTableProps {
 
 const formatPrice = (price?: number): string => {
   if (!price) return 'Sin precio';
-  return new Intl.NumberFormat('es-MX', {
+  const formatted = new Intl.NumberFormat('es-MX', {
     style: 'currency',
     currency: 'MXN',
     minimumFractionDigits: 0,
     maximumFractionDigits: 0
   }).format(price);
+  return `${formatted} MXN`;
 };
 
 const getStatusVariant = (status: string) => {
@@ -73,6 +74,9 @@ export const PropertyTable = ({
 
   const [initialLoad, setInitialLoad] = useState(true);
   const [hoveredRow, setHoveredRow] = useState<number | null>(null);
+
+  // Ref to table container for scrolling
+  const tableContainerRef = useRef<HTMLDivElement>(null);
 
   const canCreate = canCreateProperty();
 
@@ -149,6 +153,20 @@ export const PropertyTable = ({
 
   const handlePageChange = (page: number) => {
     setPage(page);
+
+    // Scroll to top after page change
+    // Use requestAnimationFrame to ensure the page change is processed first
+    requestAnimationFrame(() => {
+      // Find the scrollable parent container (the one in PropertiesPage)
+      if (tableContainerRef.current) {
+        // Find the closest parent element with overflow-auto class
+        const scrollableParent = tableContainerRef.current.closest('.overflow-auto');
+        
+        if (scrollableParent) {
+          scrollableParent.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+      }
+    });
   };
 
   const handlePerPageChange = (newPerPage: number) => {
@@ -177,11 +195,12 @@ export const PropertyTable = ({
   // Get human-readable sort label
   const getSortLabel = () => {
     const labels: Record<string, string> = {
+      ID: 'Orden de creación',
       title: 'Propiedad',
       state: 'Ubicación',
       status: 'Estado',
       price: 'Precio',
-      date: 'Fecha'
+      date: 'Fecha de publicación'
     };
 
     const columnLabel = labels[sortBy] || sortBy;
@@ -191,7 +210,7 @@ export const PropertyTable = ({
     let directionText = direction;
     if (sortBy === 'price') {
       directionText = sortOrder === 'asc' ? 'Menor a mayor' : 'Mayor a menor';
-    } else if (sortBy === 'date') {
+    } else if (sortBy === 'date' || sortBy === 'ID') {
       directionText = sortOrder === 'asc' ? 'Más antiguo primero' : 'Más reciente primero';
     } else {
       directionText = sortOrder === 'asc' ? 'A → Z' : 'Z → A';
@@ -227,34 +246,53 @@ export const PropertyTable = ({
   }
 
   if (properties.length === 0) {
+    // Determinar si hay búsqueda activa
+    const hasActiveSearch = filters.searchValue && filters.searchValue.trim() !== '';
+
     return (
       <div className="bg-white rounded-lg shadow-sm p-12 text-center">
         <svg className="w-20 h-20 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
         </svg>
-        <h3 className="text-lg font-semibold text-gray-700 mb-2">
-          No hay propiedades disponibles
-        </h3>
-        <p className="text-sm text-gray-500 mb-6">
-          {canCreate
-            ? 'Comienza agregando tu primera propiedad'
-            : 'No tienes propiedades asignadas en este momento'
-          }
-        </p>
-        {canCreate && onCreateNew && (
-          <button
-            onClick={onCreateNew}
-            className="px-6 py-3 bg-primary text-white rounded-lg hover:bg-primary-hover transition-colors font-medium text-sm"
-          >
-            + Agregar Primera Propiedad
-          </button>
+        
+        {hasActiveSearch ? (
+          // Búsqueda sin resultados
+          <>
+            <h3 className="text-lg font-semibold text-gray-700 mb-2">
+              No se encontraron propiedades
+            </h3>
+            <p className="text-sm text-gray-500 mb-6">
+              No hay propiedades que coincidan con tu búsqueda. Intenta con otros criterios.
+            </p>
+          </>
+        ) : (
+          // Sistema completamente vacío
+          <>
+            <h3 className="text-lg font-semibold text-gray-700 mb-2">
+              No hay propiedades disponibles
+            </h3>
+            <p className="text-sm text-gray-500 mb-6">
+              {canCreate
+                ? 'Comienza agregando tu primera propiedad'
+                : 'No tienes propiedades asignadas en este momento'
+              }
+            </p>
+            {canCreate && onCreateNew && (
+              <button
+                onClick={onCreateNew}
+                className="px-6 py-3 bg-primary text-white rounded-lg hover:bg-primary-hover transition-colors font-medium text-sm"
+              >
+                + Agregar Primera Propiedad
+              </button>
+            )}
+          </>
         )}
       </div>
     );
   }
 
   return (
-    <div className="h-full flex flex-col">
+    <div ref={tableContainerRef} className="h-full flex flex-col">
       {/* Sort Indicator Badge - Only shown when not default sort */}
       {isCustomSort && (
         <div className="bg-blue-50 border-b border-blue-200 px-6 py-3">
