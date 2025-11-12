@@ -134,7 +134,7 @@ export interface SearchContext {
 export const SEARCH_CONTEXTS: SearchContext[] = [
   {
     value: 'all',
-    label: 'Búsqueda General',
+    label: 'Buscar',
     type: 'text',
     placeholder: 'Buscar por título, patente, municipio...'
   },

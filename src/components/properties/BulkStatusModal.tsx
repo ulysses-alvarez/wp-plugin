@@ -76,13 +76,13 @@ export const BulkStatusModal = ({
       />
 
       {/* Modal */}
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none">
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 pointer-events-none">
         <div
           className="bg-white rounded-xl shadow-2xl max-w-lg w-full pointer-events-auto animate-in zoom-in-95 duration-200"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header */}
-          <div className="flex items-start justify-between p-6 border-b border-gray-200">
+          <div className="flex items-start justify-between p-4 sm:p-6 border-b border-gray-200">
             <div className="flex items-center gap-3">
               <div className="flex items-center justify-center w-12 h-12 bg-primary-light rounded-full">
                 <RefreshCw className="w-6 h-6 text-primary" />
@@ -108,7 +108,7 @@ export const BulkStatusModal = ({
           </div>
 
           {/* Content */}
-          <div className="p-6">
+          <div className="p-4 sm:p-6">
             {/* Status selection */}
             <div className="mb-6">
               <ComboBox

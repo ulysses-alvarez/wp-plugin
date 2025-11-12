@@ -74,29 +74,37 @@ export const Pagination = ({
   const pages = getPageNumbers();
 
   return (
-    <div className="flex flex-col sm:flex-row items-stretch sm:items-center sm:justify-between gap-2 sm:gap-4">
-      {/* Info de resultados */}
+    <div className="flex flex-row items-center justify-between gap-2 sm:gap-4">
+      {/* Info de resultados - Simplificado en mobile */}
       {total > 0 && (
-        <p className="text-xs sm:text-sm text-gray-600 px-2 sm:px-0">
-          <span className="font-semibold">{startItem}</span> a{' '}
-          <span className="font-semibold">{endItem}</span> de{' '}
-          <span className="font-semibold">{total}</span> propiedades
+        <p className="text-xs sm:text-sm text-gray-600">
+          {/* Mobile: "1-20 / 150" */}
+          <span className="sm:hidden">
+            <span className="font-semibold">{startItem}-{endItem}</span> /{' '}
+            <span className="font-semibold">{total}</span>
+          </span>
+          {/* Desktop: "1 a 20 de 150 propiedades" */}
+          <span className="hidden sm:inline">
+            <span className="font-semibold">{startItem}</span> a{' '}
+            <span className="font-semibold">{endItem}</span> de{' '}
+            <span className="font-semibold">{total}</span> propiedades
+          </span>
         </p>
       )}
 
       {/* Selector + Controles de paginación */}
       <div className={clsx('flex items-center gap-1 sm:gap-2', className)}>
-        {/* Per Page Selector - compacto */}
+        {/* Per Page Selector - Solo en desktop */}
         {showPerPageSelector && onPerPageChange && (
-          <div className="flex items-center gap-1 sm:gap-2 mr-2 sm:mr-3">
-            <label htmlFor="perPage" className="hidden sm:block text-xs sm:text-sm text-gray-600 whitespace-nowrap">
+          <div className="hidden sm:flex items-center gap-2 mr-3">
+            <label htmlFor="perPage" className="text-sm text-gray-600 whitespace-nowrap">
               Por página:
             </label>
             <select
               id="perPage"
               value={perPage}
               onChange={(e) => onPerPageChange(Number(e.target.value))}
-              className="px-1.5 py-0.5 sm:px-2 sm:py-1 text-xs sm:text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary"
+              className="px-2 py-1 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary"
               title="Propiedades por página"
             >
               {perPageOptions.map((option) => (
@@ -108,38 +116,38 @@ export const Pagination = ({
           </div>
         )}
 
-        {/* Botón Primera */}
+        {/* Botón Primera - Dobles flechas */}
         {showFirstLast && (
           <button
             onClick={() => onPageChange(1)}
             disabled={currentPage === 1}
             className={clsx(
-              'px-1 py-0.5 sm:px-2 sm:py-1 rounded-md border transition-colors',
+              'px-1.5 py-1 sm:px-2 sm:py-1.5 rounded-md border transition-colors',
               currentPage === 1
                 ? 'border-gray-200 text-gray-400 cursor-not-allowed'
                 : 'border-gray-300 text-gray-700 hover:bg-gray-100'
             )}
             aria-label="Primera página"
           >
-            <svg className="w-3 h-3 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
             </svg>
           </button>
         )}
 
-        {/* Botón Anterior */}
+        {/* Botón Anterior - OCULTO EN MOBILE */}
         <button
           onClick={() => onPageChange(currentPage - 1)}
           disabled={currentPage === 1}
           className={clsx(
-            'px-1 py-0.5 sm:px-2 sm:py-1 rounded-md border transition-colors',
+            'hidden sm:flex px-2 py-1.5 rounded-md border transition-colors',
             currentPage === 1
               ? 'border-gray-200 text-gray-400 cursor-not-allowed'
               : 'border-gray-300 text-gray-700 hover:bg-gray-100'
           )}
           aria-label="Página anterior"
         >
-          <svg className="w-3 h-3 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
           </svg>
         </button>
@@ -162,7 +170,7 @@ export const Pagination = ({
               key={pageNumber}
               onClick={() => onPageChange(pageNumber)}
               className={clsx(
-                'px-1.5 py-0.5 sm:px-2.5 sm:py-1 rounded-md border transition-colors min-w-[24px] sm:min-w-[32px] text-xs sm:text-sm',
+                'px-2 py-1 sm:px-2.5 sm:py-1.5 rounded-md border transition-colors min-w-[28px] sm:min-w-[34px] text-xs sm:text-sm',
                 isActive
                   ? 'bg-primary text-white border-primary font-semibold'
                   : 'border-gray-300 text-gray-700 hover:bg-gray-100'
@@ -175,37 +183,37 @@ export const Pagination = ({
           );
         })}
 
-        {/* Botón Siguiente */}
+        {/* Botón Siguiente - OCULTO EN MOBILE */}
         <button
           onClick={() => onPageChange(currentPage + 1)}
           disabled={currentPage === totalPages}
           className={clsx(
-            'px-1 py-0.5 sm:px-2 sm:py-1 rounded-md border transition-colors',
+            'hidden sm:flex px-2 py-1.5 rounded-md border transition-colors',
             currentPage === totalPages
               ? 'border-gray-200 text-gray-400 cursor-not-allowed'
               : 'border-gray-300 text-gray-700 hover:bg-gray-100'
           )}
           aria-label="Página siguiente"
         >
-          <svg className="w-3 h-3 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
           </svg>
         </button>
 
-        {/* Botón Última */}
+        {/* Botón Última - Dobles flechas */}
         {showFirstLast && (
           <button
             onClick={() => onPageChange(totalPages)}
             disabled={currentPage === totalPages}
             className={clsx(
-              'px-1 py-0.5 sm:px-2 sm:py-1 rounded-md border transition-colors',
+              'px-1.5 py-1 sm:px-2 sm:py-1.5 rounded-md border transition-colors',
               currentPage === totalPages
                 ? 'border-gray-200 text-gray-400 cursor-not-allowed'
                 : 'border-gray-300 text-gray-700 hover:bg-gray-100'
             )}
             aria-label="Última página"
           >
-            <svg className="w-3 h-3 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 5l7 7-7 7M5 5l7 7-7 7" />
             </svg>
           </button>

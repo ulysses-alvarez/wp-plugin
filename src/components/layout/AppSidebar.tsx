@@ -1,27 +1,20 @@
-import { useState } from 'react';
 import { SidebarHeader } from './SidebarHeader';
 import { SidebarNavigation } from './SidebarNavigation';
 import { SidebarFooter } from './SidebarFooter';
-import { X, Menu } from 'lucide-react';
 
-export const AppSidebar = () => {
-  const [isMobileOpen, setIsMobileOpen] = useState(false);
+interface AppSidebarProps {
+  isOpen: boolean;
+  onClose: () => void;
+}
 
+export const AppSidebar = ({ isOpen, onClose }: AppSidebarProps) => {
   return (
     <>
-      {/* Mobile menu button */}
-      <button
-        onClick={() => setIsMobileOpen(!isMobileOpen)}
-        className="fixed top-4 left-4 z-50 lg:hidden bg-primary text-white p-2 rounded-lg shadow-lg hover:bg-primary-hover transition-colors"
-      >
-        {isMobileOpen ? <X size={24} /> : <Menu size={24} />}
-      </button>
-
       {/* Overlay para mobile */}
-      {isMobileOpen && (
+      {isOpen && (
         <div
           className="fixed inset-0 bg-black bg-opacity-50 z-30 lg:hidden"
-          onClick={() => setIsMobileOpen(false)}
+          onClick={onClose}
         />
       )}
 
@@ -32,12 +25,12 @@ export const AppSidebar = () => {
           fixed inset-y-0 left-0 w-[260px]
           lg:static lg:w-[260px] lg:flex-shrink-0
           transform transition-transform duration-300 ease-in-out
-          ${isMobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+          ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
         `}
       >
-        <SidebarHeader />
-        <SidebarNavigation onLinkClick={() => setIsMobileOpen(false)} />
-        <SidebarFooter onLinkClick={() => setIsMobileOpen(false)} />
+        <SidebarHeader onClose={onClose} />
+        <SidebarNavigation onLinkClick={onClose} />
+        <SidebarFooter onLinkClick={onClose} />
       </aside>
     </>
   );

@@ -1,4 +1,6 @@
 import { useLocation } from 'react-router-dom';
+import { Menu, X } from 'lucide-react';
+import { UserDropdown } from './UserDropdown';
 
 const getPageTitle = (pathname: string): string => {
   if (pathname.startsWith('/properties')) return 'Propiedades';
@@ -7,38 +9,45 @@ const getPageTitle = (pathname: string): string => {
   return 'Dashboard';
 };
 
-export const AppHeader = () => {
+interface AppHeaderProps {
+  onToggleSidebar: () => void;
+  isSidebarOpen: boolean;
+}
+
+export const AppHeader = ({ onToggleSidebar, isSidebarOpen }: AppHeaderProps) => {
   const location = useLocation();
   const wpData = window.wpPropertyDashboard;
 
   const pageTitle = getPageTitle(location.pathname);
 
   return (
-    <header className="bg-white border-b border-gray-200 px-4 sm:px-6 py-3 lg:pl-6 pl-16">
-      {/* Layout adaptativo: stack en móvil, fila en desktop */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
-        {/* Ruta Actual - con truncate para evitar desbordamiento */}
+    <header className="bg-white border-b border-gray-200 px-4 sm:px-6 py-3">
+      {/* Header: [Hamburguesa] [Título] [Avatar] - Todo alineado center */}
+      <div className="flex items-center justify-between gap-3 sm:gap-4">
+        {/* Botón Hamburguesa - Solo en mobile/tablet */}
+        <button
+          onClick={onToggleSidebar}
+          className="lg:hidden flex-shrink-0 p-2 -ml-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
+          aria-label={isSidebarOpen ? 'Cerrar menú' : 'Abrir menú'}
+        >
+          {isSidebarOpen ? <X size={22} /> : <Menu size={22} />}
+        </button>
+
+        {/* Título de Página */}
         <div className="flex-1 min-w-0">
           <h1 className="text-lg sm:text-xl font-semibold text-gray-900 truncate">
             {pageTitle}
           </h1>
         </div>
 
-        {/* Usuario Info - completo en todas las pantallas */}
+        {/* User Dropdown - Avatar + Menú */}
         {wpData?.currentUser && (
-          <div className="flex items-center gap-3 flex-shrink-0">
-            <div className="text-right">
-              <div className="text-sm font-medium text-gray-900">
-                {wpData.currentUser.name}
-              </div>
-              <div className="text-xs text-gray-500">
-                {wpData.currentUser.roleLabel || wpData.currentUser.role}
-              </div>
-            </div>
-            <div className="w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center font-semibold">
-              {wpData.currentUser.name.charAt(0).toUpperCase()}
-            </div>
-          </div>
+          <UserDropdown
+            name={wpData.currentUser.name}
+            role={wpData.currentUser.role}
+            roleLabel={wpData.currentUser.roleLabel}
+            email={wpData.currentUser.email}
+          />
         )}
       </div>
     </header>

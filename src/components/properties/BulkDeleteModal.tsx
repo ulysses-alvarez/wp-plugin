@@ -54,13 +54,13 @@ export const BulkDeleteModal = ({
       />
 
       {/* Modal */}
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none">
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 pointer-events-none">
         <div
           className="bg-white rounded-xl shadow-2xl max-w-lg w-full pointer-events-auto animate-in zoom-in-95 duration-200"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header */}
-          <div className="flex items-start justify-between p-6 border-b border-gray-200">
+          <div className="flex items-start justify-between p-4 sm:p-6 border-b border-gray-200">
             <div className="flex items-center gap-3">
               <div className="flex items-center justify-center w-12 h-12 bg-red-100 rounded-full">
                 <AlertTriangle className="w-6 h-6 text-red-600" />
@@ -85,7 +85,7 @@ export const BulkDeleteModal = ({
           </div>
 
           {/* Content */}
-          <div className="p-6">
+          <div className="p-4 sm:p-6">
             <p className="text-sm text-gray-700 mb-4">
               Vas a eliminar{' '}
               <span className="font-semibold text-red-600">
