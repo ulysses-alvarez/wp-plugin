@@ -69,32 +69,32 @@ function App() {
           duration: 3000,
           style: {
             fontSize: '14px',
-            background: '#3b82f6', // Azul info por defecto para consistencia
+            background: '#2753b3', // Azul info personalizado
             color: '#ffffff',
             fontWeight: '500'
           },
           success: {
             style: {
-              background: '#10b981',
+              background: '#16a34a', // Verde consistente con modales (green-600)
               color: '#ffffff',
               fontSize: '14px',
               fontWeight: '500'
             },
             iconTheme: {
               primary: '#ffffff',
-              secondary: '#10b981'
+              secondary: '#16a34a'
             }
           },
           error: {
             style: {
-              background: '#ef4444',
+              background: '#dc2626', // Rojo consistente con modales (red-600)
               color: '#ffffff',
               fontSize: '14px',
               fontWeight: '500'
             },
             iconTheme: {
               primary: '#ffffff',
-              secondary: '#ef4444'
+              secondary: '#dc2626'
             }
           }
         }}

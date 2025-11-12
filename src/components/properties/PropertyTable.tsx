@@ -54,23 +54,22 @@ export const PropertyTable = ({
   onCreateNew,
   onSelectionChange
 }: PropertyTableProps) => {
-  const {
-    properties,
-    loading,
-    error,
-    currentPage,
-    totalPages,
-    total,
-    perPage,
-    sortBy,
-    sortOrder,
-    filters,
-    loadProperties,
-    setPage,
-    setPerPage,
-    setSortBy,
-    setSortOrder
-  } = usePropertyStore();
+  // Use specific selectors to avoid infinite loops
+  const properties = usePropertyStore(state => state.properties);
+  const loading = usePropertyStore(state => state.loading);
+  const error = usePropertyStore(state => state.error);
+  const currentPage = usePropertyStore(state => state.currentPage);
+  const totalPages = usePropertyStore(state => state.totalPages);
+  const total = usePropertyStore(state => state.total);
+  const perPage = usePropertyStore(state => state.perPage);
+  const sortBy = usePropertyStore(state => state.sortBy);
+  const sortOrder = usePropertyStore(state => state.sortOrder);
+  const filters = usePropertyStore(state => state.filters);
+  const loadProperties = usePropertyStore(state => state.loadProperties);
+  const setPage = usePropertyStore(state => state.setPage);
+  const setPerPage = usePropertyStore(state => state.setPerPage);
+  const setSortBy = usePropertyStore(state => state.setSortBy);
+  const setSortOrder = usePropertyStore(state => state.setSortOrder);
 
   const [initialLoad, setInitialLoad] = useState(true);
   const [hoveredRow, setHoveredRow] = useState<number | null>(null);
@@ -105,13 +104,13 @@ export const PropertyTable = ({
   }, [properties, selectedIds, clearSelections]);
 
   // Explicitly check sessionStorage to detect external clears
-  // This runs on EVERY render to catch when parent clears sessionStorage
   useEffect(() => {
     const stored = sessionStorage.getItem('propertySelection');
     if (!stored && selectedIds.size > 0) {
       clearSelections();
     }
-  });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedIds.size]);
 
   // Notify parent of selection changes
   useEffect(() => {
@@ -119,7 +118,8 @@ export const PropertyTable = ({
       const selectedProperties = getSelectedProperties(properties);
       onSelectionChange(selectedIds, selectedProperties);
     }
-  }, [selectedIds, properties, onSelectionChange, getSelectedProperties]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedIds, properties]);
 
   // Check if all properties on current page are selected
   const currentPagePropertyIds = properties.map((p) => p.id);

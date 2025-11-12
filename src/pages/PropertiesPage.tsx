@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { PropertyTable } from '@/components/properties/PropertyTable';
 import { PropertyFilters } from '@/components/properties/PropertyFilters';
 import { PropertySidebar } from '@/components/properties/PropertySidebar';
@@ -13,6 +14,7 @@ import type { Property } from '@/utils/permissions';
 import type { PropertyStatus } from '@/types/bulk';
 import { MEXICAN_STATES } from '@/utils/constants';
 import toast from 'react-hot-toast';
+import { Info } from 'lucide-react';
 
 // Función para normalizar el nombre del estado al value esperado
 const normalizeStateName = (stateName: string): string => {
@@ -154,6 +156,7 @@ const validateProperty = (property: any, rowNumber: number): ImportError[] => {
 };
 
 export const PropertiesPage = () => {
+  const location = useLocation();
   const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [sidebarMode, setSidebarMode] = useState<'view' | 'create' | 'edit'>('view');
@@ -166,9 +169,31 @@ export const PropertiesPage = () => {
   const [isBulkStatusModalOpen, setIsBulkStatusModalOpen] = useState(false);
   const [isBulkPatentModalOpen, setIsBulkPatentModalOpen] = useState(false);
 
-  const { createProperty, updateProperty, deleteProperty, bulkDeleteProperties, bulkUpdateStatus, bulkUpdatePatent, loadProperties, setPage } = usePropertyStore();
+  // Use specific selectors to avoid infinite loops
+  const createProperty = usePropertyStore(state => state.createProperty);
+  const updateProperty = usePropertyStore(state => state.updateProperty);
+  const deleteProperty = usePropertyStore(state => state.deleteProperty);
+  const bulkDeleteProperties = usePropertyStore(state => state.bulkDeleteProperties);
+  const bulkUpdateStatus = usePropertyStore(state => state.bulkUpdateStatus);
+  const bulkUpdatePatent = usePropertyStore(state => state.bulkUpdatePatent);
+  const loadProperties = usePropertyStore(state => state.loadProperties);
+  const setPage = usePropertyStore(state => state.setPage);
   const loading = usePropertyStore(state => state.loading);
   const total = usePropertyStore(state => state.total);
+
+  // Close all modals when component unmounts or route changes
+  useEffect(() => {
+    return () => {
+      setIsSidebarOpen(false);
+      setIsBulkDeleteModalOpen(false);
+      setIsBulkStatusModalOpen(false);
+      setIsBulkPatentModalOpen(false);
+      setIsImportModalOpen(false);
+      setSelectedProperty(null);
+      setSelectedProperties([]);
+      setSelectedIds(new Set());
+    };
+  }, [location.pathname]);
 
   const handlePropertySelect = (property: Property) => {
     setSelectedProperty(property);
@@ -355,10 +380,10 @@ export const PropertiesPage = () => {
         // Backend now returns { success: false, message: '...' } instead of throwing 404
         const message = result.message || 'Ninguna propiedad tiene ficha técnica adjunta';
         toast(message, {
-          icon: 'ℹ️',
+          icon: <Info className="w-5 h-5 text-white" />,
           duration: 4000,
           style: {
-            background: '#3b82f6', // Azul info - mejor contraste
+            background: '#2753b3', // Azul info personalizado
             color: '#ffffff',
           }
         });

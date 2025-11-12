@@ -199,16 +199,10 @@ export const PropertySidebar = ({
                   Ubicación
                 </h4>
                 <div className="space-y-3">
-                  {property.street && (
+                  {property.state && (
                     <div className="flex items-start gap-3 pb-2 border-b border-gray-100">
-                      <span className="text-sm text-gray-500 min-w-[90px] font-medium">Dirección:</span>
-                      <span className="text-sm text-gray-900 font-medium flex-1">{property.street}</span>
-                    </div>
-                  )}
-                  {property.neighborhood && (
-                    <div className="flex items-start gap-3 pb-2 border-b border-gray-100">
-                      <span className="text-sm text-gray-500 min-w-[90px] font-medium">Colonia:</span>
-                      <span className="text-sm text-gray-900 font-medium flex-1">{property.neighborhood}</span>
+                      <span className="text-sm text-gray-500 min-w-[90px] font-medium">Estado:</span>
+                      <span className="text-sm text-gray-900 font-medium flex-1">{getStateLabel(property.state)}</span>
                     </div>
                   )}
                   {property.municipality && (
@@ -217,16 +211,22 @@ export const PropertySidebar = ({
                       <span className="text-sm text-gray-900 font-medium flex-1">{property.municipality}</span>
                     </div>
                   )}
-                  {property.state && (
+                  {property.neighborhood && (
                     <div className="flex items-start gap-3 pb-2 border-b border-gray-100">
-                      <span className="text-sm text-gray-500 min-w-[90px] font-medium">Estado:</span>
-                      <span className="text-sm text-gray-900 font-medium flex-1">{getStateLabel(property.state)}</span>
+                      <span className="text-sm text-gray-500 min-w-[90px] font-medium">Colonia:</span>
+                      <span className="text-sm text-gray-900 font-medium flex-1">{property.neighborhood}</span>
                     </div>
                   )}
                   {property.postal_code && (
                     <div className="flex items-start gap-3 pb-2 border-b border-gray-100">
                       <span className="text-sm text-gray-500 min-w-[90px] font-medium">Código Postal:</span>
                       <span className="text-sm text-gray-900 font-semibold flex-1">{property.postal_code}</span>
+                    </div>
+                  )}
+                  {property.street && (
+                    <div className="flex items-start gap-3 pb-2 border-b border-gray-100">
+                      <span className="text-sm text-gray-500 min-w-[90px] font-medium">Dirección:</span>
+                      <span className="text-sm text-gray-900 font-medium flex-1">{property.street}</span>
                     </div>
                   )}
 

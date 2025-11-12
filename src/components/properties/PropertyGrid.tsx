@@ -23,19 +23,18 @@ export const PropertyGrid = ({
   onPropertyDelete,
   onCreateNew
 }: PropertyGridProps) => {
-  const {
-    properties,
-    loading,
-    error,
-    currentPage,
-    totalPages,
-    total,
-    perPage,
-    filters,
-    loadProperties,
-    setPage,
-    setPerPage
-  } = usePropertyStore();
+  // Use specific selectors to avoid infinite loops
+  const properties = usePropertyStore(state => state.properties);
+  const loading = usePropertyStore(state => state.loading);
+  const error = usePropertyStore(state => state.error);
+  const currentPage = usePropertyStore(state => state.currentPage);
+  const totalPages = usePropertyStore(state => state.totalPages);
+  const total = usePropertyStore(state => state.total);
+  const perPage = usePropertyStore(state => state.perPage);
+  const filters = usePropertyStore(state => state.filters);
+  const loadProperties = usePropertyStore(state => state.loadProperties);
+  const setPage = usePropertyStore(state => state.setPage);
+  const setPerPage = usePropertyStore(state => state.setPerPage);
 
   const [initialLoad, setInitialLoad] = useState(true);
   

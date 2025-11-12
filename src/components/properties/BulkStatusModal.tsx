@@ -4,10 +4,10 @@
  */
 
 import { useState } from 'react';
-import { RefreshCw, X, CheckCircle2 } from 'lucide-react';
+import { RefreshCw, X } from 'lucide-react';
 import type { Property } from '@/utils/permissions';
 import type { PropertyStatus } from '@/types/bulk';
-import { LoadingSpinner } from '@/components/ui';
+import { ComboBox, LoadingSpinner } from '@/components/ui';
 import clsx from 'clsx';
 
 interface BulkStatusModalProps {
@@ -17,37 +17,19 @@ interface BulkStatusModalProps {
   onConfirm: (propertyIds: number[], newStatus: PropertyStatus) => Promise<void>;
 }
 
-const STATUS_OPTIONS: Array<{
-  value: PropertyStatus;
-  label: string;
-  description: string;
-  color: string;
-}> = [
-  {
-    value: 'available',
-    label: 'Disponible',
-    description: 'Propiedad disponible para venta/renta',
-    color: 'bg-green-100 text-green-800 border-green-300',
-  },
-  {
-    value: 'sold',
-    label: 'Vendida',
-    description: 'Propiedad vendida',
-    color: 'bg-red-100 text-red-800 border-red-300',
-  },
-  {
-    value: 'rented',
-    label: 'Alquilada',
-    description: 'Propiedad en renta',
-    color: 'bg-orange-100 text-orange-800 border-orange-300',
-  },
-  {
-    value: 'reserved',
-    label: 'Reservada',
-    description: 'Propiedad reservada',
-    color: 'bg-blue-100 text-blue-800 border-blue-300',
-  },
+const STATUS_OPTIONS = [
+  'Disponible',
+  'Vendida',
+  'Alquilada',
+  'Reservada'
 ];
+
+const STATUS_VALUES: Record<string, PropertyStatus> = {
+  'Disponible': 'available',
+  'Vendida': 'sold',
+  'Alquilada': 'rented',
+  'Reservada': 'reserved'
+};
 
 export const BulkStatusModal = ({
   isOpen,
@@ -56,9 +38,15 @@ export const BulkStatusModal = ({
   onConfirm,
 }: BulkStatusModalProps) => {
   const [selectedStatus, setSelectedStatus] = useState<PropertyStatus>('available');
+  const [selectedStatusLabel, setSelectedStatusLabel] = useState<string>('Disponible');
   const [isUpdating, setIsUpdating] = useState(false);
 
   if (!isOpen) return null;
+
+  const handleStatusChange = (label: string) => {
+    setSelectedStatusLabel(label);
+    setSelectedStatus(STATUS_VALUES[label]);
+  };
 
   const handleConfirm = async () => {
     setIsUpdating(true);
@@ -90,7 +78,7 @@ export const BulkStatusModal = ({
       {/* Modal */}
       <div className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none">
         <div
-          className="bg-white rounded-xl shadow-2xl max-w-2xl w-full pointer-events-auto animate-in zoom-in-95 duration-200"
+          className="bg-white rounded-xl shadow-2xl max-w-lg w-full pointer-events-auto animate-in zoom-in-95 duration-200"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header */}
@@ -122,72 +110,46 @@ export const BulkStatusModal = ({
           {/* Content */}
           <div className="p-6">
             {/* Status selection */}
-            <div className="mb-4">
-              <h3 className="text-sm font-semibold text-gray-700 mb-3">
-                Nuevo estado:
-              </h3>
-              <div className="space-y-2">
-                {STATUS_OPTIONS.map((option) => (
-                  <label
-                    key={option.value}
-                    className={clsx(
-                      'flex items-start gap-3 p-4 rounded-lg border-2 cursor-pointer transition-all',
-                      selectedStatus === option.value
-                        ? 'border-primary bg-primary-light'
-                        : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
-                    )}
-                  >
-                    <input
-                      type="radio"
-                      name="status"
-                      value={option.value}
-                      checked={selectedStatus === option.value}
-                      onChange={(e) =>
-                        setSelectedStatus(e.target.value as PropertyStatus)
-                      }
-                      className="mt-1 w-4 h-4 text-primary border-gray-300 focus:ring-primary cursor-pointer"
-                    />
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className="font-semibold text-gray-900">
-                          {option.label}
-                        </span>
-                        {selectedStatus === option.value && (
-                          <CheckCircle2 className="w-4 h-4 text-primary" />
-                        )}
-                      </div>
-                      <p className="text-sm text-gray-600">
-                        {option.description}
-                      </p>
-                    </div>
-                  </label>
-                ))}
-              </div>
+            <div className="mb-6">
+              <ComboBox
+                label="Selecciona el nuevo estado"
+                value={selectedStatusLabel}
+                options={STATUS_OPTIONS}
+                onChange={handleStatusChange}
+                placeholder="Buscar estado..."
+                disabled={isUpdating}
+                required
+                helperText="Selecciona el estado que se aplicará a todas las propiedades seleccionadas"
+              />
             </div>
+
+            {/* Note */}
+            {selectedStatusLabel && (
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                <p className="text-sm text-blue-800">
+                  <strong>ℹ️ Nota:</strong> Todas las propiedades seleccionadas cambiarán a estado <span className="font-bold">{selectedStatusLabel}</span>
+                </p>
+              </div>
+            )}
           </div>
 
           {/* Footer */}
-          <div className="flex items-center justify-end gap-3 p-6 border-t border-gray-200 bg-gray-50 rounded-b-xl">
+          <div className="flex items-center justify-end gap-3 px-6 py-4 bg-gray-50 border-t border-gray-200 rounded-b-xl">
             <button
               onClick={handleClose}
               disabled={isUpdating}
-              className={clsx(
-                'px-4 py-2 text-sm font-medium rounded-lg transition-colors',
-                isUpdating
-                  ? 'text-gray-400 cursor-not-allowed'
-                  : 'text-gray-700 hover:bg-gray-200'
-              )}
+              className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Cancelar
             </button>
             <button
               onClick={handleConfirm}
-              disabled={isUpdating}
+              disabled={isUpdating || !selectedStatusLabel}
               className={clsx(
-                'px-4 py-2 text-sm font-medium text-white rounded-lg transition-colors flex items-center gap-2',
-                isUpdating
-                  ? 'bg-primary-hover cursor-not-allowed'
-                  : 'bg-primary hover:bg-primary-hover'
+                'px-4 py-2 text-sm font-medium rounded-lg transition-colors flex items-center gap-2',
+                isUpdating || !selectedStatusLabel
+                  ? 'bg-gray-400 cursor-not-allowed text-white'
+                  : 'bg-primary text-primary-text hover:bg-primary-hover'
               )}
             >
               {isUpdating ? (

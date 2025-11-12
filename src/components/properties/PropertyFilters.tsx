@@ -16,9 +16,7 @@ interface PropertyFiltersProps {
 }
 
 export const PropertyFilters = ({ onCreateNew, onExport, onImport }: PropertyFiltersProps) => {
-  const {
-    setFieldSearch
-  } = usePropertyStore();
+  const setFieldSearch = usePropertyStore(state => state.setFieldSearch);
 
   const canCreate = canCreateProperty();
 
