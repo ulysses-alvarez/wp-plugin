@@ -127,7 +127,7 @@ export const BulkStatusModal = ({
             {selectedStatusLabel && (
               <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
                 <p className="text-sm text-blue-800">
-                  <strong>ℹ️ Nota:</strong> Todas las propiedades seleccionadas cambiarán a estado <span className="font-bold">{selectedStatusLabel}</span>
+                  <strong>Nota:</strong> Todas las propiedades seleccionadas cambiarán a estado <span className="font-bold">{selectedStatusLabel}</span>
                 </p>
               </div>
             )}

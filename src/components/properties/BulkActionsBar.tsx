@@ -3,7 +3,7 @@
  * Floating action bar that appears when properties are selected
  */
 
-import { Trash2, RefreshCw, Tag, Download, X } from 'lucide-react';
+import { Trash2, RefreshCw, Tag, Download, FileDown, X } from 'lucide-react';
 import clsx from 'clsx';
 import { BulkActionSelect, type BulkActionOption } from '@/components/ui';
 
@@ -14,6 +14,7 @@ interface BulkActionsBarProps {
   onStatusChange: () => void;
   onPatentChange: () => void;
   onDownloadSheets: () => void;
+  onExport: () => void;
   className?: string;
 }
 
@@ -24,6 +25,7 @@ export const BulkActionsBar = ({
   onStatusChange,
   onPatentChange,
   onDownloadSheets,
+  onExport,
   className,
 }: BulkActionsBarProps) => {
   if (selectedCount === 0) {
@@ -45,8 +47,14 @@ export const BulkActionsBar = ({
       action: onPatentChange,
     },
     {
+      id: 'export',
+      label: 'Exportar CSV',
+      icon: FileDown,
+      action: onExport,
+    },
+    {
       id: 'download',
-      label: 'Descargar',
+      label: 'Descargar Fichas',
       icon: Download,
       action: onDownloadSheets,
     },

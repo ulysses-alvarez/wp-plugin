@@ -8,6 +8,7 @@ import { BulkDeleteModal } from '@/components/properties/BulkDeleteModal';
 import { BulkStatusModal } from '@/components/properties/BulkStatusModal';
 import { BulkPatentModal } from '@/components/properties/BulkPatentModal';
 import { ImportCSVModal, type ImportError, type ImportProgress } from '@/components/properties/ImportCSVModal';
+import { ExportModal } from '@/components/properties/ExportModal';
 import type { PropertyFormData } from '@/components/properties/PropertyForm';
 import { usePropertyStore } from '@/stores/usePropertyStore';
 import type { Property } from '@/utils/permissions';
@@ -161,6 +162,7 @@ export const PropertiesPage = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [sidebarMode, setSidebarMode] = useState<'view' | 'create' | 'edit'>('view');
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
+  const [isExportModalOpen, setIsExportModalOpen] = useState(false);
 
   // Bulk actions state
   const [selectedProperties, setSelectedProperties] = useState<Property[]>([]);
@@ -188,6 +190,7 @@ export const PropertiesPage = () => {
       setIsBulkStatusModalOpen(false);
       setIsBulkPatentModalOpen(false);
       setIsImportModalOpen(false);
+      setIsExportModalOpen(false);
       setSelectedProperty(null);
       setSelectedProperties([]);
       setSelectedIds(new Set());
@@ -266,7 +269,11 @@ export const PropertiesPage = () => {
   };
 
   const handleExport = () => {
-    // TODO: Implementar exportación
+    setIsExportModalOpen(true);
+  };
+
+  const handleBulkExport = () => {
+    setIsExportModalOpen(true);
   };
 
   // Bulk actions handlers
@@ -576,6 +583,7 @@ export const PropertiesPage = () => {
         onStatusChange={handleBulkStatusChange}
         onPatentChange={handleBulkPatentChange}
         onDownloadSheets={handleBulkDownloadSheets}
+        onExport={handleBulkExport}
       />
 
       {/* Bulk Delete Modal */}
@@ -626,6 +634,14 @@ export const PropertiesPage = () => {
         isOpen={isImportModalOpen}
         onClose={() => setIsImportModalOpen(false)}
         onImport={handleImportCSV}
+      />
+
+      {/* Export Modal */}
+      <ExportModal
+        isOpen={isExportModalOpen}
+        onClose={() => setIsExportModalOpen(false)}
+        selectedProperties={selectedProperties.length > 0 ? selectedProperties : undefined}
+        onExportComplete={handleDeselectAll}
       />
     </div>
   );

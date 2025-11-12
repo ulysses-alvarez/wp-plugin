@@ -8,6 +8,7 @@ import { usePropertyStore } from '@/stores/usePropertyStore';
 import { AdvancedSearchBar } from '@/components/ui';
 import { Download, Plus, Upload } from 'lucide-react';
 import { canCreateProperty } from '@/utils/permissions';
+import clsx from 'clsx';
 
 interface PropertyFiltersProps {
   onCreateNew?: () => void;
@@ -17,8 +18,15 @@ interface PropertyFiltersProps {
 
 export const PropertyFilters = ({ onCreateNew, onExport, onImport }: PropertyFiltersProps) => {
   const setFieldSearch = usePropertyStore(state => state.setFieldSearch);
+  const total = usePropertyStore(state => state.total);
+  const filters = usePropertyStore(state => state.filters);
 
   const canCreate = canCreateProperty();
+
+  // Check if there's an active filter
+  const hasActiveFilter = filters.searchField && 
+                          filters.searchField !== 'all' && 
+                          filters.searchValue;
 
   const handleSearch = useCallback((field: string, value: string) => {
     setFieldSearch(field, value);
@@ -50,10 +58,21 @@ export const PropertyFilters = ({ onCreateNew, onExport, onImport }: PropertyFil
           {onExport && (
             <button
               onClick={onExport}
-              className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium flex items-center gap-2 text-sm"
+              className={clsx(
+                'px-4 py-2 rounded-lg hover:bg-gray-50 transition-colors font-medium flex items-center gap-2 text-sm',
+                hasActiveFilter
+                  ? 'border-2 border-primary text-primary'
+                  : 'border border-gray-300 text-gray-700'
+              )}
+              title={hasActiveFilter ? 'Exportar propiedades filtradas' : 'Exportar todas las propiedades'}
             >
               <Download size={16} />
               Exportar
+              {total > 0 && hasActiveFilter && (
+                <span className="ml-1 px-1.5 py-0.5 bg-primary text-white rounded text-xs font-semibold">
+                  {total}
+                </span>
+              )}
             </button>
           )}
 

@@ -142,7 +142,7 @@ export const BulkPatentModal = ({
             {selectedPatent && (
               <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
                 <p className="text-sm text-blue-800">
-                  <strong>ℹ️ Nota:</strong> Todas las propiedades seleccionadas tendrán la patente <span className="font-mono font-bold">{selectedPatent}</span>
+                  <strong>Nota:</strong> Todas las propiedades seleccionadas tendrán la patente <span className="font-mono font-bold">{selectedPatent}</span>
                 </p>
               </div>
             )}
