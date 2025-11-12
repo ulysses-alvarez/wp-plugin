@@ -248,7 +248,7 @@ export const ExportModal = ({
                 </button>
               </div>
 
-              <div className="grid grid-cols-2 gap-2 max-h-80 overflow-y-auto">
+              <div className="flex flex-wrap gap-2 max-h-80 overflow-y-auto pb-2">
                 {DEFAULT_COLUMNS.map((column) => {
                   const columnKey = String(column.key);
                   const isSelected = selectedColumns.includes(columnKey);
@@ -260,24 +260,30 @@ export const ExportModal = ({
                       onClick={() => toggleColumn(columnKey)}
                       disabled={isExporting}
                       className={clsx(
-                        'px-3 py-2 text-sm font-medium rounded-lg border-2 transition-all text-left',
+                        'inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-full border-2 transition-all',
                         isSelected
                           ? 'bg-primary text-primary-text border-primary'
-                          : 'bg-white text-gray-700 border-gray-200 hover:border-gray-300',
+                          : 'bg-white text-gray-700 border-gray-300 hover:border-gray-400 hover:bg-gray-50',
                         isExporting && 'opacity-50 cursor-not-allowed'
                       )}
                     >
                       {column.label}
+                      {isSelected && <X className="w-3 h-3" />}
                     </button>
                   );
                 })}
               </div>
 
-              {selectedColumns.length === 0 && (
-                <p className="text-xs text-red-600 mt-2">
-                  Selecciona al menos una columna
+              <div className="flex items-center justify-between mt-2 pt-2 border-t border-gray-200">
+                <p className="text-xs text-gray-600">
+                  {selectedColumns.length} de {DEFAULT_COLUMNS.length} columnas seleccionadas
                 </p>
-              )}
+                {selectedColumns.length === 0 && (
+                  <p className="text-xs text-red-600">
+                    Selecciona al menos una columna
+                  </p>
+                )}
+              </div>
             </div>
           </div>
 
