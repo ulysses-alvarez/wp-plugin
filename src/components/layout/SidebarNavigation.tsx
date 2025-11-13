@@ -1,18 +1,21 @@
 import { Link, useLocation } from 'react-router-dom';
 import { Home, User } from 'lucide-react';
+import { canManageUsers } from '../../utils/permissions';
 
 const navItems = [
   {
     id: 'properties',
     label: 'Propiedades',
     icon: Home,
-    path: '/properties'
+    path: '/properties',
+    requiresCapability: null, // Always visible
   },
   {
     id: 'users',
     label: 'Usuario',
     icon: User,
-    path: '/users'
+    path: '/users',
+    requiresCapability: 'manage_dashboard_users',
   }
 ];
 
@@ -27,10 +30,19 @@ export const SidebarNavigation = ({ onLinkClick }: SidebarNavigationProps) => {
     return location.pathname === path || location.pathname.startsWith(path + '/');
   };
 
+  // Filter nav items based on user capabilities
+  const visibleNavItems = navItems.filter((item) => {
+    if (!item.requiresCapability) return true;
+    if (item.requiresCapability === 'manage_dashboard_users') {
+      return canManageUsers();
+    }
+    return false;
+  });
+
   return (
     <nav className="flex-1 px-3 py-4 overflow-y-auto">
       <ul className="space-y-1">
-        {navItems.map((item) => {
+        {visibleNavItems.map((item) => {
           const Icon = item.icon;
           const active = isActive(item.path);
 

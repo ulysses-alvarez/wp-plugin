@@ -1,5 +1,6 @@
 import { Link, useLocation } from 'react-router-dom';
 import { Settings } from 'lucide-react';
+import { canManageUsers } from '../../utils/permissions';
 
 interface SidebarFooterProps {
   onLinkClick?: () => void;
@@ -8,6 +9,11 @@ interface SidebarFooterProps {
 export const SidebarFooter = ({ onLinkClick }: SidebarFooterProps) => {
   const location = useLocation();
   const isActive = location.pathname === '/settings';
+
+  // Only show settings to users with manage_dashboard_users capability (property_admin)
+  if (!canManageUsers()) {
+    return null;
+  }
 
   return (
     <div className="border-t border-sidebar-border p-3">

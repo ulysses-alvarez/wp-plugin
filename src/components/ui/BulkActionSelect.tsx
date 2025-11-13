@@ -13,6 +13,7 @@ export interface BulkActionOption {
   icon: LucideIcon;
   color?: 'default' | 'danger';
   action: () => void;
+  disabled?: boolean;
 }
 
 interface BulkActionSelectProps {
@@ -58,8 +59,10 @@ export const BulkActionSelect = ({
   };
 
   const handleSelect = (option: BulkActionOption) => {
-    option.action();
-    setIsOpen(false);
+    if (!option.disabled) {
+      option.action();
+      setIsOpen(false);
+    }
   };
 
   return (
@@ -92,22 +95,26 @@ export const BulkActionSelect = ({
           {options.map((option) => {
             const Icon = option.icon;
             const isDanger = option.color === 'danger';
+            const isDisabled = option.disabled === true;
 
             return (
               <button
                 key={option.id}
                 type="button"
                 onClick={() => handleSelect(option)}
+                disabled={isDisabled}
                 className={clsx(
                   'w-full flex items-center gap-2 sm:gap-3 px-3 py-2 sm:px-4 sm:py-2.5 text-sm font-medium transition-colors',
-                  isDanger
+                  isDisabled
+                    ? 'text-gray-400 cursor-not-allowed opacity-50'
+                    : isDanger
                     ? 'text-red-700 hover:bg-red-50'
                     : 'text-gray-700 hover:bg-gray-50'
                 )}
               >
                 <Icon className={clsx(
                   'w-4 h-4',
-                  isDanger ? 'text-red-600' : 'text-primary'
+                  isDisabled ? 'text-gray-400' : isDanger ? 'text-red-600' : 'text-primary'
                 )} />
                 <span>{option.label}</span>
               </button>

@@ -1,8 +1,8 @@
 import { createHashRouter, Navigate } from 'react-router-dom';
 import { AppLayout } from './components/layout/AppLayout';
 import { PropertiesPage } from './pages/PropertiesPage';
-import { ComingSoonPage } from './pages/ComingSoonPage';
 import { SettingsPage } from './pages/SettingsPage';
+import UsersPage from './pages/UsersPage';
 
 /**
  * Router configuration
@@ -23,7 +23,7 @@ export const router = createHashRouter([
       },
       {
         path: 'users',
-        element: <ComingSoonPage />
+        element: <UsersPage />
       },
       {
         path: 'settings',

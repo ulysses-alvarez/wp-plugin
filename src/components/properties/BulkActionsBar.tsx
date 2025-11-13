@@ -3,12 +3,16 @@
  * Floating action bar that appears when properties are selected
  */
 
+import { useMemo } from 'react';
 import { Trash2, RefreshCw, Tag, Download, FileDown, X } from 'lucide-react';
 import clsx from 'clsx';
 import { BulkActionSelect, type BulkActionOption } from '@/components/ui';
+import type { Property } from '@/utils/permissions';
+import { canEditProperty, canDeleteProperty, can } from '@/utils/permissions';
 
 interface BulkActionsBarProps {
   selectedCount: number;
+  selectedProperties: Property[];
   onDeselectAll: () => void;
   onDelete: () => void;
   onStatusChange: () => void;
@@ -20,6 +24,7 @@ interface BulkActionsBarProps {
 
 export const BulkActionsBar = ({
   selectedCount,
+  selectedProperties,
   onDeselectAll,
   onDelete,
   onStatusChange,
@@ -32,25 +37,39 @@ export const BulkActionsBar = ({
     return null;
   }
 
-  // Define bulk action options
+  // Calculate which bulk actions are available based on permissions
+  const permissions = useMemo(() => {
+    return {
+      canEditAll: selectedProperties.every(prop => canEditProperty(prop)),
+      canDeleteAll: selectedProperties.every(prop => canDeleteProperty(prop)),
+      canExport: can('export_properties'),
+      editableCount: selectedProperties.filter(prop => canEditProperty(prop)).length,
+      deletableCount: selectedProperties.filter(prop => canDeleteProperty(prop)).length,
+    };
+  }, [selectedProperties]);
+
+  // Define bulk action options with conditional disabled state
   const bulkActions: BulkActionOption[] = [
     {
       id: 'status',
-      label: 'Estado',
+      label: permissions.canEditAll ? 'Estado' : `Estado (${permissions.editableCount}/${selectedCount})`,
       icon: RefreshCw,
       action: onStatusChange,
+      disabled: !permissions.canEditAll,
     },
     {
       id: 'patent',
-      label: 'Patente',
+      label: permissions.canEditAll ? 'Patente' : `Patente (${permissions.editableCount}/${selectedCount})`,
       icon: Tag,
       action: onPatentChange,
+      disabled: !permissions.canEditAll,
     },
     {
       id: 'export',
       label: 'Exportar',
       icon: FileDown,
       action: onExport,
+      disabled: !permissions.canExport,
     },
     {
       id: 'download',
@@ -60,10 +79,11 @@ export const BulkActionsBar = ({
     },
     {
       id: 'delete',
-      label: 'Eliminar',
+      label: permissions.canDeleteAll ? 'Eliminar' : `Eliminar (${permissions.deletableCount}/${selectedCount})`,
       icon: Trash2,
       color: 'danger' as const,
       action: onDelete,
+      disabled: !permissions.canDeleteAll,
     },
   ];
 

@@ -6,6 +6,13 @@
 import { USER_ROLES, USER_ROLE_LABELS, PROPERTY_STATUS_OPTIONS } from './constants';
 import type { UserRole, PropertyStatus } from './constants';
 
+// Property Permissions (calculated by backend)
+export interface PropertyPermissions {
+  can_edit: boolean;
+  can_delete: boolean;
+  can_assign: boolean;
+}
+
 // Property Type Definition
 export interface Property {
   id: number;
@@ -26,6 +33,7 @@ export interface Property {
   created_at?: string;
   updated_at?: string;
   last_dashboard_update?: string | null;
+  permissions?: PropertyPermissions; // Permissions calculated by backend
 }
 
 // WordPress User Type
@@ -107,8 +115,15 @@ export const canViewProperty = (property: Property): boolean => {
 
 /**
  * Check if user can edit a property
+ * Prefers backend-calculated permissions if available
  */
 export const canEditProperty = (property: Property): boolean => {
+  // Use backend-calculated permission if available
+  if (property.permissions) {
+    return property.permissions.can_edit;
+  }
+
+  // Fallback to frontend calculation (for backward compatibility)
   if (can('edit_others_properties')) return true;
 
   if (can('edit_properties')) {
@@ -121,8 +136,15 @@ export const canEditProperty = (property: Property): boolean => {
 
 /**
  * Check if user can delete a property
+ * Prefers backend-calculated permissions if available
  */
 export const canDeleteProperty = (property: Property): boolean => {
+  // Use backend-calculated permission if available
+  if (property.permissions) {
+    return property.permissions.can_delete;
+  }
+
+  // Fallback to frontend calculation (for backward compatibility)
   if (can('delete_others_properties')) return true;
 
   if (can('delete_properties')) {
@@ -147,6 +169,8 @@ export const canExportData = (): boolean => can('export_properties');
 export const canViewAllProperties = (): boolean => can('view_all_properties');
 
 export const canViewStatistics = (): boolean => can('view_statistics') || can('view_team_statistics') || can('view_own_statistics');
+
+export const canManageUsers = (): boolean => can('manage_dashboard_users');
 
 /**
  * Get role label in Spanish

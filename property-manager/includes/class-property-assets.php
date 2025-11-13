@@ -240,6 +240,7 @@ class Property_Assets {
             'delete_others_properties',
             'assign_properties',
             'manage_property_roles',
+            'manage_dashboard_users',
             'export_properties',
             'view_statistics',
             'view_team_statistics',

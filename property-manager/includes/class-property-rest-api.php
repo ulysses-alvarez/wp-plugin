@@ -1011,6 +1011,14 @@ class Property_REST_API {
             // Get audit information
             $audit_info = Property_Audit::get_audit_info($post->ID);
 
+            // Calculate permissions for current user
+            $current_user_id = get_current_user_id();
+            $permissions = [
+                'can_edit'   => Property_Roles::can_edit_property($current_user_id, $post->ID),
+                'can_delete' => Property_Roles::can_delete_property($current_user_id, $post->ID),
+                'can_assign' => current_user_can('assign_properties'),
+            ];
+
             return [
                 'id'              => $post->ID,
                 'title'           => $post->post_title,
@@ -1032,6 +1040,7 @@ class Property_REST_API {
                 'updated_at'      => $post->post_modified,
                 'last_dashboard_update' => get_post_meta($post->ID, '_property_last_dashboard_update', true) ?: null,
                 'audit'           => $audit_info,
+                'permissions'     => $permissions,
             ];
         } catch (Exception $e) {
             error_log('prepare_property_response Exception: ' . $e->getMessage() . ' in ' . $e->getFile() . ':' . $e->getLine());

@@ -580,6 +580,7 @@ export const PropertiesPage = () => {
       {/* Bulk Actions Bar */}
       <BulkActionsBar
         selectedCount={selectedIds.size}
+        selectedProperties={selectedProperties}
         onDeselectAll={handleDeselectAll}
         onDelete={handleBulkDelete}
         onStatusChange={handleBulkStatusChange}

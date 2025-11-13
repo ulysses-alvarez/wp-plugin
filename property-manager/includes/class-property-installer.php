@@ -21,6 +21,9 @@ class Property_Installer {
         // Register roles and capabilities
         Property_Roles::register_roles();
 
+        // Save roles version
+        update_option('property_manager_roles_version', PROPERTY_MANAGER_ROLES_VERSION);
+
         // Flush rewrite rules to enable CPT URLs
         flush_rewrite_rules();
 

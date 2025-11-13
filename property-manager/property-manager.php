@@ -20,6 +20,7 @@ if (!defined('ABSPATH')) {
 
 // Define plugin constants
 define('PROPERTY_MANAGER_VERSION', '1.0.0');
+define('PROPERTY_MANAGER_ROLES_VERSION', '1.0.1'); // Increment this when roles/capabilities change
 define('PROPERTY_MANAGER_PATH', plugin_dir_path(__FILE__));
 define('PROPERTY_MANAGER_URL', plugin_dir_url(__FILE__));
 define('PROPERTY_MANAGER_FILE', __FILE__);
@@ -47,6 +48,22 @@ register_activation_hook(__FILE__, ['Property_Installer', 'activate']);
  * Deactivation hook
  */
 register_deactivation_hook(__FILE__, ['Property_Installer', 'deactivate']);
+
+/**
+ * Check and update roles if needed
+ * This runs on every plugin load to ensure roles are up to date
+ */
+function property_manager_check_roles_version() {
+    $current_roles_version = get_option('property_manager_roles_version', '0');
+
+    // If roles version is outdated, recreate roles
+    if (version_compare($current_roles_version, PROPERTY_MANAGER_ROLES_VERSION, '<')) {
+        Property_Roles::register_roles();
+        update_option('property_manager_roles_version', PROPERTY_MANAGER_ROLES_VERSION);
+        error_log('Property Manager: Roles updated to version ' . PROPERTY_MANAGER_ROLES_VERSION);
+    }
+}
+add_action('admin_init', 'property_manager_check_roles_version');
 
 /**
  * Initialize plugin
