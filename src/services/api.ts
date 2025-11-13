@@ -66,12 +66,18 @@ const getAPIConfig = () => {
 /**
  * Get default headers for API requests
  */
-const getHeaders = (): HeadersInit => {
+const getHeaders = (includeDashboardUpdate = false): HeadersInit => {
   const config = getAPIConfig();
-  return {
+  const headers: HeadersInit = {
     'Content-Type': 'application/json',
     'X-WP-Nonce': config.nonce
   };
+  
+  if (includeDashboardUpdate) {
+    headers['X-Dashboard-Update'] = 'true';
+  }
+  
+  return headers;
 };
 
 /**
@@ -196,7 +202,7 @@ export const updateProperty = async (
 
   const response = await fetch(url, {
     method: 'PUT',
-    headers: getHeaders(),
+    headers: getHeaders(true), // Include X-Dashboard-Update header
     body: JSON.stringify(data)
   });
 
@@ -350,7 +356,7 @@ export const bulkUpdateStatus = async (
 
   const response = await fetch(url, {
     method: 'POST',
-    headers: getHeaders(),
+    headers: getHeaders(true), // Include X-Dashboard-Update header
     body: JSON.stringify({
       property_ids: propertyIds,
       status
@@ -376,7 +382,7 @@ export const bulkUpdatePatent = async (
 
   const response = await fetch(url, {
     method: 'POST',
-    headers: getHeaders(),
+    headers: getHeaders(true), // Include X-Dashboard-Update header
     body: JSON.stringify({
       property_ids: propertyIds,
       patent

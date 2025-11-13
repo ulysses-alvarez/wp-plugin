@@ -315,6 +315,32 @@ export const PropertySidebar = ({
                   </p>
                 </div>
               )}
+
+              {/* Last Dashboard Update Card - Only show if exists */}
+              {property.last_dashboard_update && (
+                <div className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm">
+                  <h4 className="text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2 uppercase tracking-wide">
+                    <svg className="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    Información de Actualización
+                  </h4>
+                  <div className="space-y-2">
+                    <div className="flex items-start gap-3">
+                      <span className="text-sm text-gray-500 min-w-[140px] font-medium">Última actualización:</span>
+                      <span className="text-sm text-gray-900 font-medium flex-1">
+                        {new Date(property.last_dashboard_update).toLocaleString('es-MX', {
+                          year: 'numeric',
+                          month: 'long',
+                          day: 'numeric',
+                          hour: '2-digit',
+                          minute: '2-digit'
+                        })}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </div>

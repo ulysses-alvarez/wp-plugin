@@ -220,6 +220,15 @@ class Property_Meta {
             'normal',
             'high'
         );
+
+        add_meta_box(
+            'property_last_update',
+            __('Información de Actualización', 'property-dashboard'),
+            [self::class, 'render_last_update_meta_box'],
+            'property',
+            'side',
+            'default'
+        );
     }
 
     /**
@@ -532,6 +541,40 @@ class Property_Meta {
                 </td>
             </tr>
         </table>
+        <?php
+    }
+
+    /**
+     * Render last update meta box (read-only)
+     */
+    public static function render_last_update_meta_box($post) {
+        // Get last dashboard update
+        $last_dashboard_update = get_post_meta($post->ID, '_property_last_dashboard_update', true);
+        
+        ?>
+        <div class="property-last-update-info">
+            <?php if ($last_dashboard_update): ?>
+                <p>
+                    <strong><?php _e('Última actualización:', 'property-dashboard'); ?></strong><br>
+                    <span style="color: #666; font-size: 13px;">
+                        <?php 
+                        // Format date in Spanish using WordPress date_i18n
+                        $timestamp = strtotime($last_dashboard_update);
+                        $formatted_date = date_i18n(get_option('date_format') . ' ' . get_option('time_format'), $timestamp);
+                        echo esc_html($formatted_date);
+                        ?>
+                    </span>
+                </p>
+            <?php else: ?>
+                <p style="color: #999; font-style: italic;">
+                    <?php _e('Esta propiedad aún no ha sido actualizada desde el Dashboard.', 'property-dashboard'); ?>
+                </p>
+            <?php endif; ?>
+            
+            <p class="description" style="margin-top: 10px; font-size: 12px; color: #666;">
+                <?php _e('Este campo muestra la última vez que la propiedad fue actualizada desde el Dashboard de Propiedades. Es solo informativo y no se puede editar.', 'property-dashboard'); ?>
+            </p>
+        </div>
         <?php
     }
 

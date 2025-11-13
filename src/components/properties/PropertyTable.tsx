@@ -307,7 +307,7 @@ export const PropertyTable = ({
       {isCustomSort && (
         <>
           {/* Mobile: Versión compacta */}
-          <div className="sm:hidden bg-primary-light border-b border-primary/20 px-3 py-2">
+          <div className="sm:hidden bg-primary-light border-b border-primary/20 px-3 py-2 flex-shrink-0">
             <div className="flex items-center justify-between gap-2">
               <span className="text-xs text-gray-700 flex items-center gap-1.5">
                 <svg className="w-3.5 h-3.5 text-primary flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -331,7 +331,7 @@ export const PropertyTable = ({
           </div>
 
           {/* Desktop: Versión completa */}
-          <div className="hidden sm:block bg-primary-light border-b border-primary/20 px-6 py-3">
+          <div className="hidden sm:block bg-primary-light border-b border-primary/20 px-6 py-3 flex-shrink-0">
             <div className="flex items-center justify-between gap-4">
               <div className="flex items-center gap-2 text-sm">
                 <svg className="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -359,262 +359,260 @@ export const PropertyTable = ({
         </>
       )}
 
-      {/* Table Container - Scrollable */}
-      <div className="flex-1 overflow-hidden flex flex-col">
-        <div className="flex-1 overflow-auto px-4 sm:px-0">
-          <table className="w-full">
-            <thead>
-              <tr className="bg-gray-50 border-b border-gray-200">
-                {/* Checkbox column */}
-                <th className="sticky top-0 z-30 bg-gray-50 w-12 px-3 py-2 sm:py-3">
-                  <input
-                    type="checkbox"
-                    checked={isAllCurrentPageSelected}
-                    ref={(input) => {
-                      if (input) {
-                        input.indeterminate = isSomeCurrentPageSelected;
-                      }
-                    }}
-                    onChange={handleSelectAllCurrentPage}
-                    className="checkbox-primary"
-                    title={
-                      isAllCurrentPageSelected
-                        ? 'Deseleccionar todas'
-                        : 'Seleccionar todas'
+      {/* Table Container - Scrollable con altura calculada */}
+      <div className="flex-1 min-h-0 overflow-auto px-4 sm:px-0">
+        <table className="w-full">
+          <thead>
+            <tr className="bg-gray-50 border-b border-gray-200">
+              {/* Checkbox column */}
+              <th className="sticky top-0 z-30 bg-gray-50 w-12 px-3 py-2 sm:py-3">
+                <input
+                  type="checkbox"
+                  checked={isAllCurrentPageSelected}
+                  ref={(input) => {
+                    if (input) {
+                      input.indeterminate = isSomeCurrentPageSelected;
                     }
-                  />
-                </th>
-                <SortableTableHeader
-                  label="Propiedad"
-                  sortKey="title"
-                  currentSortBy={sortBy}
-                  currentSortOrder={sortOrder}
-                  onSort={handleSort}
+                  }}
+                  onChange={handleSelectAllCurrentPage}
+                  className="checkbox-primary"
+                  title={
+                    isAllCurrentPageSelected
+                      ? 'Deseleccionar todas'
+                      : 'Seleccionar todas'
+                  }
                 />
-                <SortableTableHeader
-                  label="Ubicación"
-                  sortKey="state"
-                  currentSortBy={sortBy}
-                  currentSortOrder={sortOrder}
-                  onSort={handleSort}
-                  className="hidden md:table-cell"
-                />
-                <SortableTableHeader
-                  label="Estado"
-                  sortKey="status"
-                  currentSortBy={sortBy}
-                  currentSortOrder={sortOrder}
-                  onSort={handleSort}
-                />
-                <SortableTableHeader
-                  label="Precio"
-                  sortKey="price"
-                  currentSortBy={sortBy}
-                  currentSortOrder={sortOrder}
-                  onSort={handleSort}
-                  className="hidden md:table-cell"
-                />
-                <th className="sticky top-0 right-0 z-30 bg-gray-50 px-2 py-2 sm:px-6 sm:py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider shadow-sticky-column">
-                  <span className="hidden sm:inline">Acciones</span>
-                  <span className="sm:hidden sr-only">Acciones</span>
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {properties.map((property) => {
-                const canEdit = canEditProperty(property);
-                const canDelete = canDeleteProperty(property);
-                const isHovered = hoveredRow === property.id;
-                const isSelected = isPropertySelected(property.id);
+              </th>
+              <SortableTableHeader
+                label="Propiedad"
+                sortKey="title"
+                currentSortBy={sortBy}
+                currentSortOrder={sortOrder}
+                onSort={handleSort}
+              />
+              <SortableTableHeader
+                label="Ubicación"
+                sortKey="state"
+                currentSortBy={sortBy}
+                currentSortOrder={sortOrder}
+                onSort={handleSort}
+                className="hidden md:table-cell"
+              />
+              <SortableTableHeader
+                label="Estado"
+                sortKey="status"
+                currentSortBy={sortBy}
+                currentSortOrder={sortOrder}
+                onSort={handleSort}
+              />
+              <SortableTableHeader
+                label="Precio"
+                sortKey="price"
+                currentSortBy={sortBy}
+                currentSortOrder={sortOrder}
+                onSort={handleSort}
+                className="hidden md:table-cell"
+              />
+              <th className="sticky top-0 right-0 z-30 bg-gray-50 px-2 py-2 sm:px-6 sm:py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider shadow-sticky-column">
+                <span className="hidden sm:inline">Acciones</span>
+                <span className="sm:hidden sr-only">Acciones</span>
+              </th>
+            </tr>
+          </thead>
+          <tbody className="bg-white divide-y divide-gray-200">
+            {properties.map((property) => {
+              const canEdit = canEditProperty(property);
+              const canDelete = canDeleteProperty(property);
+              const isHovered = hoveredRow === property.id;
+              const isSelected = isPropertySelected(property.id);
 
-                return (
-                  <tr
-                    key={property.id}
-                    className={clsx(
-                      'transition-colors cursor-pointer',
-                      isHovered
-                        ? 'bg-gray-100'
-                        : 'hover:bg-gray-50'
-                    )}
-                    onMouseEnter={() => setHoveredRow(property.id)}
-                    onMouseLeave={() => setHoveredRow(null)}
-                    onClick={() => onPropertySelect(property)}
+              return (
+                <tr
+                  key={property.id}
+                  className={clsx(
+                    'transition-colors cursor-pointer',
+                    isHovered
+                      ? 'bg-gray-100'
+                      : 'hover:bg-gray-50'
+                  )}
+                  onMouseEnter={() => setHoveredRow(property.id)}
+                  onMouseLeave={() => setHoveredRow(null)}
+                  onClick={() => onPropertySelect(property)}
+                >
+                  {/* Checkbox */}
+                  <td
+                    className="w-12 px-3 py-3"
+                    onClick={(e) => e.stopPropagation()}
                   >
-                    {/* Checkbox */}
-                    <td
-                      className="w-12 px-3 py-3"
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      <input
-                        type="checkbox"
-                        checked={isSelected}
-                        onChange={() => toggleProperty(property.id)}
-                        className="checkbox-primary"
-                        title={
-                          isSelected
-                            ? 'Deseleccionar propiedad'
-                            : 'Seleccionar propiedad'
-                        }
-                      />
-                    </td>
+                    <input
+                      type="checkbox"
+                      checked={isSelected}
+                      onChange={() => toggleProperty(property.id)}
+                      className="checkbox-primary"
+                      title={
+                        isSelected
+                          ? 'Deseleccionar propiedad'
+                          : 'Seleccionar propiedad'
+                      }
+                    />
+                  </td>
 
-                    {/* Property Name & Patent */}
-                    <td className="px-3 py-3 sm:px-6 sm:py-4">
-                      <div className="flex flex-col">
-                        <div className="text-sm font-medium text-gray-900 truncate max-w-xs">
-                          {property.title}
+                  {/* Property Name & Patent */}
+                  <td className="px-3 py-3 sm:px-6 sm:py-4">
+                    <div className="flex flex-col">
+                      <div className="text-sm font-medium text-gray-900 truncate max-w-xs">
+                        {property.title}
+                      </div>
+                      {property.patent && (
+                        <div className="text-sm text-gray-500 mt-0.5">
+                          Patente: {property.patent}
                         </div>
-                        {property.patent && (
-                          <div className="text-sm text-gray-500 mt-0.5">
-                            Patente: {property.patent}
-                          </div>
-                        )}
-                      </div>
-                    </td>
-
-                    {/* Location */}
-                    <td className="hidden md:table-cell px-3 py-3 sm:px-6 sm:py-4">
-                      <div className="text-sm text-gray-900 flex items-start gap-1.5">
-                        <svg className="w-4 h-4 text-gray-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                        </svg>
-                        <div className="flex flex-col max-w-xs">
-                          {property.state && (
-                            <span className="font-medium truncate">{getStateLabel(property.state)}</span>
-                          )}
-                          <span className="text-gray-600 text-sm truncate">
-                            {property.municipality}
-                            {property.neighborhood && `, ${property.neighborhood}`}
-                            {property.postal_code && `. C.P. ${property.postal_code}`}
-                          </span>
-                        </div>
-                      </div>
-                    </td>
-
-                    {/* Status */}
-                    <td className="px-3 py-3 sm:px-6 sm:py-4">
-                      <Badge 
-                        variant={getStatusVariant(property.status)}
-                        className="px-1.5 py-0.5 text-xs sm:px-2.5 sm:py-1 sm:text-sm"
-                      >
-                        {getStatusLabel(property.status)}
-                      </Badge>
-                    </td>
-
-                    {/* Price */}
-                    <td className="hidden md:table-cell px-3 py-3 sm:px-6 sm:py-4">
-                      <div className="text-sm font-semibold text-gray-900">
-                        {formatPrice(property.price)}
-                      </div>
-                    </td>
-
-                    {/* Actions - Sticky Column */}
-                    <td 
-                      className={clsx(
-                        'sticky right-0 z-10 px-2 py-2 sm:px-6 sm:py-4 text-right shadow-sticky-column',
-                        isHovered ? 'bg-gray-100' : 'bg-white'
                       )}
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      {/* Mobile/Tablet: Action Menu (< 1024px) */}
-                      <div className="lg:hidden flex items-center justify-end">
-                        <PropertyActionMenu
-                          property={property}
-                          canEdit={canEdit}
-                          canDelete={canDelete}
-                          onView={onPropertySelect}
-                          onEdit={onPropertyEdit}
-                          onDelete={onPropertyDelete}
-                        />
-                      </div>
+                    </div>
+                  </td>
 
-                      {/* Desktop: Individual Action Buttons (>= 1024px) - Tamaños responsive */}
-                      <div className="hidden lg:flex items-center justify-end gap-1">
-                        {/* Ver */}
+                  {/* Location */}
+                  <td className="hidden md:table-cell px-3 py-3 sm:px-6 sm:py-4">
+                    <div className="text-sm text-gray-900 flex items-start gap-1.5">
+                      <svg className="w-4 h-4 text-gray-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                      </svg>
+                      <div className="flex flex-col max-w-xs">
+                        {property.state && (
+                          <span className="font-medium truncate">{getStateLabel(property.state)}</span>
+                        )}
+                        <span className="text-gray-600 text-sm truncate">
+                          {property.municipality}
+                          {property.neighborhood && `, ${property.neighborhood}`}
+                          {property.postal_code && `. C.P. ${property.postal_code}`}
+                        </span>
+                      </div>
+                    </div>
+                  </td>
+
+                  {/* Status */}
+                  <td className="px-3 py-3 sm:px-6 sm:py-4">
+                    <Badge 
+                      variant={getStatusVariant(property.status)}
+                      className="px-1.5 py-0.5 text-xs sm:px-2.5 sm:py-1 sm:text-sm"
+                    >
+                      {getStatusLabel(property.status)}
+                    </Badge>
+                  </td>
+
+                  {/* Price */}
+                  <td className="hidden md:table-cell px-3 py-3 sm:px-6 sm:py-4">
+                    <div className="text-sm font-semibold text-gray-900">
+                      {formatPrice(property.price)}
+                    </div>
+                  </td>
+
+                  {/* Actions - Sticky Column */}
+                  <td 
+                    className={clsx(
+                      'sticky right-0 z-10 px-2 py-2 sm:px-6 sm:py-4 text-right shadow-sticky-column',
+                      isHovered ? 'bg-gray-100' : 'bg-white'
+                    )}
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    {/* Mobile/Tablet: Action Menu (< 1024px) */}
+                    <div className="lg:hidden flex items-center justify-end">
+                      <PropertyActionMenu
+                        property={property}
+                        canEdit={canEdit}
+                        canDelete={canDelete}
+                        onView={onPropertySelect}
+                        onEdit={onPropertyEdit}
+                        onDelete={onPropertyDelete}
+                      />
+                    </div>
+
+                    {/* Desktop: Individual Action Buttons (>= 1024px) - Tamaños responsive */}
+                    <div className="hidden lg:flex items-center justify-end gap-1">
+                      {/* Ver */}
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onPropertySelect(property);
+                        }}
+                        className="p-1 sm:p-1.5 text-gray-600 hover:text-primary hover:bg-primary-light rounded-lg transition-colors"
+                        title="Ver detalles"
+                      >
+                        <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                        </svg>
+                      </button>
+
+                      {/* Editar */}
+                      {canEdit && onPropertyEdit && (
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
-                            onPropertySelect(property);
+                            onPropertyEdit(property);
                           }}
                           className="p-1 sm:p-1.5 text-gray-600 hover:text-primary hover:bg-primary-light rounded-lg transition-colors"
-                          title="Ver detalles"
+                          title="Editar"
                         >
                           <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                           </svg>
                         </button>
+                      )}
 
-                        {/* Editar */}
-                        {canEdit && onPropertyEdit && (
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              onPropertyEdit(property);
-                            }}
-                            className="p-1 sm:p-1.5 text-gray-600 hover:text-primary hover:bg-primary-light rounded-lg transition-colors"
-                            title="Editar"
-                          >
-                            <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                            </svg>
-                          </button>
-                        )}
+                      {/* Descargar ficha */}
+                      {property.attachment_url && (
+                        <a
+                          href={property.attachment_url}
+                          download
+                          onClick={(e) => e.stopPropagation()}
+                          className="p-1 sm:p-1.5 text-gray-600 hover:text-success hover:bg-success-light rounded-lg transition-colors"
+                          title="Descargar ficha"
+                        >
+                          <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                          </svg>
+                        </a>
+                      )}
 
-                        {/* Descargar ficha */}
-                        {property.attachment_url && (
-                          <a
-                            href={property.attachment_url}
-                            download
-                            onClick={(e) => e.stopPropagation()}
-                            className="p-1 sm:p-1.5 text-gray-600 hover:text-success hover:bg-success-light rounded-lg transition-colors"
-                            title="Descargar ficha"
-                          >
-                            <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                            </svg>
-                          </a>
-                        )}
-
-                        {/* Eliminar */}
-                        {canDelete && onPropertyDelete && (
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              onPropertyDelete(property);
-                            }}
-                            className="p-1 sm:p-1.5 text-gray-600 hover:text-danger hover:bg-danger-light rounded-lg transition-colors"
-                            title="Eliminar"
-                          >
-                            <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                            </svg>
-                          </button>
-                        )}
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
-
-        {/* Pagination - Fixed at bottom, con padding lateral en mobile */}
-        {total > 0 && (
-          <div className="flex-shrink-0 border-t border-gray-200 px-4 py-3 sm:px-6 sm:py-4 bg-gray-50">
-            <Pagination
-              currentPage={currentPage}
-              totalPages={totalPages}
-              total={total}
-              perPage={perPage}
-              onPageChange={handlePageChange}
-              onPerPageChange={handlePerPageChange}
-            />
-          </div>
-        )}
+                      {/* Eliminar */}
+                      {canDelete && onPropertyDelete && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onPropertyDelete(property);
+                          }}
+                          className="p-1 sm:p-1.5 text-gray-600 hover:text-danger hover:bg-danger-light rounded-lg transition-colors"
+                          title="Eliminar"
+                        >
+                          <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                          </svg>
+                        </button>
+                      )}
+                    </div>
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
       </div>
+
+      {/* Pagination - Fixed at bottom en mobile, normal en desktop */}
+      {total > 0 && (
+        <div className="flex-shrink-0 border-t border-gray-200 px-4 py-2.5 sm:px-6 sm:py-4 bg-gray-50">
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            total={total}
+            perPage={perPage}
+            onPageChange={handlePageChange}
+            onPerPageChange={handlePerPageChange}
+          />
+        </div>
+      )}
 
       {/* Loading Overlay */}
       {loading && !initialLoad && (

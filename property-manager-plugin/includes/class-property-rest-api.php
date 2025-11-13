@@ -642,6 +642,15 @@ class Property_REST_API {
             // Update meta fields
             $this->update_property_meta($property_id, $request);
 
+            // Check if update comes from dashboard (via custom header)
+            $is_dashboard_update = isset($_SERVER['HTTP_X_DASHBOARD_UPDATE']) && 
+                                  $_SERVER['HTTP_X_DASHBOARD_UPDATE'] === 'true';
+            
+            if ($is_dashboard_update) {
+                // Update last dashboard update timestamp
+                update_post_meta($property_id, '_property_last_dashboard_update', current_time('mysql'));
+            }
+
             $updated_post = get_post($property_id);
 
             if (!$updated_post) {
@@ -983,6 +992,7 @@ class Property_REST_API {
                 'author_name'     => $author ? $author->display_name : '',
                 'created_at'      => $post->post_date,
                 'updated_at'      => $post->post_modified,
+                'last_dashboard_update' => get_post_meta($post->ID, '_property_last_dashboard_update', true) ?: null,
             ];
         } catch (Exception $e) {
             error_log('prepare_property_response Exception: ' . $e->getMessage() . ' in ' . $e->getFile() . ':' . $e->getLine());
@@ -1180,6 +1190,15 @@ class Property_REST_API {
             // Attempt to update
             $updated = update_post_meta($property_id, '_property_status', $new_status);
 
+            // Check if update comes from dashboard (via custom header)
+            $is_dashboard_update = isset($_SERVER['HTTP_X_DASHBOARD_UPDATE']) && 
+                                  $_SERVER['HTTP_X_DASHBOARD_UPDATE'] === 'true';
+            
+            if ($is_dashboard_update && $updated !== false) {
+                // Update last dashboard update timestamp
+                update_post_meta($property_id, '_property_last_dashboard_update', current_time('mysql'));
+            }
+
             // CRITICAL: Clear ALL caches to ensure fresh data is read immediately
             clean_post_cache($property_id);
             wp_cache_delete($property_id, 'post_meta');
@@ -1266,6 +1285,15 @@ class Property_REST_API {
 
             // Update patent (idempotent - will update even if same value)
             $updated = update_post_meta($property_id, '_property_patent', $new_patent);
+
+            // Check if update comes from dashboard (via custom header)
+            $is_dashboard_update = isset($_SERVER['HTTP_X_DASHBOARD_UPDATE']) && 
+                                  $_SERVER['HTTP_X_DASHBOARD_UPDATE'] === 'true';
+            
+            if ($is_dashboard_update && $updated !== false) {
+                // Update last dashboard update timestamp
+                update_post_meta($property_id, '_property_last_dashboard_update', current_time('mysql'));
+            }
 
             // CRITICAL: Clear ALL caches to ensure fresh data is read immediately
             clean_post_cache($property_id);

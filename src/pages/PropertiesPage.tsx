@@ -554,24 +554,26 @@ export const PropertiesPage = () => {
   };
 
   return (
-    <div className="h-full flex flex-col">
-      <PropertyFilters
-        onCreateNew={handleCreateNew}
-        onExport={handleExport}
-        onImport={() => setIsImportModalOpen(true)}
-      />
+    <div className="h-full flex flex-col overflow-hidden">
+      {/* Filters - Fixed at top */}
+      <div className="flex-shrink-0">
+        <PropertyFilters
+          onCreateNew={handleCreateNew}
+          onExport={handleExport}
+          onImport={() => setIsImportModalOpen(true)}
+        />
+      </div>
 
-      <div className="flex-1 overflow-auto">
+      {/* Table Container - Scrollable content with fixed footer */}
+      <div className="flex-1 min-h-0 overflow-hidden">
         <div className="sm:px-6 lg:px-8 pt-6 h-full flex flex-col">
-          <div className="flex-1 overflow-hidden">
-            <PropertyTable
-              onPropertySelect={handlePropertySelect}
-              onPropertyEdit={handleEdit}
-              onPropertyDelete={handleDelete}
-              onCreateNew={handleCreateNew}
-              onSelectionChange={handleSelectionChange}
-            />
-          </div>
+          <PropertyTable
+            onPropertySelect={handlePropertySelect}
+            onPropertyEdit={handleEdit}
+            onPropertyDelete={handleDelete}
+            onCreateNew={handleCreateNew}
+            onSelectionChange={handleSelectionChange}
+          />
         </div>
       </div>
 

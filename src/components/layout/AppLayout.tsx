@@ -30,7 +30,7 @@ export const AppLayout = () => {
   const closeSidebar = () => setIsSidebarOpen(false);
 
   return (
-    <div className="flex h-screen bg-gray-50 overflow-hidden">
+    <div className="flex h-screen bg-gray-50 overflow-hidden supports-[height:100dvh]:h-dvh">
       <AppSidebar isOpen={isSidebarOpen} onClose={closeSidebar} />
       <div className="flex-1 flex flex-col overflow-hidden">
         <AppHeader onToggleSidebar={toggleSidebar} isSidebarOpen={isSidebarOpen} />

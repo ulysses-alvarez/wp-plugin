@@ -25,6 +25,7 @@ export interface Property {
   attachment_url?: string;
   created_at?: string;
   updated_at?: string;
+  last_dashboard_update?: string | null;
 }
 
 // WordPress User Type
