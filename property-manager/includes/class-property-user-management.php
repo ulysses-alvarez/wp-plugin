@@ -50,6 +50,7 @@ class Property_User_Management {
 
         // Only allow property_admin to see these roles (for creating new users)
         $allowed_roles = [
+            'property_admin',
             'property_manager',
             'property_associate'
         ];
@@ -77,7 +78,7 @@ class Property_User_Management {
         $new_role = isset($_POST['role']) ? $_POST['role'] : '';
 
         // Allowed roles for property_admin to assign
-        $allowed_roles_to_assign = ['property_manager', 'property_associate'];
+        $allowed_roles_to_assign = ['property_admin', 'property_manager', 'property_associate'];
 
         // Check if trying to assign a prohibited role (including property_admin)
         if (!empty($new_role) && !in_array($new_role, $allowed_roles_to_assign)) {
@@ -146,9 +147,9 @@ class Property_User_Management {
         }
 
         $user_role = $user->roles[0];
-        $allowed_roles_to_edit = ['property_manager', 'property_associate'];
+        $allowed_roles_to_edit = ['property_admin', 'property_manager', 'property_associate'];
 
-        // Property admin cannot edit other property admins or prohibited roles
+        // Property admin can now edit other property admins and allowed roles
         if (!in_array($user_role, $allowed_roles_to_edit)) {
             wp_die(
                 __('No tienes permisos para editar este usuario.', 'property-dashboard'),
@@ -191,9 +192,9 @@ class Property_User_Management {
         }
 
         $target_role = $target_user->roles[0];
-        $allowed_roles_to_delete = ['property_manager', 'property_associate'];
+        $allowed_roles_to_delete = ['property_admin', 'property_manager', 'property_associate'];
 
-        // Property admin cannot delete other property admins or prohibited roles
+        // Property admin can now delete other property admins and allowed roles
         if (!in_array($target_role, $allowed_roles_to_delete)) {
             $allcaps['delete_user'] = false;
             $allcaps['delete_users'] = false;
@@ -249,7 +250,7 @@ class Property_User_Management {
         }
 
         // Filter to only show allowed roles plus current user
-        $allowed_roles = ['property_manager', 'property_associate'];
+        $allowed_roles = ['property_admin', 'property_manager', 'property_associate'];
 
         // IMPORTANT: Remove this filter temporarily to avoid infinite loop
         remove_action('pre_get_users', [__CLASS__, 'filter_users_list']);

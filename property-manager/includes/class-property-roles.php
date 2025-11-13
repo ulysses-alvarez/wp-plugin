@@ -86,6 +86,7 @@ class Property_Roles {
             'create_users'           => true,
             'edit_users'             => true,
             'delete_users'           => true,
+            'promote_users'          => true,
             'manage_dashboard_users' => true,
 
             // Settings access
