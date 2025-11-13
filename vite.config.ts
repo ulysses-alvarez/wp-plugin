@@ -13,7 +13,7 @@ export default defineConfig({
   },
 
   build: {
-    outDir: 'property-manager-plugin/dist',
+    outDir: 'property-manager/dist',
     emptyOutDir: true,
 
     rollupOptions: {

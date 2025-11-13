@@ -973,6 +973,9 @@ class Property_REST_API {
                 }
             }
 
+            // Get audit information
+            $audit_info = Property_Audit::get_audit_info($post->ID);
+
             return [
                 'id'              => $post->ID,
                 'title'           => $post->post_title,
@@ -993,6 +996,7 @@ class Property_REST_API {
                 'created_at'      => $post->post_date,
                 'updated_at'      => $post->post_modified,
                 'last_dashboard_update' => get_post_meta($post->ID, '_property_last_dashboard_update', true) ?: null,
+                'audit'           => $audit_info,
             ];
         } catch (Exception $e) {
             error_log('prepare_property_response Exception: ' . $e->getMessage() . ' in ' . $e->getFile() . ':' . $e->getLine());

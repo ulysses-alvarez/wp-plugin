@@ -121,7 +121,7 @@ class Property_Assets {
      * @param array $config Configuration passed from shortcode
      */
     public static function enqueue_app($config = []) {
-        $dist_url = plugin_dir_url(dirname(__FILE__)) . 'dist/';
+        $dist_url = PROPERTY_MANAGER_URL . 'dist/';
 
         // Version con timestamp para forzar recarga
         $version = '1.0.0-' . time();

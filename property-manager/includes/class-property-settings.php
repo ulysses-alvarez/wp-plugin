@@ -22,18 +22,18 @@ class Property_Settings {
      * Register REST API routes
      */
     public static function register_routes() {
-        // GET /settings
+        // GET /settings - All authenticated users can read settings (logo, colors)
         register_rest_route('property-dashboard/v1', '/settings', [
             'methods' => 'GET',
             'callback' => [__CLASS__, 'get_settings'],
-            'permission_callback' => [__CLASS__, 'check_permissions']
+            'permission_callback' => [__CLASS__, 'check_read_permissions']
         ]);
 
-        // POST /settings
+        // POST /settings - Only Admin can modify settings
         register_rest_route('property-dashboard/v1', '/settings', [
             'methods' => 'POST',
             'callback' => [__CLASS__, 'update_settings'],
-            'permission_callback' => [__CLASS__, 'check_permissions'],
+            'permission_callback' => [__CLASS__, 'check_write_permissions'],
             'args' => [
                 'logoId' => [
                     'type' => 'integer',
@@ -47,18 +47,18 @@ class Property_Settings {
             ]
         ]);
 
-        // POST /settings/upload-logo
+        // POST /settings/upload-logo - Only Admin can upload logo
         register_rest_route('property-dashboard/v1', '/settings/upload-logo', [
             'methods' => 'POST',
             'callback' => [__CLASS__, 'upload_logo'],
-            'permission_callback' => [__CLASS__, 'check_permissions']
+            'permission_callback' => [__CLASS__, 'check_write_permissions']
         ]);
 
-        // DELETE /settings/delete-logo
+        // DELETE /settings/delete-logo - Only Admin can delete logo
         register_rest_route('property-dashboard/v1', '/settings/delete-logo', [
             'methods' => 'DELETE',
             'callback' => [__CLASS__, 'delete_logo'],
-            'permission_callback' => [__CLASS__, 'check_permissions']
+            'permission_callback' => [__CLASS__, 'check_write_permissions']
         ]);
     }
 
@@ -244,10 +244,18 @@ class Property_Settings {
     }
 
     /**
-     * Check if user has permission to manage settings
+     * Check if user has permission to read settings
+     * All authenticated users with view_properties can read settings (logo, colors)
      */
-    public static function check_permissions() {
-        return current_user_can('manage_properties') ||
-               current_user_can('administrator');
+    public static function check_read_permissions() {
+        return current_user_can('view_properties');
+    }
+
+    /**
+     * Check if user has permission to write/modify settings
+     * Only Admin role can modify settings
+     */
+    public static function check_write_permissions() {
+        return current_user_can('manage_properties');
     }
 }
