@@ -32,9 +32,6 @@ class Property_Installer {
 
         // Create example page (optional)
         self::create_example_page();
-
-        // Log activation
-        error_log('Property Dashboard plugin activated successfully');
     }
 
     /**
@@ -46,8 +43,6 @@ class Property_Installer {
 
         // Note: We don't remove roles on deactivation
         // to preserve user data. Only remove on uninstall.
-
-        error_log('Property Dashboard plugin deactivated');
     }
 
     /**
@@ -93,7 +88,6 @@ class Property_Installer {
             if ($page_id && !is_wp_error($page_id)) {
                 // Store page ID in options
                 update_option('property_dashboard_page_id', $page_id);
-                error_log("Property Dashboard page created with ID: {$page_id}");
             }
         }
     }
