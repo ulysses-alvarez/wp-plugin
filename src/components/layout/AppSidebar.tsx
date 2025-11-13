@@ -14,7 +14,7 @@ export const AppSidebar = ({ isOpen, onClose }: AppSidebarProps) => {
       {/* Overlay para mobile */}
       {isOpen && (
         <div
-          className="fixed inset-0 bg-black bg-opacity-50 z-30 lg:hidden"
+          className="fixed inset-0 bg-black bg-opacity-50 z-[60] lg:hidden"
           onClick={onClose}
         />
       )}
@@ -23,17 +23,18 @@ export const AppSidebar = ({ isOpen, onClose }: AppSidebarProps) => {
       {isOpen && (
         <button
           onClick={onClose}
-          className="fixed top-4 right-4 z-50 lg:hidden bg-white rounded-full p-2 shadow-lg text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-colors"
+          className="fixed top-4 right-4 z-[70] lg:hidden p-2 text-white hover:text-gray-200 transition-colors"
+          style={{ filter: 'drop-shadow(0 0 3px black) drop-shadow(0 0 3px black)' }}
           aria-label="Cerrar menú"
         >
-          <X size={20} />
+          <X size={26} strokeWidth={2.5} />
         </button>
       )}
 
       {/* Sidebar */}
       <aside
         className={`
-          bg-sidebar flex flex-col h-screen z-40 border-r border-sidebar-border
+          bg-sidebar flex flex-col h-screen z-[70] border-r border-sidebar-border
           fixed inset-y-0 left-0 w-[260px]
           lg:static lg:w-[260px] lg:flex-shrink-0
           transform transition-transform duration-300 ease-in-out

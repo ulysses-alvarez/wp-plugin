@@ -78,14 +78,14 @@ export const BulkPatentModal = ({
       {/* Modal */}
       <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 pointer-events-none">
         <div
-          className="bg-white rounded-xl shadow-2xl max-w-lg w-full pointer-events-auto animate-in zoom-in-95 duration-200"
+          className="bg-white rounded-xl shadow-2xl max-w-lg w-full sm:w-fit pointer-events-auto animate-in zoom-in-95 duration-200"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header */}
           <div className="flex items-start justify-between p-4 sm:p-6 border-b border-gray-200">
             <div className="flex items-center gap-3">
               <div className="flex items-center justify-center w-12 h-12 bg-primary-light rounded-full">
-                <Tag className="w-6 h-6 text-primary" />
+                <Tag className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
               </div>
               <div>
                 <h2 className="text-xl font-semibold text-gray-900">

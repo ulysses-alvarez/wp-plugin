@@ -91,7 +91,7 @@
 
   /* Custom checkbox con color primario */
   .checkbox-primary {
-    @apply w-4 h-4 rounded cursor-pointer transition-colors;
+    @apply w-[14px] h-[14px] sm:w-4 sm:h-4 rounded cursor-pointer transition-colors;
     accent-color: var(--color-primary);
     border: none;
   }

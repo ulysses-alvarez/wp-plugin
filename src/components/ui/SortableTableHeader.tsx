@@ -75,7 +75,7 @@ export const SortableTableHeader = ({
   return (
     <th
       className={clsx(
-        'px-6 py-3 text-xs uppercase tracking-wider',
+        'sticky top-0 z-30 bg-gray-50 px-3 sm:px-6 py-2 sm:py-3 text-xs uppercase tracking-wider',
         'cursor-pointer select-none hover:bg-gray-100 transition-colors',
         getTextAlign(),
         isActive ? 'font-semibold text-gray-700' : 'font-medium text-gray-500',

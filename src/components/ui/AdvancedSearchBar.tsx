@@ -98,12 +98,12 @@ export const AdvancedSearchBar = ({
         <div className="flex-1 flex items-stretch gap-0 border border-gray-300 rounded-lg overflow-hidden focus-within:ring-2 focus-within:ring-primary/50 focus-within:border-primary transition-all">
           {/* Context Selector */}
           <div className="relative">
-            <select
-              value={selectedContext.value}
-              onChange={(e) => handleContextChange(e.target.value)}
-              className="h-full px-2 py-1.5 sm:px-3 sm:py-2.5 text-xs sm:text-sm w-[110px] sm:w-[130px] bg-gray-50 border-r border-gray-300 text-gray-700 font-medium focus:outline-none cursor-pointer hover:bg-gray-100 transition-colors"
-              aria-label="Campo de búsqueda"
-            >
+        <select
+          value={selectedContext.value}
+          onChange={(e) => handleContextChange(e.target.value)}
+          className="h-full px-2 py-2.5 sm:px-3 sm:py-2.5 text-xs sm:text-sm w-[125px] sm:w-[150px] pr-7 bg-gray-50 border-r border-gray-300 text-gray-700 font-medium focus:outline-none cursor-pointer hover:bg-gray-100 transition-colors"
+          aria-label="Campo de búsqueda"
+        >
               {SEARCH_CONTEXTS.map((context) => (
                 <option key={context.value} value={context.value}>
                   {context.label}
@@ -135,7 +135,7 @@ export const AdvancedSearchBar = ({
               <select
                 value={searchValue}
                 onChange={(e) => handleValueChange(e.target.value)}
-                className="w-full pl-8 sm:pl-10 pr-2 sm:pr-3 py-1.5 sm:py-2.5 text-xs sm:text-sm focus:outline-none"
+                className="w-full pl-8 sm:pl-10 pr-2 sm:pr-3 py-2.5 text-xs sm:text-sm focus:outline-none"
                 aria-label={selectedContext.label}
               >
                 <option value="">Todos</option>
@@ -160,7 +160,7 @@ export const AdvancedSearchBar = ({
                 value={searchValue}
                 onChange={(e) => handleValueChange(e.target.value)}
                 placeholder={selectedContext.placeholder}
-                className="w-full pl-8 sm:pl-10 pr-2 sm:pr-3 py-1.5 sm:py-2.5 text-xs sm:text-sm focus:outline-none"
+                className="w-full pl-8 sm:pl-10 pr-2 sm:pr-3 py-2.5 text-xs sm:text-sm focus:outline-none"
                 aria-label={selectedContext.label}
               />
             ) : (
@@ -170,7 +170,7 @@ export const AdvancedSearchBar = ({
                 value={searchValue}
                 onChange={(e) => handleValueChange(e.target.value)}
                 placeholder={selectedContext.placeholder}
-                className="w-full pl-8 sm:pl-10 pr-2 sm:pr-3 py-1.5 sm:py-2.5 text-xs sm:text-sm focus:outline-none"
+                className="w-full pl-8 sm:pl-10 pr-2 sm:pr-3 py-2.5 text-xs sm:text-sm focus:outline-none"
                 aria-label={selectedContext.label}
               />
             )}

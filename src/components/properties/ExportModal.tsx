@@ -168,7 +168,7 @@ export const ExportModal = ({
           <div className="flex items-start justify-between p-6 border-b border-gray-200">
             <div className="flex items-center gap-3">
               <div className="flex items-center justify-center w-12 h-12 bg-primary rounded-full">
-                <Download className="w-6 h-6 text-primary-text" />
+                <Download className="w-5 h-5 sm:w-6 sm:h-6 text-primary-text" />
               </div>
               <div>
                 <h2 className="text-xl font-semibold text-gray-900">

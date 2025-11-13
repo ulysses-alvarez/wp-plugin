@@ -76,7 +76,7 @@ export const DropdownMenu = ({
       {isOpen && (
         <div
           className={clsx(
-            'absolute z-50 mt-2 w-full min-w-[200px] bg-white rounded-lg shadow-lg border border-gray-200 py-1',
+            'absolute z-50 mt-2 w-40 sm:w-full min-w-[160px] sm:min-w-[200px] bg-white rounded-lg shadow-lg border border-gray-200 py-1',
             align === 'right' ? 'right-0' : 'left-0'
           )}
         >
@@ -108,7 +108,7 @@ export const DropdownMenuItem = ({
       onClick={onClick}
       disabled={disabled}
       className={clsx(
-        'w-full px-4 py-2.5 text-left text-sm font-medium flex items-center gap-3 transition-colors',
+        'w-full px-3 py-2 sm:px-4 sm:py-2.5 text-left text-sm font-medium flex items-center gap-2 sm:gap-3 transition-colors',
         variant === 'default' &&
           'text-gray-700 hover:bg-gray-50 active:bg-gray-100',
         variant === 'danger' &&

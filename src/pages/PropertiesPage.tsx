@@ -562,7 +562,7 @@ export const PropertiesPage = () => {
       />
 
       <div className="flex-1 overflow-auto">
-        <div className="px-4 sm:px-6 lg:px-8 py-6 h-full flex flex-col">
+        <div className="sm:px-6 lg:px-8 pt-6 h-full flex flex-col">
           <div className="flex-1 overflow-hidden">
             <PropertyTable
               onPropertySelect={handlePropertySelect}

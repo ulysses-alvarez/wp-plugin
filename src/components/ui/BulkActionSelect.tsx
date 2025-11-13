@@ -69,10 +69,11 @@ export const BulkActionSelect = ({
         type="button"
         onClick={handleToggle}
         className={clsx(
-          'flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg transition-all',
+          'flex items-center gap-2 px-3 py-1.5 sm:px-4 sm:py-2 text-sm font-medium rounded-lg transition-all',
           'bg-white text-gray-700 border border-gray-300',
           'hover:bg-gray-50',
           'focus:outline-none',
+          'w-[176px] sm:w-auto',
           isOpen && 'bg-gray-50 border-gray-400'
         )}
       >
@@ -87,7 +88,7 @@ export const BulkActionSelect = ({
 
       {/* Dropdown Menu */}
       {isOpen && (
-        <div className="absolute bottom-full right-0 mb-2 w-56 bg-white rounded-xl shadow-2xl border border-gray-200 py-2 z-50 animate-in fade-in zoom-in-95 duration-200 origin-bottom-right">
+        <div className="absolute bottom-full right-0 mb-2 w-[168px] sm:w-56 bg-white rounded-xl shadow-2xl border border-gray-200 py-2 z-50 animate-in fade-in zoom-in-95 duration-200 origin-bottom-right">
           {options.map((option) => {
             const Icon = option.icon;
             const isDanger = option.color === 'danger';
@@ -98,7 +99,7 @@ export const BulkActionSelect = ({
                 type="button"
                 onClick={() => handleSelect(option)}
                 className={clsx(
-                  'w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium transition-colors',
+                  'w-full flex items-center gap-2 sm:gap-3 px-3 py-2 sm:px-4 sm:py-2.5 text-sm font-medium transition-colors',
                   isDanger
                     ? 'text-red-700 hover:bg-red-50'
                     : 'text-gray-700 hover:bg-gray-50'

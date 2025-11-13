@@ -85,9 +85,9 @@ export const UserDropdown = ({ name, role, roleLabel, email }: UserDropdownProps
 
       {/* Dropdown Menu */}
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
+        <div className="absolute right-0 mt-2 w-48 sm:w-64 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
           {/* User Info Header */}
-          <div className="px-4 py-3 border-b border-gray-100">
+          <div className="px-3 py-2 sm:px-4 sm:py-3 border-b border-gray-100">
             <div className="font-semibold text-gray-900 text-sm">{name}</div>
             <div className="text-xs text-gray-500 mt-0.5">{displayRole}</div>
             {email && (
@@ -100,7 +100,7 @@ export const UserDropdown = ({ name, role, roleLabel, email }: UserDropdownProps
             {/* Configuración */}
             <a
               href="/wp-admin/admin.php?page=property-dashboard#/settings"
-              className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+              className="flex items-center gap-2 sm:gap-3 px-3 py-2 sm:px-4 sm:py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
               onClick={() => setIsOpen(false)}
             >
               <Settings size={16} className="text-gray-400" />
@@ -112,7 +112,7 @@ export const UserDropdown = ({ name, role, roleLabel, email }: UserDropdownProps
               href="https://wordpress.org/support/"
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+              className="flex items-center gap-2 sm:gap-3 px-3 py-2 sm:px-4 sm:py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
               onClick={() => setIsOpen(false)}
             >
               <HelpCircle size={16} className="text-gray-400" />
@@ -125,7 +125,7 @@ export const UserDropdown = ({ name, role, roleLabel, email }: UserDropdownProps
             {/* Cerrar Sesión */}
             <a
               href="/wp-login.php?action=logout"
-              className="flex items-center gap-3 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors"
+              className="flex items-center gap-2 sm:gap-3 px-3 py-2 sm:px-4 sm:py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors"
               onClick={() => setIsOpen(false)}
             >
               <LogOut size={16} />

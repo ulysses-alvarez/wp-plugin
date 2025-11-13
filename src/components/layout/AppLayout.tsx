@@ -34,7 +34,7 @@ export const AppLayout = () => {
       <AppSidebar isOpen={isSidebarOpen} onClose={closeSidebar} />
       <div className="flex-1 flex flex-col overflow-hidden">
         <AppHeader onToggleSidebar={toggleSidebar} isSidebarOpen={isSidebarOpen} />
-        <main className="flex-1 overflow-auto bg-white">
+        <main className="flex-1 overflow-hidden bg-white">
           <Outlet />
         </main>
       </div>

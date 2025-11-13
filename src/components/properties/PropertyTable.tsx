@@ -361,12 +361,12 @@ export const PropertyTable = ({
 
       {/* Table Container - Scrollable */}
       <div className="flex-1 overflow-hidden flex flex-col">
-        <div className="flex-1 overflow-auto">
+        <div className="flex-1 overflow-auto px-4 sm:px-0">
           <table className="w-full">
             <thead>
               <tr className="bg-gray-50 border-b border-gray-200">
                 {/* Checkbox column */}
-                <th className="w-12 px-4 py-3">
+                <th className="sticky top-0 z-30 bg-gray-50 w-12 px-3 py-2 sm:py-3">
                   <input
                     type="checkbox"
                     checked={isAllCurrentPageSelected}
@@ -414,7 +414,7 @@ export const PropertyTable = ({
                   onSort={handleSort}
                   className="hidden md:table-cell"
                 />
-                <th className="sticky right-0 z-20 bg-gray-50 px-2 py-2 sm:px-6 sm:py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider shadow-sticky-column">
+                <th className="sticky top-0 right-0 z-30 bg-gray-50 px-2 py-2 sm:px-6 sm:py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider shadow-sticky-column">
                   <span className="hidden sm:inline">Acciones</span>
                   <span className="sm:hidden sr-only">Acciones</span>
                 </th>
@@ -442,7 +442,7 @@ export const PropertyTable = ({
                   >
                     {/* Checkbox */}
                     <td
-                      className="w-12 px-4 py-4"
+                      className="w-12 px-3 py-3"
                       onClick={(e) => e.stopPropagation()}
                     >
                       <input
@@ -494,7 +494,10 @@ export const PropertyTable = ({
 
                     {/* Status */}
                     <td className="px-3 py-3 sm:px-6 sm:py-4">
-                      <Badge variant={getStatusVariant(property.status)}>
+                      <Badge 
+                        variant={getStatusVariant(property.status)}
+                        className="px-1.5 py-0.5 text-xs sm:px-2.5 sm:py-1 sm:text-sm"
+                      >
                         {getStatusLabel(property.status)}
                       </Badge>
                     </td>
@@ -598,9 +601,9 @@ export const PropertyTable = ({
           </table>
         </div>
 
-        {/* Pagination - Fixed at bottom, sin padding lateral en mobile */}
+        {/* Pagination - Fixed at bottom, con padding lateral en mobile */}
         {total > 0 && (
-          <div className="flex-shrink-0 border-t border-gray-200 px-0 py-0 pt-3 sm:px-6 sm:py-4 bg-gray-50">
+          <div className="flex-shrink-0 border-t border-gray-200 px-4 py-3 sm:px-6 sm:py-4 bg-gray-50">
             <Pagination
               currentPage={currentPage}
               totalPages={totalPages}

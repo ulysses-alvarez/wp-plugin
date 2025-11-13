@@ -48,7 +48,7 @@ export const BulkActionsBar = ({
     },
     {
       id: 'export',
-      label: 'Exportar CSV',
+      label: 'Exportar',
       icon: FileDown,
       action: onExport,
     },
@@ -70,63 +70,47 @@ export const BulkActionsBar = ({
   return (
     <div
       className={clsx(
-        'fixed bottom-4 sm:bottom-6 left-4 right-4 sm:left-1/2 sm:-translate-x-1/2 z-50',
+        'fixed bottom-4 sm:bottom-6 left-1/2 -translate-x-1/2 z-50',
         'bg-white rounded-xl shadow-2xl border border-gray-200',
-        'px-3 py-3 sm:px-6 sm:py-4',
-        'sm:min-w-[500px] sm:max-w-4xl w-auto',
+        'px-3 py-2.5 sm:px-6 sm:py-4',
+        'w-fit max-w-[calc(100vw-2rem)]',
         'animate-in slide-in-from-bottom-4 duration-300',
         className
       )}
     >
-      {/* Mobile: 2 filas | Desktop: 1 fila */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-6">
+      {/* Mobile: 1 fila | Desktop: 1 fila con texto */}
+      <div className="flex items-center gap-2 sm:gap-6">
         
-        {/* Fila 1 mobile / Izquierda desktop: Contador + texto + X en mobile */}
-        <div className="flex items-center justify-between sm:justify-start gap-3">
-          <div className="flex items-center gap-2 sm:gap-3">
-            <div className="flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8 bg-primary text-white rounded-full font-semibold text-xs sm:text-sm">
-              {selectedCount}
-            </div>
-            <span className="text-xs sm:text-sm font-semibold text-gray-900">
-              {/* Mobile: "5 seleccionadas" | Desktop: "5 propiedades seleccionadas" */}
-              <span className="sm:hidden">{selectedCount} seleccionadas</span>
-              <span className="hidden sm:inline">
-                {selectedCount === 1 ? 'propiedad seleccionada' : 'propiedades seleccionadas'}
-              </span>
-            </span>
-          </div>
-          
-          {/* X - Solo en mobile aquí */}
-          <button
-            onClick={onDeselectAll}
-            className="sm:hidden flex items-center justify-center w-7 h-7 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
-            title="Deseleccionar todas"
-            aria-label="Deseleccionar todas"
-          >
-            <X className="w-4 h-4" />
-          </button>
+        {/* Badge con número - Siempre visible */}
+        <div className="flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8 bg-primary text-white rounded-full font-semibold text-xs sm:text-sm flex-shrink-0">
+          {selectedCount}
         </div>
-
-        {/* Fila 2 mobile / Derecha desktop: Selector + X */}
-        <div className="flex items-center gap-2 sm:gap-3">
+        
+        {/* Texto - Solo en desktop */}
+        <span className="hidden sm:inline text-sm font-semibold text-gray-900 whitespace-nowrap">
+          {selectedCount === 1 ? 'propiedad seleccionada' : 'propiedades seleccionadas'}
+        </span>
+        
+        {/* Divider - Solo desktop */}
+        <div className="hidden sm:block w-px h-8 bg-gray-300" />
+        
+        {/* Select - Compacto en mobile, normal en desktop */}
+        <div className="flex-1 sm:flex-initial min-w-0">
           <BulkActionSelect
             options={bulkActions}
             placeholder="Seleccionar acción"
           />
-          
-          {/* Divider + X - Solo en desktop */}
-          <div className="hidden sm:flex items-center gap-3">
-            <div className="w-px h-8 bg-gray-300" />
-            <button
-              onClick={onDeselectAll}
-              className="flex items-center justify-center w-8 h-8 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
-              title="Deseleccionar todas"
-              aria-label="Deseleccionar todas"
-            >
-              <X className="w-5 h-5" />
-            </button>
-          </div>
         </div>
+        
+        {/* X - Siempre visible */}
+        <button
+          onClick={onDeselectAll}
+          className="flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors flex-shrink-0"
+          title="Deseleccionar todas"
+          aria-label="Deseleccionar todas"
+        >
+          <X className="w-4 h-4 sm:w-5 sm:h-5" />
+        </button>
       </div>
 
       {/* Optional: Banner for selecting all across pages (Phase 4) */}
