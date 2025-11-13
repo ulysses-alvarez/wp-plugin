@@ -157,6 +157,41 @@ class Property_REST_API {
                 ],
             ],
         ]);
+
+        // Get users list (only property roles)
+        register_rest_route($this->namespace, '/users', [
+            'methods'             => WP_REST_Server::READABLE,
+            'callback'            => [$this, 'get_users'],
+            'permission_callback' => [$this, 'check_manage_users_permission'],
+        ]);
+
+        // Get current user profile
+        register_rest_route($this->namespace, '/profile', [
+            'methods'             => WP_REST_Server::READABLE,
+            'callback'            => [$this, 'get_profile'],
+            'permission_callback' => '__return_true',
+        ]);
+
+        // Update current user profile
+        register_rest_route($this->namespace, '/profile', [
+            'methods'             => WP_REST_Server::EDITABLE,
+            'callback'            => [$this, 'update_profile'],
+            'permission_callback' => 'is_user_logged_in',
+            'args'                => [
+                'first_name' => [
+                    'type'              => 'string',
+                    'sanitize_callback' => 'sanitize_text_field',
+                ],
+                'last_name' => [
+                    'type'              => 'string',
+                    'sanitize_callback' => 'sanitize_text_field',
+                ],
+                'password' => [
+                    'type'              => 'string',
+                    'sanitize_callback' => 'sanitize_text_field',
+                ],
+            ],
+        ]);
     }
 
     /**
@@ -1461,5 +1496,128 @@ class Property_REST_API {
             'files_count' => count($attachments),
             'files_without_attachment' => $files_without_attachment
         ]);
+    }
+
+    /**
+     * Get users list (only property roles)
+     */
+    public function get_users($request) {
+        $users = Property_User_Management::get_dashboard_users();
+
+        $formatted_users = [];
+        foreach ($users as $user) {
+            $role = !empty($user->roles) ? $user->roles[0] : '';
+
+            $formatted_users[] = [
+                'id' => $user->ID,
+                'name' => $user->display_name,
+                'email' => $user->user_email,
+                'role' => $role,
+                'role_label' => Property_Roles::get_role_label($role),
+                'registered' => $user->user_registered,
+                'first_name' => get_user_meta($user->ID, 'first_name', true),
+                'last_name' => get_user_meta($user->ID, 'last_name', true),
+            ];
+        }
+
+        return rest_ensure_response($formatted_users);
+    }
+
+    /**
+     * Get current user profile
+     */
+    public function get_profile($request) {
+        $user = wp_get_current_user();
+
+        if (!$user->ID) {
+            return new WP_Error(
+                'not_logged_in',
+                __('Usuario no autenticado', 'property-dashboard'),
+                ['status' => 401]
+            );
+        }
+
+        $role = !empty($user->roles) ? $user->roles[0] : '';
+
+        return rest_ensure_response([
+            'id' => $user->ID,
+            'name' => $user->display_name,
+            'email' => $user->user_email,
+            'first_name' => get_user_meta($user->ID, 'first_name', true),
+            'last_name' => get_user_meta($user->ID, 'last_name', true),
+            'role' => $role,
+            'role_label' => Property_Roles::get_role_label($role),
+        ]);
+    }
+
+    /**
+     * Update current user profile
+     */
+    public function update_profile($request) {
+        $user_id = get_current_user_id();
+
+        if (!$user_id) {
+            return new WP_Error(
+                'not_logged_in',
+                __('Usuario no autenticado', 'property-dashboard'),
+                ['status' => 401]
+            );
+        }
+
+        $data = $request->get_json_params();
+        $update_data = ['ID' => $user_id];
+
+        // Update first name
+        if (isset($data['first_name'])) {
+            update_user_meta($user_id, 'first_name', sanitize_text_field($data['first_name']));
+        }
+
+        // Update last name
+        if (isset($data['last_name'])) {
+            update_user_meta($user_id, 'last_name', sanitize_text_field($data['last_name']));
+        }
+
+        // Update password if provided and not empty
+        if (!empty($data['password'])) {
+            // Validate password length
+            if (strlen($data['password']) < 8) {
+                return new WP_Error(
+                    'invalid_password',
+                    __('La contraseña debe tener al menos 8 caracteres', 'property-dashboard'),
+                    ['status' => 400]
+                );
+            }
+
+            $update_data['user_pass'] = $data['password'];
+        }
+
+        // Update display name if first or last name changed
+        $first_name = get_user_meta($user_id, 'first_name', true);
+        $last_name = get_user_meta($user_id, 'last_name', true);
+        if (!empty($first_name) || !empty($last_name)) {
+            $update_data['display_name'] = trim($first_name . ' ' . $last_name);
+        }
+
+        $result = wp_update_user($update_data);
+
+        if (is_wp_error($result)) {
+            return new WP_Error(
+                'update_failed',
+                $result->get_error_message(),
+                ['status' => 500]
+            );
+        }
+
+        return rest_ensure_response([
+            'success' => true,
+            'message' => __('Perfil actualizado correctamente', 'property-dashboard'),
+        ]);
+    }
+
+    /**
+     * Check if user can manage users
+     */
+    public function check_manage_users_permission($request) {
+        return Property_User_Management::can_manage_users();
     }
 }
