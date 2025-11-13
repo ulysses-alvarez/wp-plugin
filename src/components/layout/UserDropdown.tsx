@@ -4,7 +4,7 @@
  */
 
 import { useState, useRef, useEffect } from 'react';
-import { ChevronDown, Settings, HelpCircle, LogOut } from 'lucide-react';
+import { ChevronDown, User, HelpCircle, LogOut } from 'lucide-react';
 import clsx from 'clsx';
 
 interface UserDropdownProps {
@@ -97,14 +97,14 @@ export const UserDropdown = ({ name, role, roleLabel, email }: UserDropdownProps
 
           {/* Menu Items */}
           <div className="py-1">
-            {/* Configuración */}
+            {/* Perfil */}
             <a
-              href="/wp-admin/admin.php?page=property-dashboard#/settings"
+              href="/wp-admin/admin.php?page=property-dashboard#/profile"
               className="flex items-center gap-2 sm:gap-3 px-3 py-2 sm:px-4 sm:py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
               onClick={() => setIsOpen(false)}
             >
-              <Settings size={16} className="text-gray-400" />
-              <span>Configuración</span>
+              <User size={16} className="text-gray-400" />
+              <span>Perfil</span>
             </a>
 
             {/* Ayuda */}

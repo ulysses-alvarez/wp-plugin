@@ -1,6 +1,7 @@
 import { createHashRouter, Navigate } from 'react-router-dom';
 import { AppLayout } from './components/layout/AppLayout';
 import { PropertiesPage } from './pages/PropertiesPage';
+import { ProfilePage } from './pages/ProfilePage';
 import { SettingsPage } from './pages/SettingsPage';
 import UsersPage from './pages/UsersPage';
 
@@ -24,6 +25,10 @@ export const router = createHashRouter([
       {
         path: 'users',
         element: <UsersPage />
+      },
+      {
+        path: 'profile',
+        element: <ProfilePage />
       },
       {
         path: 'settings',

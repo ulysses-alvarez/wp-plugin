@@ -13,6 +13,22 @@ export interface PropertyPermissions {
   can_assign: boolean;
 }
 
+// Audit Information
+export interface AuditInfo {
+  created_by: {
+    id: number;
+    name: string | null;
+    email: string | null;
+  };
+  created_date: string;
+  modified_by: {
+    id: number | null;
+    name: string | null;
+    email: string | null;
+  };
+  modified_date: string | null;
+}
+
 // Property Type Definition
 export interface Property {
   id: number;
@@ -20,6 +36,7 @@ export interface Property {
   description?: string;
   status: PropertyStatus;
   author_id: number;
+  author_name?: string;
   state?: string;
   municipality?: string;
   neighborhood?: string;
@@ -34,6 +51,7 @@ export interface Property {
   updated_at?: string;
   last_dashboard_update?: string | null;
   permissions?: PropertyPermissions; // Permissions calculated by backend
+  audit?: AuditInfo; // Audit trail information
 }
 
 // WordPress User Type

@@ -316,28 +316,70 @@ export const PropertySidebar = ({
                 </div>
               )}
 
-              {/* Last Dashboard Update Card - Only show if exists */}
-              {property.last_dashboard_update && (
-                <div className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm">
-                  <h4 className="text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2 uppercase tracking-wide">
-                    <svg className="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    Información de Actualización
+              {/* Audit Trail Card - Show creation and modification info */}
+              {property.audit && (
+                <div className="bg-gradient-to-br from-gray-50 to-white border border-gray-200 rounded-xl p-5 shadow-sm">
+                  <h4 className="text-sm font-semibold text-gray-900 mb-4 uppercase tracking-wide">
+                    Información de Seguimiento
                   </h4>
-                  <div className="space-y-2">
-                    <div className="flex items-start gap-3">
-                      <span className="text-sm text-gray-500 min-w-[140px] font-medium">Última actualización:</span>
-                      <span className="text-sm text-gray-900 font-medium flex-1">
-                        {new Date(property.last_dashboard_update).toLocaleString('es-MX', {
-                          year: 'numeric',
-                          month: 'long',
-                          day: 'numeric',
-                          hour: '2-digit',
-                          minute: '2-digit'
-                        })}
-                      </span>
+                  <div className="space-y-3">
+                    {/* Created By */}
+                    <div className="bg-white rounded-lg p-3 border border-gray-200">
+                      <div className="mb-2">
+                        <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Creación</span>
+                      </div>
+                      <div className="space-y-1">
+                        <div className="flex items-start gap-2">
+                          <span className="text-sm text-gray-600">Por:</span>
+                          <span className="text-sm text-gray-900 font-medium">
+                            {property.audit.created_by.name || 'Usuario desconocido'}
+                          </span>
+                        </div>
+                        <div className="flex items-start gap-2">
+                          <span className="text-sm text-gray-600">Fecha:</span>
+                          <span className="text-sm text-gray-700">
+                            {new Date(property.audit.created_date).toLocaleString('es-MX', {
+                              year: 'numeric',
+                              month: 'long',
+                              day: 'numeric',
+                              hour: '2-digit',
+                              minute: '2-digit'
+                            })}
+                          </span>
+                        </div>
+                      </div>
                     </div>
+
+                    {/* Modified By - Only show if property was modified */}
+                    {property.audit.modified_by?.id && (
+                      <div className="bg-white rounded-lg p-3 border border-gray-200">
+                        <div className="mb-2">
+                          <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Última Modificación</span>
+                        </div>
+                        <div className="space-y-1">
+                          <div className="flex items-start gap-2">
+                            <span className="text-sm text-gray-600">Por:</span>
+                            <span className="text-sm text-gray-900 font-medium">
+                              {property.audit.modified_by.name || 'Usuario desconocido'}
+                            </span>
+                          </div>
+                          {property.audit.modified_date && (
+                            <div className="flex items-start gap-2">
+                              <span className="text-sm text-gray-600">Fecha:</span>
+                              <span className="text-sm text-gray-700">
+                                {new Date(property.audit.modified_date).toLocaleString('es-MX', {
+                                  year: 'numeric',
+                                  month: 'long',
+                                  day: 'numeric',
+                                  hour: '2-digit',
+                                  minute: '2-digit'
+                                })}
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
               )}

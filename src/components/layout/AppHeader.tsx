@@ -5,6 +5,7 @@ import { UserDropdown } from './UserDropdown';
 const getPageTitle = (pathname: string): string => {
   if (pathname.startsWith('/properties')) return 'Propiedades';
   if (pathname.startsWith('/users')) return 'Usuarios';
+  if (pathname.startsWith('/profile')) return 'Perfil';
   if (pathname.startsWith('/settings')) return 'Configuración';
   return 'Dashboard';
 };
