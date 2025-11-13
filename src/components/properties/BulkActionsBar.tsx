@@ -70,47 +70,62 @@ export const BulkActionsBar = ({
   return (
     <div
       className={clsx(
-        'fixed bottom-6 left-1/2 -translate-x-1/2 z-50',
+        'fixed bottom-4 sm:bottom-6 left-4 right-4 sm:left-1/2 sm:-translate-x-1/2 z-50',
         'bg-white rounded-xl shadow-2xl border border-gray-200',
-        'px-6 py-4 min-w-[500px] max-w-4xl',
+        'px-3 py-3 sm:px-6 sm:py-4',
+        'sm:min-w-[500px] sm:max-w-4xl w-auto',
         'animate-in slide-in-from-bottom-4 duration-300',
         className
       )}
     >
-      <div className="flex items-center justify-between gap-6">
-        {/* Selection info */}
-        <div className="flex items-center gap-3">
-          <div className="flex items-center justify-center w-8 h-8 bg-primary text-white rounded-full font-semibold text-sm">
-            {selectedCount}
-          </div>
-          <div className="flex flex-col">
-            <span className="text-sm font-semibold text-gray-900">
-              {selectedCount === 1
-                ? 'propiedad seleccionada'
-                : 'propiedades seleccionadas'}
+      {/* Mobile: 2 filas | Desktop: 1 fila */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-6">
+        
+        {/* Fila 1 mobile / Izquierda desktop: Contador + texto + X en mobile */}
+        <div className="flex items-center justify-between sm:justify-start gap-3">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <div className="flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8 bg-primary text-white rounded-full font-semibold text-xs sm:text-sm">
+              {selectedCount}
+            </div>
+            <span className="text-xs sm:text-sm font-semibold text-gray-900">
+              {/* Mobile: "5 seleccionadas" | Desktop: "5 propiedades seleccionadas" */}
+              <span className="sm:hidden">{selectedCount} seleccionadas</span>
+              <span className="hidden sm:inline">
+                {selectedCount === 1 ? 'propiedad seleccionada' : 'propiedades seleccionadas'}
+              </span>
             </span>
           </div>
+          
+          {/* X - Solo en mobile aquí */}
+          <button
+            onClick={onDeselectAll}
+            className="sm:hidden flex items-center justify-center w-7 h-7 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+            title="Deseleccionar todas"
+            aria-label="Deseleccionar todas"
+          >
+            <X className="w-4 h-4" />
+          </button>
         </div>
 
-        {/* Actions */}
-        <div className="flex items-center gap-3">
-          {/* Bulk Action Select */}
+        {/* Fila 2 mobile / Derecha desktop: Selector + X */}
+        <div className="flex items-center gap-2 sm:gap-3">
           <BulkActionSelect
             options={bulkActions}
             placeholder="Seleccionar acción"
           />
-
-          {/* Divider */}
-          <div className="w-px h-8 bg-gray-300" />
-
-          {/* Deselect All */}
-          <button
-            onClick={onDeselectAll}
-            className="flex items-center justify-center w-8 h-8 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
-            title="Deseleccionar todas"
-          >
-            <X className="w-5 h-5" />
-          </button>
+          
+          {/* Divider + X - Solo en desktop */}
+          <div className="hidden sm:flex items-center gap-3">
+            <div className="w-px h-8 bg-gray-300" />
+            <button
+              onClick={onDeselectAll}
+              className="flex items-center justify-center w-8 h-8 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+              title="Deseleccionar todas"
+              aria-label="Deseleccionar todas"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
         </div>
       </div>
 

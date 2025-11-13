@@ -43,12 +43,12 @@ export const PropertyActionMenu = ({
   };
 
   return (
-    <div ref={menuRef} className="relative">
+    <div ref={menuRef} className="relative z-[101]">
       {/* Menu Trigger Button */}
       <button
         onClick={handleToggle}
         className={clsx(
-          'p-2 rounded-lg transition-colors',
+          'relative z-[102] p-2 rounded-lg transition-colors',
           isOpen
             ? 'bg-gray-200 text-gray-900'
             : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
@@ -68,7 +68,7 @@ export const PropertyActionMenu = ({
       {/* Dropdown Menu */}
       {isOpen && (
         <div
-          className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-[100]"
+          className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-[103]"
           role="menu"
           aria-orientation="vertical"
         >

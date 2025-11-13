@@ -414,8 +414,9 @@ export const PropertyTable = ({
                   onSort={handleSort}
                   className="hidden md:table-cell"
                 />
-                <th className="sticky right-0 z-20 bg-gray-50 px-3 py-2 sm:px-6 sm:py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider shadow-sticky-column">
-                  Acciones
+                <th className="sticky right-0 z-20 bg-gray-50 px-2 py-2 sm:px-6 sm:py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider shadow-sticky-column">
+                  <span className="hidden sm:inline">Acciones</span>
+                  <span className="sm:hidden sr-only">Acciones</span>
                 </th>
               </tr>
             </thead>
@@ -508,7 +509,7 @@ export const PropertyTable = ({
                     {/* Actions - Sticky Column */}
                     <td 
                       className={clsx(
-                        'sticky right-0 z-10 px-3 py-3 sm:px-6 sm:py-4 text-right shadow-sticky-column',
+                        'sticky right-0 z-10 px-2 py-2 sm:px-6 sm:py-4 text-right shadow-sticky-column',
                         isHovered ? 'bg-gray-100' : 'bg-white'
                       )}
                       onClick={(e) => e.stopPropagation()}

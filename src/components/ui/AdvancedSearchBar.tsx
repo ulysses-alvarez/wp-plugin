@@ -101,7 +101,7 @@ export const AdvancedSearchBar = ({
             <select
               value={selectedContext.value}
               onChange={(e) => handleContextChange(e.target.value)}
-              className="h-full px-2 py-1.5 sm:px-3 sm:py-2.5 text-xs sm:text-sm bg-gray-50 border-r border-gray-300 text-gray-700 font-medium focus:outline-none cursor-pointer hover:bg-gray-100 transition-colors"
+              className="h-full px-2 py-1.5 sm:px-3 sm:py-2.5 text-xs sm:text-sm w-[110px] sm:w-[130px] bg-gray-50 border-r border-gray-300 text-gray-700 font-medium focus:outline-none cursor-pointer hover:bg-gray-100 transition-colors"
               aria-label="Campo de búsqueda"
             >
               {SEARCH_CONTEXTS.map((context) => (
