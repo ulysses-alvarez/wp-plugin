@@ -121,10 +121,14 @@ export const usePropertyStore = create<PropertyState>((set, get) => ({
     try {
       const { filters, currentPage, perPage, sortBy, sortOrder } = get();
 
+      // Forzar 20 propiedades en mobile (independientemente de la configuración)
+      const isMobile = typeof window !== 'undefined' && window.innerWidth < 640; // sm breakpoint
+      const effectivePerPage = isMobile ? 20 : perPage;
+
       // Build query params, prioritizing advanced search over old filters
       const queryParams: PropertyQueryParams = {
         page: params?.page ?? currentPage,
-        per_page: params?.per_page ?? perPage,
+        per_page: params?.per_page ?? effectivePerPage,
         orderby: params?.orderby ?? sortBy,
         order: params?.order ?? sortOrder
       };
