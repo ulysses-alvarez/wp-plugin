@@ -56,7 +56,7 @@ El campo "Rol" NO se mostraba en la página de perfil.
 
 ---
 
-### ❌ 4. Scroll Automático en Paginación (NO FUNCIONA)
+### ❌ 3. Scroll Automático en Paginación (NO FUNCIONA)
 
 **Problema:**
 Cuando el usuario está navegando por la tabla de propiedades y hace scroll hasta abajo, al cambiar de página la vista NO sube automáticamente al inicio de la tabla. El usuario se queda viendo el final de la página vacía.

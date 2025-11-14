@@ -218,3 +218,5 @@ loadProperties: async (params?: PropertyQueryParams) => {
 **Fecha de Análisis:** 13 de Noviembre, 2025  
 **Recomendación:** ✅ Usar solución simple (Opción 2)
 
+
+

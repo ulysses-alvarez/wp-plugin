@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
+import { PasswordInput } from '../components/ui/PasswordInput';
 import toast from 'react-hot-toast';
 
 interface ProfileData {
@@ -55,10 +56,21 @@ export const ProfilePage = () => {
       }
 
       const data = await response.json();
-      setProfile(data);
-      setProfileForm({
-        display_name: data.display_name,
+      console.log('Profile loaded:', data); // Debug log
+
+      // Map API response to expected format (handle both name and display_name)
+      const profileData = {
+        id: data.id,
+        display_name: data.display_name || data.name || '',
         email: data.email,
+        role: data.role,
+        roleLabel: data.roleLabel || data.role_label || '',
+      };
+
+      setProfile(profileData);
+      setProfileForm({
+        display_name: profileData.display_name,
+        email: profileData.email,
       });
     } catch (error) {
       console.error('Error loading profile:', error);
@@ -84,6 +96,8 @@ export const ProfilePage = () => {
 
     try {
       setSaving(true);
+      console.log('Updating profile with data:', profileForm); // Debug log
+
       const response = await fetch('/wp-json/property-dashboard/v1/profile', {
         method: 'PUT',
         headers: {
@@ -94,13 +108,32 @@ export const ProfilePage = () => {
       });
 
       const data = await response.json();
+      console.log('Profile update response:', { status: response.status, data }); // Debug log
 
       if (!response.ok) {
         throw new Error(data.message || 'Error al actualizar perfil');
       }
 
       toast.success('Perfil actualizado exitosamente');
-      loadProfile(); // Reload profile data
+
+      // If API returns updated user data, use it instead of reloading
+      if (data.user) {
+        const profileData = {
+          id: data.user.id,
+          display_name: data.user.display_name || data.user.name || '',
+          email: data.user.email,
+          role: data.user.role,
+          roleLabel: data.user.roleLabel || data.user.role_label || '',
+        };
+        setProfile(profileData);
+        setProfileForm({
+          display_name: profileData.display_name,
+          email: profileData.email,
+        });
+      } else {
+        // Fallback to reloading profile
+        await loadProfile();
+      }
     } catch (error: any) {
       console.error('Error updating profile:', error);
       toast.error(error.message || 'Error al actualizar el perfil');
@@ -135,25 +168,48 @@ export const ProfilePage = () => {
 
     try {
       setSaving(true);
+      const requestData = {
+        display_name: profileForm.display_name,
+        email: profileForm.email,
+        current_password: passwordForm.current_password,
+        new_password: passwordForm.new_password,
+      };
+      console.log('Changing password with data:', requestData); // Debug log
+
       const response = await fetch('/wp-json/property-dashboard/v1/profile', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
           'X-WP-Nonce': window.wpPropertyDashboard?.nonce || '',
         },
-        body: JSON.stringify({
-          current_password: passwordForm.current_password,
-          new_password: passwordForm.new_password,
-        }),
+        body: JSON.stringify(requestData),
       });
 
       const data = await response.json();
+      console.log('Password change response:', { status: response.status, data }); // Debug log
 
       if (!response.ok) {
         throw new Error(data.message || 'Error al cambiar contraseña');
       }
 
       toast.success('Contraseña actualizada exitosamente');
+
+      // Update profile data if returned by API
+      if (data.user) {
+        const profileData = {
+          id: data.user.id,
+          display_name: data.user.display_name || data.user.name || '',
+          email: data.user.email,
+          role: data.user.role,
+          roleLabel: data.user.roleLabel || data.user.role_label || '',
+        };
+        setProfile(profileData);
+        setProfileForm({
+          display_name: profileData.display_name,
+          email: profileData.email,
+        });
+      }
+
       // Clear password form
       setPasswordForm({
         current_password: '',
@@ -217,7 +273,7 @@ export const ProfilePage = () => {
 
               <div>
                 <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-                  Correo Electrónico
+                  Correo Electrónico <span className="text-gray-500 font-normal text-xs">(solo lectura)</span>
                 </label>
                 <Input
                   id="email"
@@ -226,6 +282,9 @@ export const ProfilePage = () => {
                   onChange={(e) => setProfileForm({ ...profileForm, email: e.target.value })}
                   placeholder="correo@ejemplo.com"
                   required
+                  readOnly
+                  disabled
+                  className="bg-gray-50 cursor-not-allowed"
                 />
               </div>
             </div>
@@ -251,9 +310,8 @@ export const ProfilePage = () => {
                 <label htmlFor="current_password" className="block text-sm font-medium text-gray-700 mb-1">
                   Contraseña Actual
                 </label>
-                <Input
+                <PasswordInput
                   id="current_password"
-                  type="password"
                   value={passwordForm.current_password}
                   onChange={(e) => setPasswordForm({ ...passwordForm, current_password: e.target.value })}
                   placeholder="••••••••"
@@ -264,23 +322,21 @@ export const ProfilePage = () => {
                 <label htmlFor="new_password" className="block text-sm font-medium text-gray-700 mb-1">
                   Nueva Contraseña
                 </label>
-                <Input
+                <PasswordInput
                   id="new_password"
-                  type="password"
                   value={passwordForm.new_password}
                   onChange={(e) => setPasswordForm({ ...passwordForm, new_password: e.target.value })}
                   placeholder="••••••••"
+                  helperText="Mínimo 8 caracteres"
                 />
-                <p className="text-xs text-gray-500 mt-1">Mínimo 8 caracteres</p>
               </div>
 
               <div>
                 <label htmlFor="confirm_password" className="block text-sm font-medium text-gray-700 mb-1">
                   Confirmar Nueva Contraseña
                 </label>
-                <Input
+                <PasswordInput
                   id="confirm_password"
-                  type="password"
                   value={passwordForm.confirm_password}
                   onChange={(e) => setPasswordForm({ ...passwordForm, confirm_password: e.target.value })}
                   placeholder="••••••••"

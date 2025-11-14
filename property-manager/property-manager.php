@@ -33,6 +33,7 @@ require_once PROPERTY_MANAGER_PATH . 'includes/class-property-roles.php';
 require_once PROPERTY_MANAGER_PATH . 'includes/class-property-audit.php';
 require_once PROPERTY_MANAGER_PATH . 'includes/class-property-admin-restrictions.php';
 require_once PROPERTY_MANAGER_PATH . 'includes/class-property-user-management.php';
+require_once PROPERTY_MANAGER_PATH . 'includes/class-property-user-fields-customization.php';
 require_once PROPERTY_MANAGER_PATH . 'includes/class-property-rest-api.php';
 require_once PROPERTY_MANAGER_PATH . 'includes/class-property-profile-api.php';
 require_once PROPERTY_MANAGER_PATH . 'includes/class-property-settings.php';
@@ -91,6 +92,9 @@ function property_manager_init() {
 
     // Initialize user management restrictions
     Property_User_Management::init();
+
+    // Initialize user fields customization
+    Property_User_Fields_Customization::init();
 
     // Initialize REST API
     $rest_api = new Property_REST_API();
