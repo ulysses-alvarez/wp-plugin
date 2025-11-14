@@ -181,9 +181,11 @@ export const ProfilePage = () => {
 
   return (
     <div className="p-6">
-      <div className="max-w-3xl">
-        {/* Profile Information Section */}
-        <div className="bg-white rounded-lg shadow mb-6">
+      <div className="max-w-6xl">
+        {/* Two column layout on desktop */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Profile Information Section */}
+          <div className="bg-white rounded-lg shadow">
           <div className="px-6 py-4 border-b border-gray-200">
             <h2 className="text-lg font-semibold text-gray-900">Información Personal</h2>
             <p className="text-sm text-gray-500 mt-1">Actualiza tu nombre y correo electrónico</p>
@@ -292,6 +294,7 @@ export const ProfilePage = () => {
               </Button>
             </div>
           </form>
+        </div>
         </div>
       </div>
     </div>

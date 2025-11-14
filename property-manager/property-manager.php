@@ -37,6 +37,7 @@ require_once PROPERTY_MANAGER_PATH . 'includes/class-property-rest-api.php';
 require_once PROPERTY_MANAGER_PATH . 'includes/class-property-profile-api.php';
 require_once PROPERTY_MANAGER_PATH . 'includes/class-property-settings.php';
 require_once PROPERTY_MANAGER_PATH . 'includes/class-property-shortcode.php';
+require_once PROPERTY_MANAGER_PATH . 'includes/class-property-login.php';
 require_once PROPERTY_MANAGER_PATH . 'includes/class-property-assets.php';
 require_once PROPERTY_MANAGER_PATH . 'includes/class-property-template.php';
 
@@ -103,6 +104,9 @@ function property_manager_init() {
 
     // Register shortcode
     Property_Shortcode::register();
+
+    // Initialize login handler
+    Property_Login::init();
 
     // Initialize assets
     Property_Assets::init();

@@ -68,8 +68,7 @@ export default function UsersPage() {
   return (
     <div className="p-6">
       {/* Header */}
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">Usuarios</h1>
+      <div className="flex justify-end items-center mb-6">
         <Button onClick={handleAddUser} className="flex items-center gap-2">
           <UserPlus size={18} />
           Agregar Usuario

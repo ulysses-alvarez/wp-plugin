@@ -12,7 +12,7 @@ const navItems = [
   },
   {
     id: 'users',
-    label: 'Usuario',
+    label: 'Usuarios',
     icon: User,
     path: '/users',
     requiresCapability: 'manage_dashboard_users',

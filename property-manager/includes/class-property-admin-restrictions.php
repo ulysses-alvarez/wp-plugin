@@ -45,7 +45,7 @@ class Property_Admin_Restrictions {
             in_array('property_manager', $user->roles)) {
 
             // Redirigir al dashboard React
-            wp_redirect(home_url('/propiedades'));
+            wp_redirect(home_url('/dashboard/#/properties'));
             exit;
         }
     }
