@@ -1,6 +1,6 @@
 import { Link, useLocation } from 'react-router-dom';
-import { Home, User } from 'lucide-react';
-import { canManageUsers } from '../../utils/permissions';
+import { Home, User, Settings } from 'lucide-react';
+import { canManageUsers, can } from '../../utils/permissions';
 
 const navItems = [
   {
@@ -16,6 +16,13 @@ const navItems = [
     icon: User,
     path: '/users',
     requiresCapability: 'manage_dashboard_users',
+  },
+  {
+    id: 'settings',
+    label: 'Configuración',
+    icon: Settings,
+    path: '/settings',
+    requiresCapability: 'manage_options',
   }
 ];
 
@@ -35,6 +42,9 @@ export const SidebarNavigation = ({ onLinkClick }: SidebarNavigationProps) => {
     if (!item.requiresCapability) return true;
     if (item.requiresCapability === 'manage_dashboard_users') {
       return canManageUsers();
+    }
+    if (item.requiresCapability === 'manage_options') {
+      return can('manage_options');
     }
     return false;
   });

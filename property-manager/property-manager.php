@@ -20,7 +20,7 @@ if (!defined('ABSPATH')) {
 
 // Define plugin constants
 define('PROPERTY_MANAGER_VERSION', '1.0.0');
-define('PROPERTY_MANAGER_ROLES_VERSION', '1.0.1'); // Increment this when roles/capabilities change
+define('PROPERTY_MANAGER_ROLES_VERSION', '1.0.2'); // Increment this when roles/capabilities change
 define('PROPERTY_MANAGER_PATH', plugin_dir_path(__FILE__));
 define('PROPERTY_MANAGER_URL', plugin_dir_url(__FILE__));
 define('PROPERTY_MANAGER_FILE', __FILE__);

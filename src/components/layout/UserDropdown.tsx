@@ -74,6 +74,11 @@ export const UserDropdown = ({ name, role, roleLabel, email }: UserDropdownProps
           {getInitials(name)}
         </div>
 
+        {/* User Name */}
+        <span className="hidden md:block text-sm font-medium text-gray-700 max-w-[150px] truncate">
+          {name}
+        </span>
+
         {/* Chevron Icon */}
         <ChevronDown
           size={16}
@@ -89,8 +94,7 @@ export const UserDropdown = ({ name, role, roleLabel, email }: UserDropdownProps
         <div className="absolute right-0 mt-2 w-48 sm:w-64 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
           {/* User Info Header */}
           <div className="px-3 py-2 sm:px-4 sm:py-3 border-b border-gray-100">
-            <div className="font-semibold text-gray-900 text-sm">{name}</div>
-            <div className="text-xs text-gray-500 mt-0.5">{displayRole}</div>
+            <div className="text-xs text-gray-500">{displayRole}</div>
             {email && (
               <div className="text-xs text-gray-400 mt-1">{email}</div>
             )}

@@ -208,7 +208,8 @@ class Property_Roles {
                 'manage_property_roles',
                 'export_properties',
                 'view_statistics',
-                'assign_properties'
+                'assign_properties',
+                'manage_dashboard_users'  // Allow administrator to manage users in dashboard
             ];
         }
 
