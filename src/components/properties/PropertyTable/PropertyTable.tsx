@@ -14,7 +14,6 @@ import { usePropertySelection } from '@/hooks/usePropertySelection';
 import { PropertyTableRow } from '../PropertyTableRow';
 import { PropertyTableHeader } from './PropertyTableHeader';
 import { PropertySortIndicator } from './PropertySortIndicator';
-import clsx from 'clsx';
 
 interface PropertyTableProps {
   onPropertySelect: (property: Property) => void;

@@ -12,13 +12,14 @@ export interface ImportError {
   field: string;
   value: string;
   error: string;
-  type: 'validation' | 'api' | 'system';
+  type: 'validation' | 'api' | 'system' | 'duplicate';
 }
 
 /**
  * Property data for validation (partial/CSV format)
+ * All fields are optional since they come from CSV parsing
  */
-export interface PropertyData {
+export interface CSVPropertyData {
   title?: string;
   status?: string;
   state?: string;
@@ -31,6 +32,9 @@ export interface PropertyData {
   description?: string;
   google_maps_url?: string;
 }
+
+// Re-export PropertyData from api for convenience
+export type { PropertyData } from '../services/api';
 
 /**
  * Allowed property status values
@@ -68,7 +72,7 @@ export const VALIDATION_RULES = {
  * @returns Array of validation errors
  */
 export const validateProperty = (
-  property: PropertyData,
+  property: CSVPropertyData,
   rowNumber: number = 0
 ): ImportError[] => {
   const errors: ImportError[] = [];
@@ -142,7 +146,7 @@ export const validateProperty = (
  * @returns Array of all validation errors
  */
 export const validateProperties = (
-  properties: PropertyData[],
+  properties: CSVPropertyData[],
   startRow: number = 1
 ): ImportError[] => {
   const allErrors: ImportError[] = [];
@@ -162,7 +166,7 @@ export const validateProperties = (
  * @param property - Property to check
  * @returns true if valid, false otherwise
  */
-export const isPropertyValid = (property: PropertyData): boolean => {
+export const isPropertyValid = (property: CSVPropertyData): boolean => {
   const errors = validateProperty(property);
   return errors.length === 0;
 };

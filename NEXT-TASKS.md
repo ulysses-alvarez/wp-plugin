@@ -1,5 +1,118 @@
 # 📋 TAREAS PENDIENTES - PROPERTY MANAGER
 
+## ⚙️ REFACTORING PENDIENTE (FASE 3 - BACKEND)
+
+### T3.1: Dividir `get_properties()` en métodos privados (8h)
+
+**Ubicación:** `property-manager/includes/class-property-rest-api.php:200-526`
+
+**Problema:**
+Función de 326 líneas que viola el principio de responsabilidad única. Mezcla:
+- Parsing de parámetros
+- Query building
+- Filtrado
+- Búsqueda
+- Preparación de respuesta
+
+**Solución:**
+Extraer a 5 métodos privados:
+```php
+private function parse_query_params($request) { /* ... */ }
+private function build_wp_query($params) { /* ... */ }
+private function apply_search_filter($query, $search_term) { /* ... */ }
+private function prepare_response($query) { /* ... */ }
+```
+
+**Beneficios:**
+- Mejora testabilidad
+- Reduce complejidad cognitiva
+- Facilita mantenimiento
+- Permite reutilización de lógica
+
+---
+
+### T3.2: Crear constantes para arrays repetidos (3h)
+
+**Archivos:** Múltiples clases
+
+**Problema:**
+`$allowed_roles` y `$allowed_statuses` repetidos 7+ veces en diferentes archivos:
+- `class-property-user-management.php` (líneas: 52-56, 81, 150, 195, 213, 253, 295)
+- `class-property-meta.php`
+- Otros archivos
+
+**Solución:**
+```php
+class Property_User_Management {
+    const ALLOWED_ROLES = ['property_admin', 'property_manager', 'property_associate'];
+    const ALLOWED_STATUSES = ['available', 'sold', 'rented', 'reserved'];
+}
+```
+
+**Beneficios:**
+- Elimina duplicación de código
+- Punto único de verdad
+- Fácil actualización de valores permitidos
+- Reduce errores
+
+---
+
+### T3.4: Extraer CSS inline a archivos (6h)
+
+**Archivos:**
+- `class-property-meta.php:422-448`
+- `class-property-audit.php:107-117`
+
+**Problema:**
+CSS inline dentro de métodos PHP dificulta mantenimiento y viola separación de responsabilidades.
+
+**Solución:**
+1. Crear `property-admin.css` en assets
+2. Usar `wp_add_inline_style()` o `wp_enqueue_style()`
+3. Mover todos los estilos a archivo CSS
+
+**Beneficios:**
+- Mejor organización
+- Cacheabilidad
+- Minificación
+- Reutilización de estilos
+
+---
+
+### T3.5: Consolidar duplicación de código (8h)
+
+**Archivo:** `class-property-profile-api.php:60-69, 194-204`
+
+**Problema:**
+Código duplicado para formatear respuestas de usuario en múltiples endpoints.
+
+**Solución:**
+Crear método privado `format_user_response($user)`:
+```php
+private function format_user_response($user) {
+    $role = $user->roles[0] ?? '';
+    return [
+        'id'        => $user->ID,
+        'name'      => $user->display_name,
+        'email'     => $user->user_email,
+        'role'      => $role,
+        'roleLabel' => Property_Roles::get_role_label($role)
+    ];
+}
+```
+
+**Beneficios:**
+- DRY (Don't Repeat Yourself)
+- Consistencia entre endpoints
+- Fácil actualización de formato de respuesta
+- Reduce código en ~40 líneas
+
+---
+
+**Total estimado Fase 3 backend:** ~25 horas de trabajo
+
+---
+
 ## 🔴 ALTA PRIORIDAD
 
 ### 🐛 1. BUG CRÍTICO: Cambio de Nombre y Contraseña NO se Persisten en Base de Datos

@@ -35,13 +35,18 @@ export const REQUIRED_CSV_HEADERS = [
  * CSV parsing error types
  */
 export class CSVParseError extends Error {
+  readonly code: string;
+  readonly row?: number;
+
   constructor(
     message: string,
-    public readonly code: string,
-    public readonly row?: number
+    code: string,
+    row?: number
   ) {
     super(message);
     this.name = 'CSVParseError';
+    this.code = code;
+    this.row = row;
   }
 }
 

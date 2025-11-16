@@ -115,7 +115,7 @@ export const PropertyForm = forwardRef<HTMLFormElement, PropertyFormProps>(({
     // Specific validations
     switch (name) {
       case 'postal_code':
-        if (value && !/^\d{5}$/.test(value)) {
+        if (value && typeof value === 'string' && !/^\d{5}$/.test(value)) {
           return 'El código postal debe tener 5 dígitos';
         }
         break;
@@ -127,13 +127,13 @@ export const PropertyForm = forwardRef<HTMLFormElement, PropertyFormProps>(({
         break;
 
       case 'google_maps_url':
-        if (value && !isValidUrl(value)) {
+        if (value && typeof value === 'string' && !isValidUrl(value)) {
           return 'Ingresa una URL válida';
         }
         break;
 
       case 'title':
-        if (value && value.length > 255) {
+        if (value && typeof value === 'string' && value.length > 255) {
           return 'El título no puede exceder 255 caracteres';
         }
         break;

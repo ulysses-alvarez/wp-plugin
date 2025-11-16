@@ -14,7 +14,7 @@ import { usePropertyStore } from '@/stores/usePropertyStore';
 import type { Property } from '@/utils/permissions';
 import type { PropertyStatus } from '@/types/bulk';
 import { MEXICAN_STATES } from '@/utils/constants';
-import { validateProperty, type ImportError } from '@/services/propertyValidator';
+import { validateProperty, type ImportError, type PropertyData } from '@/services/propertyValidator';
 import { parseCSV, removeBOM, CSVParseError } from '@/utils/csvParser';
 import toast from 'react-hot-toast';
 import { Info } from 'lucide-react';
@@ -361,7 +361,8 @@ export const PropertiesPage = () => {
       } else {
         // Property is valid, attempt to import
         try {
-          await createProperty(propertyData, true); // silent = true for bulk import
+          // Cast to PropertyData - validation already confirmed required fields exist
+          await createProperty(propertyData as unknown as PropertyData, true); // silent = true for bulk import
           successCount++;
         } catch (error: unknown) {
           // API error during import

@@ -5,17 +5,9 @@
 
 import { useState, useRef } from 'react';
 import { X, Upload, Download, AlertCircle, CheckCircle, XCircle } from 'lucide-react';
+import type { ImportError } from '@/services/propertyValidator';
 
 type ImportState = 'selecting' | 'importing' | 'completed' | 'cancelled';
-
-export interface ImportError {
-  row: number;
-  title: string;
-  field: string;
-  value: string;
-  error: string;
-  type: 'validation' | 'api' | 'duplicate';
-}
 
 export interface ImportProgress {
   current: number;
