@@ -792,12 +792,17 @@ class Property_REST_API {
             ['threshold' => PHP_INT_MAX, 'multiplier' => 500000] // Over 5M: round to 500k
         ];
 
-        $rounding_levels = isset($settings['priceRounding'])
+        $rounding_levels = isset($settings['priceRounding']) && is_array($settings['priceRounding']) && !empty($settings['priceRounding'])
             ? $settings['priceRounding']
             : $default_rounding;
 
         // Find the appropriate rounding level
         foreach ($rounding_levels as $level) {
+            // Validate level structure
+            if (!is_array($level) || !isset($level['threshold']) || !isset($level['multiplier'])) {
+                continue;
+            }
+
             if ($price < $level['threshold']) {
                 $multiplier = $level['multiplier'];
                 return round($price / $multiplier) * $multiplier;
@@ -806,8 +811,13 @@ class Property_REST_API {
 
         // Fallback: use the last level's multiplier (should not reach here with PHP_INT_MAX)
         $last_level = end($rounding_levels);
-        $multiplier = $last_level['multiplier'];
-        return round($price / $multiplier) * $multiplier;
+        if (is_array($last_level) && isset($last_level['multiplier'])) {
+            $multiplier = $last_level['multiplier'];
+            return round($price / $multiplier) * $multiplier;
+        }
+
+        // Ultimate fallback: return price unchanged if no valid rounding configuration
+        return $price;
     }
 
     /**
