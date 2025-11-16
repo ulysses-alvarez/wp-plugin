@@ -133,49 +133,17 @@ class Property_User_Fields_Customization {
             // Set toolbar to false by default
             $('input[name="admin_bar_front"]').prop('checked', false);
 
-            // Hide all h2 section headers in the profile form
+            // Hide section headers (h2/h3) that we don't want to show
+            // Note: Individual fields are hidden via CSS for better performance
+            var headersToHide = ['opciones', 'personales', 'nombre', 'contacto',
+                                 'acerca', 'personal', 'información', 'informacion'];
+
             $('#your-profile h2, #your-profile h3').each(function() {
                 var text = $(this).text().toLowerCase();
-                // Hide headers related to personal options, name, contact, about
-                if (text.includes('opciones') ||
-                    text.includes('personales') ||
-                    text.includes('nombre') ||
-                    text.includes('contacto') ||
-                    text.includes('acerca') ||
-                    text.includes('personal') ||
-                    text.includes('información') ||
-                    text.includes('informacion')) {
+                if (headersToHide.some(function(keyword) { return text.includes(keyword); })) {
                     $(this).hide();
                 }
             });
-
-            // More aggressive hiding with specific jQuery selectors
-            // Hide Admin Color Scheme (Esquema de color)
-            $('.user-admin-color-wrap').hide();
-
-            // Hide Keyboard Shortcuts (Atajos de teclado)
-            $('.user-comment-shortcuts-wrap').hide();
-
-            // Hide Toolbar
-            $('.show-admin-bar').hide();
-
-            // Hide Language (Idioma)
-            $('.user-language-wrap').hide();
-
-            // Hide Display Name Publicly
-            $('.user-display-name-wrap').hide();
-
-            // Hide Nickname (Alias)
-            $('.user-nickname-wrap').hide();
-
-            // Hide Website
-            $('.user-url-wrap').hide();
-
-            // Hide Biographical Info
-            $('.user-description-wrap').hide();
-
-            // Hide Profile Picture
-            $('.user-profile-picture').hide();
         });
         </script>
         <?php
