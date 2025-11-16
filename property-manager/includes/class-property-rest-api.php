@@ -1686,7 +1686,7 @@ class Property_REST_API {
         $post_ids = wp_list_pluck($query->posts, 'ID');
 
         // Cache all post meta at once (eliminates N queries for meta)
-        update_post_meta_cache($post_ids);
+        update_postmeta_cache($post_ids);
 
         // Cache all post authors at once (eliminates N queries for users)
         $author_ids = array_unique(wp_list_pluck($query->posts, 'post_author'));
