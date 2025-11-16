@@ -1,17 +1,17 @@
 /**
  * PropertyTable Component
  * Displays properties in a table layout (Dashlane-style)
+ * Optimized with React.memo and useMemo for better performance
  */
 
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useMemo, useCallback } from 'react';
 import { usePropertyStore } from '@/stores/usePropertyStore';
-import { LoadingSpinner, Pagination, Badge, SortableTableHeader } from '@/components/ui';
+import { LoadingSpinner, Pagination, SortableTableHeader } from '@/components/ui';
 import type { SortKey } from '@/components/ui';
 import type { Property } from '@/utils/permissions';
-import { canCreateProperty, canEditProperty, canDeleteProperty, getStatusLabel } from '@/utils/permissions';
-import { getStateLabel } from '@/utils/constants';
+import { canCreateProperty } from '@/utils/permissions';
 import { usePropertySelection } from '@/hooks/usePropertySelection';
-import { PropertyActionMenu } from './PropertyActionMenu';
+import { PropertyTableRow } from './PropertyTableRow';
 import clsx from 'clsx';
 
 interface PropertyTableProps {
@@ -22,32 +22,6 @@ interface PropertyTableProps {
   onSelectionChange?: (selectedIds: Set<number>, selectedProperties: Property[]) => void;
 }
 
-const formatPrice = (price?: number): string => {
-  if (!price) return 'Sin precio';
-  const formatted = new Intl.NumberFormat('es-MX', {
-    style: 'currency',
-    currency: 'MXN',
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0
-  }).format(price);
-  return `${formatted} MXN`;
-};
-
-const getStatusVariant = (status: string) => {
-  switch (status) {
-    case 'available':
-      return 'success';
-    case 'sold':
-      return 'danger';
-    case 'rented':
-      return 'warning';
-    case 'reserved':
-      return 'info';
-    default:
-      return 'default';
-  }
-};
-
 export const PropertyTable = ({
   onPropertySelect,
   onPropertyEdit,
@@ -55,22 +29,24 @@ export const PropertyTable = ({
   onCreateNew,
   onSelectionChange
 }: PropertyTableProps) => {
-  // Use specific selectors to avoid infinite loops
-  const properties = usePropertyStore(state => state.properties);
-  const loading = usePropertyStore(state => state.loading);
-  const error = usePropertyStore(state => state.error);
-  const currentPage = usePropertyStore(state => state.currentPage);
-  const totalPages = usePropertyStore(state => state.totalPages);
-  const total = usePropertyStore(state => state.total);
-  const perPage = usePropertyStore(state => state.perPage);
-  const sortBy = usePropertyStore(state => state.sortBy);
-  const sortOrder = usePropertyStore(state => state.sortOrder);
-  const filters = usePropertyStore(state => state.filters);
-  const loadProperties = usePropertyStore(state => state.loadProperties);
-  const setPage = usePropertyStore(state => state.setPage);
-  const setPerPage = usePropertyStore(state => state.setPerPage);
-  const setSortBy = usePropertyStore(state => state.setSortBy);
-  const setSortOrder = usePropertyStore(state => state.setSortOrder);
+  // Performance optimization: Combine Zustand selectors to reduce re-renders
+  const {
+    properties,
+    loading,
+    error,
+    currentPage,
+    totalPages,
+    total,
+    perPage,
+    sortBy,
+    sortOrder,
+    filters,
+    loadProperties,
+    setPage,
+    setPerPage,
+    setSortBy,
+    setSortOrder
+  } = usePropertyStore();
 
   const [initialLoad, setInitialLoad] = useState(true);
   const [hoveredRow, setHoveredRow] = useState<number | null>(null);
@@ -104,22 +80,17 @@ export const PropertyTable = ({
     }
   }, [properties, selectedIds, clearSelections]);
 
-  // Explicitly check sessionStorage to detect external clears
+  // Performance optimization: Use storage event instead of polling
+  // Listen for storage changes from other tabs/windows
   useEffect(() => {
-    const checkSessionStorage = () => {
-      const stored = sessionStorage.getItem('propertySelection');
-      if (!stored && selectedIds.size > 0) {
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'propertySelection' && !e.newValue && selectedIds.size > 0) {
         clearSelections();
       }
     };
 
-    // Check immediately
-    checkSessionStorage();
-
-    // Also check periodically to catch external clears
-    const interval = setInterval(checkSessionStorage, 100);
-
-    return () => clearInterval(interval);
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
   }, [selectedIds.size, clearSelections]);
 
   // Notify parent of selection changes
@@ -131,17 +102,21 @@ export const PropertyTable = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedIds, properties]);
 
-  // Check if all properties on current page are selected
-  const currentPagePropertyIds = properties.map((p) => p.id);
-  const isAllCurrentPageSelected =
-    currentPagePropertyIds.length > 0 &&
-    currentPagePropertyIds.every((id) => selectedIds.has(id));
-  const isSomeCurrentPageSelected =
-    currentPagePropertyIds.some((id) => selectedIds.has(id)) &&
-    !isAllCurrentPageSelected;
+  // Performance optimization: Memoize expensive calculations
+  const { currentPagePropertyIds, isAllCurrentPageSelected, isSomeCurrentPageSelected } = useMemo(() => {
+    const ids = properties.map((p) => p.id);
+    const isAll = ids.length > 0 && ids.every((id) => selectedIds.has(id));
+    const isSome = ids.some((id) => selectedIds.has(id)) && !isAll;
 
-  // Handle select/deselect all on current page
-  const handleSelectAllCurrentPage = () => {
+    return {
+      currentPagePropertyIds: ids,
+      isAllCurrentPageSelected: isAll,
+      isSomeCurrentPageSelected: isSome
+    };
+  }, [properties, selectedIds]);
+
+  // Performance optimization: Memoize callbacks to prevent unnecessary re-renders
+  const handleSelectAllCurrentPage = useCallback(() => {
     if (isAllCurrentPageSelected) {
       // Deselect all on current page
       currentPagePropertyIds.forEach((id) => {
@@ -153,7 +128,15 @@ export const PropertyTable = ({
       // Select all on current page
       selectAll(currentPagePropertyIds);
     }
-  };
+  }, [isAllCurrentPageSelected, currentPagePropertyIds, selectedIds, toggleProperty, selectAll]);
+
+  const handleMouseEnter = useCallback((propertyId: number) => {
+    setHoveredRow(propertyId);
+  }, []);
+
+  const handleMouseLeave = useCallback(() => {
+    setHoveredRow(null);
+  }, []);
 
   // Load properties on mount and when pagination, sorting, or filters change
   useEffect(() => {
@@ -420,182 +403,20 @@ export const PropertyTable = ({
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {properties.map((property) => {
-              const canEdit = canEditProperty(property);
-              const canDelete = canDeleteProperty(property);
-              const isHovered = hoveredRow === property.id;
-              const isSelected = isPropertySelected(property.id);
-
-              return (
-                <tr
-                  key={property.id}
-                  className={clsx(
-                    'transition-colors cursor-pointer',
-                    isHovered
-                      ? 'bg-gray-100'
-                      : 'hover:bg-gray-50'
-                  )}
-                  onMouseEnter={() => setHoveredRow(property.id)}
-                  onMouseLeave={() => setHoveredRow(null)}
-                  onClick={() => onPropertySelect(property)}
-                >
-                  {/* Checkbox */}
-                  <td
-                    className="w-12 px-3 py-3"
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    <input
-                      type="checkbox"
-                      checked={isSelected}
-                      onChange={() => toggleProperty(property.id)}
-                      className="checkbox-primary"
-                      title={
-                        isSelected
-                          ? 'Deseleccionar propiedad'
-                          : 'Seleccionar propiedad'
-                      }
-                    />
-                  </td>
-
-                  {/* Property Name & Patent */}
-                  <td className="px-3 py-3 sm:px-6 sm:py-4">
-                    <div className="flex flex-col">
-                      <div className="text-sm font-medium text-gray-900 truncate max-w-xs">
-                        {property.title}
-                      </div>
-                      {property.patent && (
-                        <div className="text-sm text-gray-500 mt-0.5">
-                          Patente: {property.patent}
-                        </div>
-                      )}
-                    </div>
-                  </td>
-
-                  {/* Location */}
-                  <td className="hidden md:table-cell px-3 py-3 sm:px-6 sm:py-4">
-                    <div className="text-sm text-gray-900 flex items-start gap-1.5">
-                      <svg className="w-4 h-4 text-gray-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                      </svg>
-                      <div className="flex flex-col max-w-xs">
-                        {property.state && (
-                          <span className="font-medium truncate">{getStateLabel(property.state)}</span>
-                        )}
-                        <span className="text-gray-600 text-sm truncate">
-                          {property.municipality}
-                          {property.neighborhood && `, ${property.neighborhood}`}
-                          {property.postal_code && `. C.P. ${property.postal_code}`}
-                        </span>
-                      </div>
-                    </div>
-                  </td>
-
-                  {/* Status */}
-                  <td className="px-3 py-3 sm:px-6 sm:py-4">
-                    <Badge 
-                      variant={getStatusVariant(property.status)}
-                      className="px-1.5 py-0.5 text-xs sm:px-2.5 sm:py-1 sm:text-sm"
-                    >
-                      {getStatusLabel(property.status)}
-                    </Badge>
-                  </td>
-
-                  {/* Price */}
-                  <td className="hidden md:table-cell px-3 py-3 sm:px-6 sm:py-4">
-                    <div className="text-sm font-semibold text-gray-900">
-                      {formatPrice(property.price)}
-                    </div>
-                  </td>
-
-                  {/* Actions - Sticky Column */}
-                  <td 
-                    className={clsx(
-                      'sticky right-0 z-10 px-2 py-2 sm:px-6 sm:py-4 text-right shadow-sticky-column',
-                      isHovered ? 'bg-gray-100' : 'bg-white'
-                    )}
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    {/* Mobile/Tablet: Action Menu (< 1024px) */}
-                    <div className="lg:hidden flex items-center justify-end">
-                      <PropertyActionMenu
-                        property={property}
-                        canEdit={canEdit}
-                        canDelete={canDelete}
-                        onView={onPropertySelect}
-                        onEdit={onPropertyEdit}
-                        onDelete={onPropertyDelete}
-                      />
-                    </div>
-
-                    {/* Desktop: Individual Action Buttons (>= 1024px) - Tamaños responsive */}
-                    <div className="hidden lg:flex items-center justify-end gap-1">
-                      {/* Ver */}
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          onPropertySelect(property);
-                        }}
-                        className="p-1 sm:p-1.5 text-gray-600 hover:text-primary hover:bg-primary-light rounded-lg transition-colors"
-                        title="Ver detalles"
-                      >
-                        <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                        </svg>
-                      </button>
-
-                      {/* Editar */}
-                      {canEdit && onPropertyEdit && (
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            onPropertyEdit(property);
-                          }}
-                          className="p-1 sm:p-1.5 text-gray-600 hover:text-primary hover:bg-primary-light rounded-lg transition-colors"
-                          title="Editar"
-                        >
-                          <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                          </svg>
-                        </button>
-                      )}
-
-                      {/* Descargar ficha */}
-                      {property.attachment_url && (
-                        <a
-                          href={property.attachment_url}
-                          download
-                          onClick={(e) => e.stopPropagation()}
-                          className="p-1 sm:p-1.5 text-gray-600 hover:text-success hover:bg-success-light rounded-lg transition-colors"
-                          title="Descargar ficha"
-                        >
-                          <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                          </svg>
-                        </a>
-                      )}
-
-                      {/* Eliminar */}
-                      {canDelete && onPropertyDelete && (
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            onPropertyDelete(property);
-                          }}
-                          className="p-1 sm:p-1.5 text-gray-600 hover:text-danger hover:bg-danger-light rounded-lg transition-colors"
-                          title="Eliminar"
-                        >
-                          <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                          </svg>
-                        </button>
-                      )}
-                    </div>
-                  </td>
-                </tr>
-              );
-            })}
+            {properties.map((property) => (
+              <PropertyTableRow
+                key={property.id}
+                property={property}
+                isSelected={isPropertySelected(property.id)}
+                isHovered={hoveredRow === property.id}
+                onPropertySelect={onPropertySelect}
+                onPropertyEdit={onPropertyEdit}
+                onPropertyDelete={onPropertyDelete}
+                onToggleSelection={toggleProperty}
+                onMouseEnter={handleMouseEnter}
+                onMouseLeave={handleMouseLeave}
+              />
+            ))}
           </tbody>
         </table>
       </div>

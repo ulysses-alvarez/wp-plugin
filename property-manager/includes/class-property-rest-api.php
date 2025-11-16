@@ -515,6 +515,32 @@ class Property_REST_API {
             remove_filter('posts_where', $postal_code_filter, 10);
         }
 
+        // Performance optimization: Prime caches to avoid N+1 query problem
+        if (!empty($query->posts)) {
+            $post_ids = wp_list_pluck($query->posts, 'ID');
+
+            // Cache all post meta at once (eliminates N queries for meta)
+            update_post_meta_cache($post_ids);
+
+            // Cache all post authors at once (eliminates N queries for users)
+            $author_ids = array_unique(wp_list_pluck($query->posts, 'post_author'));
+            cache_users($author_ids);
+
+            // Cache attachment posts for wp_get_attachment_url() calls
+            // First, get all attachment IDs from meta
+            $attachment_ids = [];
+            foreach ($query->posts as $post) {
+                $attachment_id = get_post_meta($post->ID, '_property_attachment_id', true);
+                if ($attachment_id) {
+                    $attachment_ids[] = intval($attachment_id);
+                }
+            }
+            if (!empty($attachment_ids)) {
+                // Prime the post cache for attachments
+                _prime_post_caches($attachment_ids, false, true);
+            }
+        }
+
         $properties = [];
 
         foreach ($query->posts as $post) {

@@ -32,6 +32,12 @@ class Property_User_Management {
 
         // Filter user count views
         add_filter('views_users', [__CLASS__, 'filter_user_count_views']);
+
+        // Clear user count cache when users are created, updated, or deleted
+        add_action('user_register', [__CLASS__, 'clear_user_count_cache']);
+        add_action('profile_update', [__CLASS__, 'clear_user_count_cache']);
+        add_action('delete_user', [__CLASS__, 'clear_user_count_cache']);
+        add_action('set_user_role', [__CLASS__, 'clear_user_count_cache']);
     }
 
     /**
@@ -304,14 +310,22 @@ class Property_User_Management {
             }
         }
 
-        // Recalculate "All" count
-        $users = count_users();
-        $total_allowed = 0;
+        // Recalculate "All" count with caching to improve performance
+        $cache_key = 'property_user_count_' . md5(serialize($allowed_roles));
+        $total_allowed = get_transient($cache_key);
 
-        foreach ($allowed_roles as $role) {
-            if (isset($users['avail_roles'][$role])) {
-                $total_allowed += $users['avail_roles'][$role];
+        if (false === $total_allowed) {
+            $users = count_users();
+            $total_allowed = 0;
+
+            foreach ($allowed_roles as $role) {
+                if (isset($users['avail_roles'][$role])) {
+                    $total_allowed += $users['avail_roles'][$role];
+                }
             }
+
+            // Cache for 1 hour
+            set_transient($cache_key, $total_allowed, HOUR_IN_SECONDS);
         }
 
         // Update "All" link with correct count
@@ -327,5 +341,15 @@ class Property_User_Management {
         }
 
         return $views;
+    }
+
+    /**
+     * Clear user count cache when users are modified
+     * This ensures the cached count stays accurate
+     */
+    public static function clear_user_count_cache() {
+        $allowed_roles = ['property_admin', 'property_manager', 'property_associate'];
+        $cache_key = 'property_user_count_' . md5(serialize($allowed_roles));
+        delete_transient($cache_key);
     }
 }
