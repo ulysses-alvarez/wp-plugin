@@ -253,90 +253,88 @@ class Property_Roles {
     }
 
     /**
-     * Check if user can view property
+     * Generic method to check property permissions
+     * Validates property and checks user permissions based on action
      *
-     * @param int $user_id
-     * @param int $property_id
-     * @return bool
+     * @param int    $user_id User ID to check
+     * @param int    $property_id Property ID
+     * @param string $action Action to check: 'view', 'edit', or 'delete'
+     * @return bool Whether user can perform the action
      */
-    public static function can_view_property($user_id, $property_id) {
-        $user = get_user_by('id', $user_id);
-
-        if (!$user) {
+    private static function check_property_permission($user_id, $property_id, $action) {
+        // Validate property exists and is correct type
+        $property = get_post($property_id);
+        if (!$property || $property->post_type !== 'property') {
             return false;
         }
 
-        // Admin and Manager can view all
-        if (user_can($user_id, 'view_all_properties')) {
-            return true;
-        }
+        $is_author = (int) $property->post_author === (int) $user_id;
 
-        // Associate can only view own properties
-        if (user_can($user_id, 'view_properties')) {
-            $property = get_post($property_id);
-            if (!$property || $property->post_type !== 'property') {
+        // Check permissions based on action
+        switch ($action) {
+            case 'view':
+                // Can view all properties?
+                if (user_can($user_id, 'view_all_properties')) {
+                    return true;
+                }
+                // Can only view own properties?
+                if (user_can($user_id, 'view_properties')) {
+                    return $is_author;
+                }
                 return false;
-            }
-            return (int) $property->post_author === (int) $user_id;
-        }
 
-        return false;
+            case 'edit':
+                // Can edit others' properties?
+                if (user_can($user_id, 'edit_others_properties')) {
+                    return true;
+                }
+                // Can only edit own properties?
+                if (user_can($user_id, 'edit_properties')) {
+                    return $is_author;
+                }
+                return false;
+
+            case 'delete':
+                // Delete is restricted to admin roles only
+                // Using capability check instead of hardcoded roles
+                return user_can($user_id, 'delete_others_properties');
+
+            default:
+                return false;
+        }
+    }
+
+    /**
+     * Check if user can view property
+     *
+     * @param int $user_id User ID
+     * @param int $property_id Property ID
+     * @return bool
+     */
+    public static function can_view_property($user_id, $property_id) {
+        return self::check_property_permission($user_id, $property_id, 'view');
     }
 
     /**
      * Check if user can edit property
      *
-     * @param int $user_id
-     * @param int $property_id
+     * @param int $user_id User ID
+     * @param int $property_id Property ID
      * @return bool
      */
     public static function can_edit_property($user_id, $property_id) {
-        // Validate that property exists and is a valid property post type
-        $property = get_post($property_id);
-        if (!$property || $property->post_type !== 'property') {
-            return false;
-        }
-
-        // Admin and Manager can edit all
-        if (user_can($user_id, 'edit_others_properties')) {
-            return true;
-        }
-
-        // Associate can only edit own
-        if (user_can($user_id, 'edit_properties')) {
-            return (int) $property->post_author === (int) $user_id;
-        }
-
-        return false;
+        return self::check_property_permission($user_id, $property_id, 'edit');
     }
 
     /**
      * Check if user can delete property
      *
-     * @param int $user_id
-     * @param int $property_id
+     * @param int $user_id User ID
+     * @param int $property_id Property ID
      * @return bool
      */
     public static function can_delete_property($user_id, $property_id) {
-        $user = get_user_by('id', $user_id);
-
-        if (!$user) {
-            return false;
-        }
-
-        // Validate that property exists and is a valid property post type
-        $property = get_post($property_id);
-        if (!$property || $property->post_type !== 'property') {
-            return false;
-        }
-
-        // Only property_admin and administrator can delete
-        if (in_array('property_admin', $user->roles) || in_array('administrator', $user->roles)) {
-            return true;
-        }
-
-        // Manager and Associate cannot delete (not even their own)
-        return false;
+        return self::check_property_permission($user_id, $property_id, 'delete');
     }
 
     /**
@@ -384,8 +382,7 @@ class Property_Roles {
 
     /**
      * Filter property deletion capabilities
-     * Only property_admin and administrator can delete properties
-     * Managers and Associates cannot delete any properties (not even their own)
+     * Ensures consistent deletion permissions across WordPress
      *
      * @param array  $caps    Required capabilities
      * @param string $cap     Capability being checked
@@ -404,20 +401,16 @@ class Property_Roles {
             return $caps;
         }
 
-        $post = get_post($args[0]);
+        $property_id = (int) $args[0];
+        $post = get_post($property_id);
+
+        // Only filter property post type
         if (!$post || $post->post_type !== 'property') {
             return $caps;
         }
 
-        // Get user
-        $user = get_user_by('id', $user_id);
-        if (!$user) {
-            return $caps;
-        }
-
-        // If user is a Manager or Associate, prevent ALL deletions
-        if (in_array('property_manager', $user->roles) || in_array('property_associate', $user->roles)) {
-            // Return 'do_not_allow' to prevent deletion
+        // Use our centralized permission check
+        if (!self::can_delete_property($user_id, $property_id)) {
             return ['do_not_allow'];
         }
 
