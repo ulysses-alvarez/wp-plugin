@@ -7,13 +7,15 @@ import { BulkActionsBar } from '@/components/properties/BulkActionsBar';
 import { BulkDeleteModal } from '@/components/properties/BulkDeleteModal';
 import { BulkStatusModal } from '@/components/properties/BulkStatusModal';
 import { BulkPatentModal } from '@/components/properties/BulkPatentModal';
-import { ImportCSVModal, type ImportError, type ImportProgress } from '@/components/properties/ImportCSVModal';
+import { ImportCSVModal, type ImportProgress } from '@/components/properties/ImportCSVModal';
 import { ExportModal } from '@/components/properties/ExportModal';
 import type { PropertyFormData } from '@/components/properties/PropertyForm';
 import { usePropertyStore } from '@/stores/usePropertyStore';
 import type { Property } from '@/utils/permissions';
 import type { PropertyStatus } from '@/types/bulk';
 import { MEXICAN_STATES } from '@/utils/constants';
+import { validateProperty, type ImportError } from '@/services/propertyValidator';
+import { parseCSV, removeBOM, CSVParseError } from '@/utils/csvParser';
 import toast from 'react-hot-toast';
 import { Info } from 'lucide-react';
 
@@ -41,119 +43,6 @@ const normalizeStateName = (stateName: string): string => {
 
   // Return original value if no match found
   return stateName.trim();
-};
-
-// Función de validación de propiedades
-const validateProperty = (property: any, rowNumber: number): ImportError[] => {
-  const errors: ImportError[] = [];
-  const title = property.title?.trim() || '[sin título]';
-
-  // Validar título (requerido)
-  if (!property.title?.trim()) {
-    errors.push({
-      row: rowNumber,
-      title,
-      field: 'title',
-      value: property.title || '',
-      error: 'El título es obligatorio',
-      type: 'validation'
-    });
-  }
-
-  // Validar status (requerido y valores específicos)
-  if (!property.status?.trim()) {
-    errors.push({
-      row: rowNumber,
-      title,
-      field: 'status',
-      value: property.status || '',
-      error: 'El status es obligatorio',
-      type: 'validation'
-    });
-  } else if (!['available', 'sold', 'rented', 'reserved'].includes(property.status)) {
-    errors.push({
-      row: rowNumber,
-      title,
-      field: 'status',
-      value: property.status,
-      error: 'Status debe ser: available, sold, rented o reserved',
-      type: 'validation'
-    });
-  }
-
-  // Validar state (requerido)
-  if (!property.state?.trim()) {
-    errors.push({
-      row: rowNumber,
-      title,
-      field: 'state',
-      value: property.state || '',
-      error: 'El estado es obligatorio',
-      type: 'validation'
-    });
-  }
-
-  // Validar municipality (requerido)
-  if (!property.municipality?.trim()) {
-    errors.push({
-      row: rowNumber,
-      title,
-      field: 'municipality',
-      value: property.municipality || '',
-      error: 'El municipio es obligatorio',
-      type: 'validation'
-    });
-  }
-
-  // Validar patent (requerido)
-  if (!property.patent?.trim()) {
-    errors.push({
-      row: rowNumber,
-      title,
-      field: 'patent',
-      value: property.patent || '',
-      error: 'La patente es obligatoria',
-      type: 'validation'
-    });
-  }
-
-  // Validar price (opcional pero debe ser número)
-  if (property.price && property.price.trim() && isNaN(Number(property.price))) {
-    errors.push({
-      row: rowNumber,
-      title,
-      field: 'price',
-      value: property.price,
-      error: 'El precio debe ser un número válido',
-      type: 'validation'
-    });
-  }
-
-  // Validar postal_code (opcional pero debe tener 5 dígitos)
-  if (property.postal_code && property.postal_code.trim() && !/^\d{5}$/.test(property.postal_code)) {
-    errors.push({
-      row: rowNumber,
-      title,
-      field: 'postal_code',
-      value: property.postal_code,
-      error: 'El código postal debe tener 5 dígitos',
-      type: 'validation'
-    });
-  }
-
-  // Validar google_maps (opcional pero debe ser URL)
-  if (property.google_maps && property.google_maps.trim() && !property.google_maps.startsWith('http')) {
-    errors.push({
-      row: rowNumber,
-      title,
-      field: 'google_maps',
-      value: property.google_maps,
-      error: 'La URL debe comenzar con http:// o https://',
-      type: 'validation'
-    });
-  }
-
-  return errors;
 };
 
 export const PropertiesPage = () => {
@@ -415,72 +304,39 @@ export const PropertiesPage = () => {
     setIsBulkPatentModalOpen(false);
   };
 
-  // Helper function to parse CSV line respecting quoted fields
-  const parseCSVLine = (line: string): string[] => {
-    const result: string[] = [];
-    let current = '';
-    let insideQuotes = false;
-
-    for (let i = 0; i < line.length; i++) {
-      const char = line[i];
-      const nextChar = line[i + 1];
-
-      if (char === '"') {
-        if (insideQuotes && nextChar === '"') {
-          // Escaped quote
-          current += '"';
-          i++; // Skip next quote
-        } else {
-          // Toggle quote state
-          insideQuotes = !insideQuotes;
-        }
-      } else if (char === ',' && !insideQuotes) {
-        // End of field
-        result.push(current.trim());
-        current = '';
-      } else {
-        current += char;
-      }
-    }
-
-    // Add last field
-    result.push(current.trim());
-    return result;
-  };
-
+  // Handle CSV import with validation and sanitization
   const handleImportCSV = async (
     file: File,
     onProgress: (progress: ImportProgress) => void,
     signal: AbortSignal
   ): Promise<{ success: number; errors: ImportError[] }> => {
-    // Parse CSV file
-    const text = await file.text();
-    const lines = text.split('\n').filter(line => line.trim());
+    // Read and parse CSV file with security validation
+    let text = await file.text();
 
-    if (lines.length < 2) {
-      throw new Error('El archivo CSV está vacío o no tiene datos');
+    // Remove BOM if present (common in Excel exports)
+    text = removeBOM(text);
+
+    // Parse CSV with validation and sanitization
+    let parsed;
+    try {
+      parsed = parseCSV(text, {
+        skipEmptyLines: true
+      });
+    } catch (error) {
+      if (error instanceof CSVParseError) {
+        throw new Error(error.message);
+      }
+      throw error;
     }
 
-    // Parse headers using robust parser
-    const headers = parseCSVLine(lines[0]);
-    const properties: any[] = [];
+    const { data: properties } = parsed;
 
-    // Parse all rows into property objects
-    for (let i = 1; i < lines.length; i++) {
-      const values = parseCSVLine(lines[i]);
-      const property: any = {};
-
-      headers.forEach((header, index) => {
-        property[header] = values[index] || '';
-      });
-
-      // Normalize state name from label to value (e.g., "Jalisco" -> "jalisco")
+    // Normalize state names for all properties
+    properties.forEach(property => {
       if (property.state) {
         property.state = normalizeStateName(property.state);
       }
-
-      properties.push(property);
-    }
+    });
 
     // Import each property with validation and progress tracking
     let successCount = 0;
