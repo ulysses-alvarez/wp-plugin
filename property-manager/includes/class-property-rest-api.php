@@ -778,21 +778,36 @@ class Property_REST_API {
     /**
      * Smart rounding for price ranges based on magnitude
      * Rounds to appropriate multiples for better UX
+     * Uses configurable thresholds and multipliers from settings
      */
     private function round_price_smart($price) {
-        if ($price < 100000) {
-            // Under 100k: round to nearest 10k
-            return round($price / 10000) * 10000;
-        } elseif ($price < 1000000) {
-            // 100k-1M: round to nearest 50k
-            return round($price / 50000) * 50000;
-        } elseif ($price < 5000000) {
-            // 1M-5M: round to nearest 100k
-            return round($price / 100000) * 100000;
-        } else {
-            // Over 5M: round to nearest 500k
-            return round($price / 500000) * 500000;
+        // Get rounding configuration from settings
+        $settings = get_option('property_dashboard_settings', []);
+
+        // Default rounding levels (same as before for backward compatibility)
+        $default_rounding = [
+            ['threshold' => 100000, 'multiplier' => 10000],     // Under 100k: round to 10k
+            ['threshold' => 1000000, 'multiplier' => 50000],    // 100k-1M: round to 50k
+            ['threshold' => 5000000, 'multiplier' => 100000],   // 1M-5M: round to 100k
+            ['threshold' => PHP_INT_MAX, 'multiplier' => 500000] // Over 5M: round to 500k
+        ];
+
+        $rounding_levels = isset($settings['priceRounding'])
+            ? $settings['priceRounding']
+            : $default_rounding;
+
+        // Find the appropriate rounding level
+        foreach ($rounding_levels as $level) {
+            if ($price < $level['threshold']) {
+                $multiplier = $level['multiplier'];
+                return round($price / $multiplier) * $multiplier;
+            }
         }
+
+        // Fallback: use the last level's multiplier (should not reach here with PHP_INT_MAX)
+        $last_level = end($rounding_levels);
+        $multiplier = $last_level['multiplier'];
+        return round($price / $multiplier) * $multiplier;
     }
 
     /**

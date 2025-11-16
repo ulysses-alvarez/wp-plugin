@@ -43,6 +43,10 @@ class Property_Settings {
                     'type' => 'string',
                     'sanitize_callback' => 'sanitize_hex_color',
                     'validate_callback' => [__CLASS__, 'validate_hex_color']
+                ],
+                'priceRounding' => [
+                    'type' => 'array',
+                    'validate_callback' => [__CLASS__, 'validate_price_rounding']
                 ]
             ]
         ]);
@@ -68,7 +72,13 @@ class Property_Settings {
     public static function get_settings($request) {
         $defaults = [
             'logoId' => 0,
-            'primaryColor' => '#000000'
+            'primaryColor' => '#000000',
+            'priceRounding' => [
+                ['threshold' => 100000, 'multiplier' => 10000],     // Under 100k: round to 10k
+                ['threshold' => 1000000, 'multiplier' => 50000],    // 100k-1M: round to 50k
+                ['threshold' => 5000000, 'multiplier' => 100000],   // 1M-5M: round to 100k
+                ['threshold' => PHP_INT_MAX, 'multiplier' => 500000] // Over 5M: round to 500k
+            ]
         ];
 
         $settings = get_option('property_dashboard_settings', $defaults);
@@ -116,6 +126,27 @@ class Property_Settings {
                 return new WP_Error(
                     'invalid_color',
                     'Color primario inválido. Debe ser un color hexadecimal válido (ej: #216121)',
+                    ['status' => 400]
+                );
+            }
+        }
+
+        if (isset($params['priceRounding'])) {
+            // Validate and sanitize price rounding configuration
+            $rounding = $params['priceRounding'];
+            if (self::validate_price_rounding($rounding, $request, 'priceRounding')) {
+                $sanitized_rounding = [];
+                foreach ($rounding as $level) {
+                    $sanitized_rounding[] = [
+                        'threshold' => absint($level['threshold']),
+                        'multiplier' => absint($level['multiplier'])
+                    ];
+                }
+                $updated['priceRounding'] = $sanitized_rounding;
+            } else {
+                return new WP_Error(
+                    'invalid_price_rounding',
+                    'Configuración de redondeo de precios inválida',
                     ['status' => 400]
                 );
             }
@@ -241,6 +272,43 @@ class Property_Settings {
         }
 
         return false;
+    }
+
+    /**
+     * Validate price rounding configuration
+     */
+    public static function validate_price_rounding($value, $request, $key) {
+        if (empty($value) || !is_array($value)) {
+            return false;
+        }
+
+        // Must have at least one level
+        if (count($value) === 0) {
+            return false;
+        }
+
+        // Validate each level
+        foreach ($value as $level) {
+            if (!is_array($level)) {
+                return false;
+            }
+
+            // Must have threshold and multiplier keys
+            if (!isset($level['threshold']) || !isset($level['multiplier'])) {
+                return false;
+            }
+
+            // Both must be positive integers
+            if (!is_numeric($level['threshold']) || !is_numeric($level['multiplier'])) {
+                return false;
+            }
+
+            if ($level['threshold'] <= 0 || $level['multiplier'] <= 0) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     /**
