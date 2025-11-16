@@ -61,6 +61,10 @@ export const PropertiesPage = () => {
   const [isBulkStatusModalOpen, setIsBulkStatusModalOpen] = useState(false);
   const [isBulkPatentModalOpen, setIsBulkPatentModalOpen] = useState(false);
 
+  // File upload progress state
+  const [uploadProgress, setUploadProgress] = useState<number>(0);
+  const [isUploading, setIsUploading] = useState(false);
+
   // Use specific selectors to avoid infinite loops
   const createProperty = usePropertyStore(state => state.createProperty);
   const updateProperty = usePropertyStore(state => state.updateProperty);
@@ -127,10 +131,21 @@ export const PropertiesPage = () => {
     let attachmentId: number | undefined;
     if (data.attachment && data.attachment instanceof File) {
       try {
-        const uploadResult = await uploadFile(data.attachment);
+        setIsUploading(true);
+        setUploadProgress(0);
+
+        const uploadResult = await uploadFile(
+          data.attachment,
+          (percent) => setUploadProgress(percent)
+        );
+
         attachmentId = uploadResult.id;
+        setIsUploading(false);
       } catch (error) {
-        // Upload error handled silently
+        setIsUploading(false);
+        setUploadProgress(0);
+        toast.error(error instanceof Error ? error.message : 'Error al subir archivo');
+        return; // Don't save property if file upload failed
       }
     }
 
@@ -487,6 +502,8 @@ export const PropertiesPage = () => {
         onDelete={handleDelete}
         onSubmit={handleFormSubmit}
         loading={loading}
+        uploadProgress={uploadProgress}
+        isUploading={isUploading}
       />
 
       <ImportCSVModal

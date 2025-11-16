@@ -40,6 +40,11 @@ All backend refactoring tasks have been completed successfully!
 - ✅ Added defensive validation to `round_price_smart()`
 - ✅ Fixed TypeScript compilation errors (8 errors fixed)
 - ✅ Unified ImportError types across codebase
+- ✅ Implemented file upload progress bar with XMLHttpRequest (2.5 hours)
+  - Real-time progress tracking (0-100%)
+  - Dynamic button text during upload
+  - Visual progress bar with percentage
+  - Error handling for failed uploads
 
 ### Features Completed (Nov 12, 2025)
 - ✅ Empty state vs search-no-results detection
@@ -50,6 +55,53 @@ All backend refactoring tasks have been completed successfully!
 ---
 
 ## 💡 Low Priority Issues
+
+### File Upload UX Enhancements (Optional/Future)
+**Priority:** 💡 Low - Nice to have
+**Status:** 🔮 Possible future implementation
+**Estimated effort:** 6-8 hours total
+
+**Current state:** Basic progress bar already implemented ✅
+
+**Possible enhancements:**
+
+1. **Image Compression (Client-Side)** - 2 hours
+   - Reduce image file sizes by 50-80% before upload
+   - Faster uploads and less bandwidth
+   - Library: `browser-image-compression` (~18KB)
+   - Only works for images (not PDFs)
+   - **Trade-off:** May reduce quality for technical drawings
+
+2. **Cancel Upload Button** - 1 hour
+   - Allow users to abort ongoing uploads
+   - Already prepared with `XMLHttpRequest.abort()`
+   - Add "Cancelar" button next to progress bar
+   - **Benefit:** Better user control
+
+3. **Upload Time Estimation** - 1 hour
+   - Display estimated remaining time ("~15 segundos restantes")
+   - Calculate based on upload speed
+   - **Benefit:** Sets user expectations
+
+4. **File Preview Before Upload** - 2 hours
+   - Show image/PDF preview before submitting
+   - Thumbnail for images
+   - PDF first page preview
+   - **Benefit:** User can verify correct file
+
+5. **Enhanced Drag & Drop** - 1 hour
+   - Visual feedback during drag
+   - Multiple file zones highlighting
+   - Drop overlay animation
+   - **Benefit:** More intuitive interface
+
+**Decision criteria:**
+- Implement if users frequently upload large files (>2MB)
+- Image compression valuable if users upload photos vs PDFs
+- Cancel button useful for slow connections
+- Low priority unless user complaints
+
+---
 
 ### Bug #1: Profile Updates Not Persisting to Database
 **Impact:** Users cannot change their name or password

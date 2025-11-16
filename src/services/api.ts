@@ -233,31 +233,66 @@ export const deleteProperty = async (id: number): Promise<{ deleted: boolean }> 
 };
 
 /**
- * Upload file/attachment
+ * Upload file/attachment with progress tracking
  */
-export const uploadFile = async (file: File): Promise<{ id: number; url: string }> => {
+export const uploadFile = async (
+  file: File,
+  onProgress?: (percent: number) => void
+): Promise<{ id: number; url: string }> => {
   const config = getAPIConfig();
-  const formData = new FormData();
-  formData.append('file', file);
 
-  const response = await fetch(`${config.wpApiUrl}/media`, {
-    method: 'POST',
-    headers: {
-      'X-WP-Nonce': config.nonce
-    },
-    body: formData
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+
+    // Track upload progress
+    xhr.upload.addEventListener('progress', (e) => {
+      if (e.lengthComputable && onProgress) {
+        const percent = Math.round((e.loaded / e.total) * 100);
+        onProgress(percent);
+      }
+    });
+
+    // Handle successful upload
+    xhr.addEventListener('load', () => {
+      if (xhr.status >= 200 && xhr.status < 300) {
+        try {
+          const data = JSON.parse(xhr.responseText);
+          resolve({
+            id: data.id,
+            url: data.source_url
+          });
+        } catch (error) {
+          reject(new Error('Error al procesar respuesta del servidor'));
+        }
+      } else {
+        // Handle HTTP errors
+        try {
+          const errorData = JSON.parse(xhr.responseText);
+          reject(new Error(errorData.message || `Error HTTP ${xhr.status}`));
+        } catch {
+          reject(new Error(`Error HTTP ${xhr.status}: ${xhr.statusText}`));
+        }
+      }
+    });
+
+    // Handle network errors
+    xhr.addEventListener('error', () => {
+      reject(new Error('Error de red durante la carga del archivo'));
+    });
+
+    // Handle upload abortion
+    xhr.addEventListener('abort', () => {
+      reject(new Error('Carga de archivo cancelada'));
+    });
+
+    // Configure and send request
+    xhr.open('POST', `${config.wpApiUrl}/media`);
+    xhr.setRequestHeader('X-WP-Nonce', config.nonce);
+
+    const formData = new FormData();
+    formData.append('file', file);
+    xhr.send(formData);
   });
-
-  if (!response.ok) {
-    await handleAPIError(response);
-  }
-
-  const data = await response.json();
-
-  return {
-    id: data.id,
-    url: data.source_url
-  };
 };
 
 /**

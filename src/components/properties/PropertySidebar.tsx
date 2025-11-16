@@ -23,6 +23,8 @@ interface PropertySidebarProps {
   onDelete?: (property: Property) => void;
   onSubmit?: (data: PropertyFormData) => Promise<void>;
   loading?: boolean;
+  uploadProgress?: number;
+  isUploading?: boolean;
 }
 
 export const PropertySidebar = ({
@@ -33,7 +35,9 @@ export const PropertySidebar = ({
   onEdit,
   onDelete,
   onSubmit,
-  loading = false
+  loading = false,
+  uploadProgress = 0,
+  isUploading = false
 }: PropertySidebarProps) => {
   // Close on ESC key
   useEffect(() => {
@@ -130,6 +134,8 @@ export const PropertySidebar = ({
             onSubmit={handleFormSubmit}
             onCancel={onClose}
             loading={loading}
+            uploadProgress={uploadProgress}
+            isUploading={isUploading}
           />
         )}
       </div>

@@ -17,6 +17,8 @@ interface PropertyFormSidebarProps {
   onSubmit: (data: PropertyFormData) => Promise<void>;
   onCancel: () => void;
   loading?: boolean;
+  uploadProgress?: number;
+  isUploading?: boolean;
 }
 
 export const PropertyFormSidebar = ({
@@ -24,7 +26,9 @@ export const PropertyFormSidebar = ({
   mode,
   onSubmit,
   onCancel,
-  loading = false
+  loading = false,
+  uploadProgress = 0,
+  isUploading = false
 }: PropertyFormSidebarProps) => {
   // Form ref to trigger submit from footer button
   const formRef = useRef<HTMLFormElement>(null);
@@ -51,6 +55,8 @@ export const PropertyFormSidebar = ({
           mode={mode}
           onSubmit={handleFormSubmit}
           loading={loading}
+          uploadProgress={uploadProgress}
+          isUploading={isUploading}
         />
       </div>
 
@@ -70,10 +76,17 @@ export const PropertyFormSidebar = ({
           variant="primary"
           size="md"
           onClick={handleFooterSubmit}
-          disabled={loading}
-          loading={loading}
+          disabled={loading || isUploading}
+          loading={loading || isUploading}
         >
-          {mode === 'create' ? 'Crear Propiedad' : 'Actualizar Propiedad'}
+          {isUploading
+            ? `Subiendo archivo (${uploadProgress}%)...`
+            : loading
+              ? 'Guardando...'
+              : mode === 'create'
+                ? 'Crear Propiedad'
+                : 'Actualizar Propiedad'
+          }
         </Button>
       </div>
     </>

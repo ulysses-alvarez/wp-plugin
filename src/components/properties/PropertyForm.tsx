@@ -14,6 +14,8 @@ interface PropertyFormProps {
   mode: 'create' | 'edit';
   onSubmit: (data: PropertyFormData) => void;
   loading?: boolean;
+  uploadProgress?: number;
+  isUploading?: boolean;
 }
 
 export interface PropertyFormData {
@@ -39,7 +41,9 @@ export const PropertyForm = forwardRef<HTMLFormElement, PropertyFormProps>(({
   property,
   mode,
   onSubmit,
-  loading = false
+  loading = false,
+  uploadProgress = 0,
+  isUploading = false
 }, ref) => {
   // Form state
   const [formData, setFormData] = useState<PropertyFormData>({
@@ -426,9 +430,28 @@ export const PropertyForm = forwardRef<HTMLFormElement, PropertyFormProps>(({
         name="attachment"
         accept=".pdf,.png,.jpg,.jpeg"
         onChange={handleFileChange}
-        disabled={loading}
+        disabled={loading || isUploading}
         helperText="PDF, PNG o JPG (max. 2MB)"
       />
+
+      {/* Upload Progress Bar */}
+      {isUploading && (
+        <div className="space-y-2">
+          <div className="flex justify-between items-center text-sm">
+            <span className="text-gray-700 font-medium">Subiendo archivo...</span>
+            <span className="text-primary font-semibold">{uploadProgress}%</span>
+          </div>
+          <div className="w-full bg-gray-200 rounded-full h-2.5 overflow-hidden">
+            <div
+              className="bg-primary h-2.5 rounded-full transition-all duration-300 ease-out"
+              style={{ width: `${uploadProgress}%` }}
+            />
+          </div>
+          <p className="text-xs text-gray-500">
+            Por favor espera, el archivo se está cargando...
+          </p>
+        </div>
+      )}
     </form>
   );
 });
