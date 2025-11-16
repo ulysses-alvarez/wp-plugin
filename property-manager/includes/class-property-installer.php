@@ -92,30 +92,4 @@ class Property_Installer {
         }
     }
 
-    /**
-     * Run on plugin uninstall (separate file: uninstall.php)
-     * This method is for reference only
-     */
-    public static function uninstall() {
-        // Remove roles
-        Property_Roles::remove_roles();
-
-        // Delete options
-        delete_option('property_dashboard_settings');
-        delete_option('property_dashboard_page_id');
-
-        // Optionally delete all property posts
-        // (commented out for safety - admin should decide)
-        /*
-        $properties = get_posts([
-            'post_type' => 'property',
-            'numberposts' => -1,
-            'post_status' => 'any'
-        ]);
-
-        foreach ($properties as $property) {
-            wp_delete_post($property->ID, true);
-        }
-        */
-    }
 }

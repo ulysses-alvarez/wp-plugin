@@ -218,26 +218,7 @@ class Property_REST_API {
         ];
 
         // Handle different orderby options
-        if ($orderby === 'price') {
-            // Order by price meta field (numeric)
-            $args['meta_key'] = '_property_price';
-            $args['orderby'] = 'meta_value_num';
-        } elseif ($orderby === 'status') {
-            // Order by status meta field (alphabetic)
-            $args['meta_key'] = '_property_status';
-            $args['orderby'] = 'meta_value';
-        } elseif ($orderby === 'state') {
-            // Order by state meta field (alphabetic)
-            $args['meta_key'] = '_property_state';
-            $args['orderby'] = 'meta_value';
-        } elseif ($orderby === 'municipality') {
-            // Order by municipality meta field (alphabetic)
-            $args['meta_key'] = '_property_municipality';
-            $args['orderby'] = 'meta_value';
-        } else {
-            // Default ordering (date, title, etc)
-            $args['orderby'] = $orderby;
-        }
+        $args = $this->build_orderby_args($orderby, $args);
 
         // If user can't view all properties, only show their own
         if (!current_user_can('view_all_properties')) {
@@ -516,30 +497,7 @@ class Property_REST_API {
         }
 
         // Performance optimization: Prime caches to avoid N+1 query problem
-        if (!empty($query->posts)) {
-            $post_ids = wp_list_pluck($query->posts, 'ID');
-
-            // Cache all post meta at once (eliminates N queries for meta)
-            update_post_meta_cache($post_ids);
-
-            // Cache all post authors at once (eliminates N queries for users)
-            $author_ids = array_unique(wp_list_pluck($query->posts, 'post_author'));
-            cache_users($author_ids);
-
-            // Cache attachment posts for wp_get_attachment_url() calls
-            // First, get all attachment IDs from meta
-            $attachment_ids = [];
-            foreach ($query->posts as $post) {
-                $attachment_id = get_post_meta($post->ID, '_property_attachment_id', true);
-                if ($attachment_id) {
-                    $attachment_ids[] = intval($attachment_id);
-                }
-            }
-            if (!empty($attachment_ids)) {
-                // Prime the post cache for attachments
-                _prime_post_caches($attachment_ids, false, true);
-            }
-        }
+        $this->prime_query_caches($query);
 
         $properties = [];
 
@@ -1661,5 +1619,64 @@ class Property_REST_API {
      */
     public function check_manage_users_permission($request) {
         return Property_User_Management::can_manage_users();
+    }
+
+    /**
+     * Build orderby arguments for WP_Query
+     *
+     * @param string $orderby Orderby field
+     * @param array $args Base query arguments
+     * @return array Modified arguments
+     */
+    private function build_orderby_args($orderby, $args) {
+        if ($orderby === 'price') {
+            $args['meta_key'] = '_property_price';
+            $args['orderby'] = 'meta_value_num';
+        } elseif ($orderby === 'status') {
+            $args['meta_key'] = '_property_status';
+            $args['orderby'] = 'meta_value';
+        } elseif ($orderby === 'state') {
+            $args['meta_key'] = '_property_state';
+            $args['orderby'] = 'meta_value';
+        } elseif ($orderby === 'municipality') {
+            $args['meta_key'] = '_property_municipality';
+            $args['orderby'] = 'meta_value';
+        } else {
+            $args['orderby'] = $orderby;
+        }
+        return $args;
+    }
+
+    /**
+     * Prime WordPress caches to avoid N+1 query problem
+     *
+     * @param WP_Query $query Query object with posts
+     * @return void
+     */
+    private function prime_query_caches($query) {
+        if (empty($query->posts)) {
+            return;
+        }
+
+        $post_ids = wp_list_pluck($query->posts, 'ID');
+
+        // Cache all post meta at once (eliminates N queries for meta)
+        update_post_meta_cache($post_ids);
+
+        // Cache all post authors at once (eliminates N queries for users)
+        $author_ids = array_unique(wp_list_pluck($query->posts, 'post_author'));
+        cache_users($author_ids);
+
+        // Cache attachment posts for wp_get_attachment_url() calls
+        $attachment_ids = [];
+        foreach ($query->posts as $post) {
+            $attachment_id = get_post_meta($post->ID, '_property_attachment_id', true);
+            if ($attachment_id) {
+                $attachment_ids[] = intval($attachment_id);
+            }
+        }
+        if (!empty($attachment_ids)) {
+            _prime_post_caches($attachment_ids, false, true);
+        }
     }
 }

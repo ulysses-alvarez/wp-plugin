@@ -157,40 +157,4 @@ class Property_Login {
         <?php
         return ob_get_clean();
     }
-
-    /**
-     * Enqueue login page assets
-     */
-    private static function enqueue_assets() {
-        $asset_file = PROPERTY_MANAGER_PATH . 'dist/index.js';
-
-        if (!file_exists($asset_file)) {
-            return;
-        }
-
-        // Enqueue React app
-        wp_enqueue_script(
-            'property-login-app',
-            PROPERTY_MANAGER_URL . 'dist/index.js',
-            [],
-            PROPERTY_MANAGER_VERSION,
-            true
-        );
-
-        // Enqueue styles
-        wp_enqueue_style(
-            'property-login-styles',
-            PROPERTY_MANAGER_URL . 'dist/index.css',
-            [],
-            PROPERTY_MANAGER_VERSION
-        );
-
-        // Add login-specific data
-        wp_localize_script('property-login-app', 'wpPropertyLogin', [
-            'loginUrl' => wp_login_url(),
-            'redirectUrl' => home_url('/dashboard/#/properties'),
-            'siteUrl' => get_site_url(),
-            'nonce' => wp_create_nonce('wp_rest')
-        ]);
-    }
 }

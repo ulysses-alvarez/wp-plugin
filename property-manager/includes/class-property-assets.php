@@ -258,35 +258,4 @@ class Property_Assets {
         return $capabilities;
     }
 
-    /**
-     * Find file by pattern in directory
-     *
-     * @param string $dir Directory to search
-     * @param string $pattern File pattern (e.g., 'index*.js')
-     * @return string|false File path or false if not found
-     */
-    private static function find_file($dir, $pattern) {
-        if (!is_dir($dir)) {
-            return false;
-        }
-
-        $files = glob($dir . $pattern);
-        return !empty($files) ? $files[0] : false;
-    }
-
-    /**
-     * Get role label in Spanish
-     *
-     * @param string $role_slug
-     * @return string
-     */
-    private static function get_role_label($role_slug) {
-        $labels = [
-            'administrator'      => __('Administrador', 'property-dashboard'),
-            'property_manager'   => __('Gerente', 'property-dashboard'),
-            'property_associate' => __('Asociado', 'property-dashboard'),
-        ];
-
-        return isset($labels[$role_slug]) ? $labels[$role_slug] : $role_slug;
-    }
 }
