@@ -35,9 +35,6 @@ export const AppLayout = () => {
       <a href="#main-content" className="skip-link">
         Saltar al contenido principal
       </a>
-      <a href="#sidebar-navigation" className="skip-link" style={{ top: '2.5rem' }}>
-        Ir a la navegación
-      </a>
 
       <AppSidebar isOpen={isSidebarOpen} onClose={closeSidebar} />
       <div className="flex-1 flex flex-col overflow-hidden">

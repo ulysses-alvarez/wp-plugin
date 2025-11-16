@@ -56,7 +56,6 @@ export const PropertyTableHeader = ({
           currentSortBy={sortBy}
           currentSortOrder={sortOrder}
           onSort={onSort}
-          className="hidden md:table-cell"
         />
 
         <SortableTableHeader

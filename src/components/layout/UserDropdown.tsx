@@ -10,14 +10,46 @@ import clsx from 'clsx';
 
 interface UserDropdownProps {
   name: string;
+  firstName?: string;
+  lastName?: string;
   role: string;
   roleLabel?: string;
   email?: string;
 }
 
-export const UserDropdown = ({ name, role, roleLabel, email }: UserDropdownProps) => {
+export const UserDropdown = ({ name, firstName, lastName, role, roleLabel, email }: UserDropdownProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // DEBUG: Log para ver qué valores llegan
+  console.log('[UserDropdown DEBUG]', {
+    name,
+    firstName,
+    lastName,
+    firstName_type: typeof firstName,
+    lastName_type: typeof lastName,
+    firstName_length: firstName?.length,
+    lastName_length: lastName?.length,
+    firstName_trimmed: firstName?.trim(),
+    lastName_trimmed: lastName?.trim()
+  });
+
+  // Calcular nombre completo
+  // Si tiene firstName Y lastName (ambos no vacíos): mostrar ambos
+  // Si solo tiene firstName (no vacío): mostrarlo
+  const fullName = (() => {
+    const first = firstName?.trim();
+    const last = lastName?.trim();
+
+    if (first && last) {
+      return `${first} ${last}`;
+    } else if (first) {
+      return first;
+    }
+    return null;
+  })();
+
+  console.log('[UserDropdown DEBUG] fullName:', fullName);
 
   // Get initials from name
   const getInitials = (name: string): string => {
@@ -69,21 +101,23 @@ export const UserDropdown = ({ name, role, roleLabel, email }: UserDropdownProps
         aria-haspopup="true"
         title={`${name} (${displayRole})`}
       >
+        {/* User Name - Solo mostrar en desktop si tiene nombre completo */}
+        {fullName && (
+          <span className="hidden md:block text-sm font-medium text-gray-700 max-w-[150px] truncate">
+            {fullName}
+          </span>
+        )}
+
         {/* Avatar */}
         <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-primary text-primary-text flex items-center justify-center font-semibold text-sm">
           {getInitials(name)}
         </div>
 
-        {/* User Name */}
-        <span className="hidden md:block text-sm font-medium text-gray-700 max-w-[150px] truncate">
-          {name}
-        </span>
-
-        {/* Chevron Icon */}
+        {/* Chevron Icon - Ahora visible en mobile también */}
         <ChevronDown
           size={16}
           className={clsx(
-            'text-gray-600 transition-transform hidden sm:block',
+            'text-gray-600 transition-transform',
             isOpen && 'rotate-180'
           )}
         />
@@ -94,6 +128,10 @@ export const UserDropdown = ({ name, role, roleLabel, email }: UserDropdownProps
         <div className="absolute right-0 mt-2 w-48 sm:w-64 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
           {/* User Info Header */}
           <div className="px-3 py-2 sm:px-4 sm:py-3 border-b border-gray-100">
+            {/* Mostrar nombre completo en mobile arriba del rol */}
+            {fullName && (
+              <div className="text-sm font-medium text-gray-700 md:hidden mb-1">{fullName}</div>
+            )}
             <div className="text-xs text-gray-500">{displayRole}</div>
             {email && (
               <div className="text-xs text-gray-400 mt-1">{email}</div>

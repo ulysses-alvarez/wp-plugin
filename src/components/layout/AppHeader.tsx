@@ -45,6 +45,8 @@ export const AppHeader = ({ onToggleSidebar, isSidebarOpen }: AppHeaderProps) =>
         {wpData?.currentUser && (
           <UserDropdown
             name={wpData.currentUser.name}
+            firstName={wpData.currentUser.firstName}
+            lastName={wpData.currentUser.lastName}
             role={wpData.currentUser.role}
             roleLabel={wpData.currentUser.roleLabel}
             email={wpData.currentUser.email}

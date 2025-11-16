@@ -19,6 +19,8 @@ declare global {
         id: number;
         name: string;
         email: string;
+        firstName: string;
+        lastName: string;
         role: string;
         roleLabel: string;
         capabilities: Record<string, boolean>;

@@ -92,7 +92,7 @@ export const PropertyTableRow = memo(({
       </td>
 
       {/* Location */}
-      <td className="hidden md:table-cell px-3 py-3 sm:px-6 sm:py-4">
+      <td className="px-3 py-3 sm:px-6 sm:py-4">
         <div className="text-sm text-gray-900 flex items-start gap-1.5">
           <svg className="w-4 h-4 text-gray-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />

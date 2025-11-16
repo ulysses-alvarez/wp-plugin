@@ -187,6 +187,8 @@ class Property_Assets {
                 'id'           => $current_user->ID,
                 'name'         => $current_user->display_name,
                 'email'        => $current_user->user_email,
+                'firstName'    => $current_user->first_name,
+                'lastName'     => $current_user->last_name,
                 'role'         => $user_role,
                 'roleLabel'    => Property_Roles::get_role_label($user_role),
                 'capabilities' => $capabilities,
