@@ -134,9 +134,10 @@ export const ProfilePage = () => {
         // Fallback to reloading profile
         await loadProfile();
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error updating profile:', error);
-      toast.error(error.message || 'Error al actualizar el perfil');
+      const errorMessage = error instanceof Error ? error.message : 'Error al actualizar el perfil';
+      toast.error(errorMessage);
     } finally {
       setSaving(false);
     }
@@ -216,9 +217,10 @@ export const ProfilePage = () => {
         new_password: '',
         confirm_password: '',
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error updating password:', error);
-      toast.error(error.message || 'Error al cambiar la contraseña');
+      const errorMessage = error instanceof Error ? error.message : 'Error al cambiar la contraseña';
+      toast.error(errorMessage);
     } finally {
       setSaving(false);
     }

@@ -58,6 +58,10 @@ export const BulkDeleteModal = ({
         <div
           className="bg-white rounded-xl shadow-2xl max-w-lg w-full sm:w-fit pointer-events-auto animate-in zoom-in-95 duration-200"
           onClick={(e) => e.stopPropagation()}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="bulk-delete-modal-title"
+          aria-describedby="bulk-delete-modal-description"
         >
           {/* Header */}
           <div className="flex items-start justify-between p-4 sm:p-6 border-b border-gray-200">
@@ -66,7 +70,7 @@ export const BulkDeleteModal = ({
                 <AlertTriangle className="w-5 h-5 sm:w-6 sm:h-6 text-red-600" />
               </div>
               <div>
-                <h2 className="text-xl font-semibold text-gray-900">
+                <h2 id="bulk-delete-modal-title" className="text-xl font-semibold text-gray-900">
                   Eliminar propiedades
                 </h2>
                 <p className="text-sm text-gray-500 mt-1">
@@ -78,6 +82,7 @@ export const BulkDeleteModal = ({
               <button
                 onClick={handleClose}
                 className="text-gray-400 hover:text-gray-600 transition-colors"
+                aria-label="Cerrar modal"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -86,7 +91,7 @@ export const BulkDeleteModal = ({
 
           {/* Content */}
           <div className="p-4 sm:p-6">
-            <p className="text-sm text-gray-700 mb-4">
+            <p id="bulk-delete-modal-description" className="text-sm text-gray-700 mb-4">
               Vas a eliminar{' '}
               <span className="font-semibold text-red-600">
                 {properties.length === 1
@@ -97,7 +102,7 @@ export const BulkDeleteModal = ({
             </p>
 
             {/* Warning */}
-            <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+            <div className="bg-red-50 border border-red-200 rounded-lg p-3" role="alert">
               <p className="text-sm text-red-800">
                 <strong>Advertencia:</strong> Esta acción eliminará
                 permanentemente las propiedades seleccionadas. No podrás
@@ -117,6 +122,7 @@ export const BulkDeleteModal = ({
                   ? 'text-gray-400 cursor-not-allowed'
                   : 'text-gray-700 hover:bg-gray-200'
               )}
+              aria-label="Cancelar eliminación"
             >
               Cancelar
             </button>
@@ -129,6 +135,7 @@ export const BulkDeleteModal = ({
                   ? 'bg-red-400 cursor-not-allowed'
                   : 'bg-red-600 hover:bg-red-700'
               )}
+              aria-label={`Confirmar eliminación de ${properties.length} ${properties.length === 1 ? 'propiedad' : 'propiedades'}`}
             >
               {isDeleting ? (
                 <>

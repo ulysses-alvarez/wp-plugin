@@ -363,15 +363,16 @@ export const PropertiesPage = () => {
         try {
           await createProperty(propertyData, true); // silent = true for bulk import
           successCount++;
-        } catch (error: any) {
+        } catch (error: unknown) {
           // API error during import
           const title = propertyData.title?.trim() || '[sin título]';
+          const errorMessage = error instanceof Error ? error.message : 'Error al importar la propiedad';
           allErrors.push({
             row: rowNumber,
             title,
             field: 'general',
             value: '',
-            error: error.message || 'Error al importar la propiedad',
+            error: errorMessage,
             type: 'api'
           });
         }

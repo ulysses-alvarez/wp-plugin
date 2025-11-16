@@ -66,11 +66,20 @@ export const PropertyCard = ({
 
   return (
     <div
+      role="button"
+      tabIndex={0}
       className={clsx(
-        'card p-4 cursor-pointer hover:border-primary transition-all duration-200',
+        'card p-4 cursor-pointer hover:border-primary transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary',
         className
       )}
       onClick={() => onView(property)}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          onView(property);
+        }
+      }}
+      aria-label={`Propiedad ${property.title}`}
     >
       {/* Header */}
       <div className="flex items-start justify-between mb-3">

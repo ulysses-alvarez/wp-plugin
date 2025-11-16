@@ -80,6 +80,9 @@ export const BulkStatusModal = ({
         <div
           className="bg-white rounded-xl shadow-2xl max-w-lg w-full sm:w-fit pointer-events-auto animate-in zoom-in-95 duration-200"
           onClick={(e) => e.stopPropagation()}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="bulk-status-modal-title"
         >
           {/* Header */}
           <div className="flex items-start justify-between p-4 sm:p-6 border-b border-gray-200">
@@ -88,7 +91,7 @@ export const BulkStatusModal = ({
                 <RefreshCw className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
               </div>
               <div>
-                <h2 className="text-xl font-semibold text-gray-900">
+                <h2 id="bulk-status-modal-title" className="text-xl font-semibold text-gray-900">
                   Cambiar estado
                 </h2>
                 <p className="text-sm text-gray-500 mt-1">
@@ -101,6 +104,7 @@ export const BulkStatusModal = ({
               <button
                 onClick={handleClose}
                 className="text-gray-400 hover:text-gray-600 transition-colors"
+                aria-label="Cerrar modal"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -125,7 +129,7 @@ export const BulkStatusModal = ({
 
             {/* Note */}
             {selectedStatusLabel && (
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-3" role="status" aria-live="polite">
                 <p className="text-sm text-blue-800">
                   <strong>Nota:</strong> Todas las propiedades seleccionadas cambiarán a estado <span className="font-bold">{selectedStatusLabel}</span>
                 </p>
@@ -139,6 +143,7 @@ export const BulkStatusModal = ({
               onClick={handleClose}
               disabled={isUpdating}
               className="px-3 py-1.5 sm:px-4 sm:py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              aria-label="Cancelar cambio de estado"
             >
               Cancelar
             </button>
@@ -151,6 +156,7 @@ export const BulkStatusModal = ({
                   ? 'bg-gray-400 cursor-not-allowed text-white'
                   : 'bg-primary text-primary-text hover:bg-primary-hover'
               )}
+              aria-label={`Aplicar estado ${selectedStatusLabel} a ${properties.length} ${properties.length === 1 ? 'propiedad' : 'propiedades'}`}
             >
               {isUpdating ? (
                 <>

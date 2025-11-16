@@ -163,6 +163,9 @@ export const ExportModal = ({
         <div
           className="bg-white rounded-xl shadow-2xl max-w-lg w-full pointer-events-auto animate-in zoom-in-95 duration-200"
           onClick={(e) => e.stopPropagation()}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="export-modal-title"
         >
           {/* Header */}
           <div className="flex items-start justify-between p-6 border-b border-gray-200">
@@ -171,13 +174,13 @@ export const ExportModal = ({
                 <Download className="w-5 h-5 sm:w-6 sm:h-6 text-primary-text" />
               </div>
               <div>
-                <h2 className="text-xl font-semibold text-gray-900">
+                <h2 id="export-modal-title" className="text-xl font-semibold text-gray-900">
                   Exportar Propiedades
                 </h2>
                 <p className="text-sm text-gray-500 mt-1">
-                  {isExportingSelected 
+                  {isExportingSelected
                     ? `${exportCount} ${exportCount === 1 ? 'propiedad seleccionada' : 'propiedades seleccionadas'}`
-                    : filterDescription 
+                    : filterDescription
                       ? `Propiedades filtradas por ${filterDescription.field}`
                       : 'Todas las propiedades'}
                 </p>
@@ -187,6 +190,7 @@ export const ExportModal = ({
               <button
                 onClick={handleClose}
                 className="text-gray-400 hover:text-gray-600 transition-colors"
+                aria-label="Cerrar modal"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -241,6 +245,7 @@ export const ExportModal = ({
                   }}
                   className="text-xs text-primary hover:text-primary-hover font-medium"
                   disabled={isExporting}
+                  aria-label={selectedColumns.length === DEFAULT_COLUMNS.length ? 'Deseleccionar todas las columnas' : 'Seleccionar todas las columnas'}
                 >
                   {selectedColumns.length === DEFAULT_COLUMNS.length
                     ? 'Deseleccionar todas'
@@ -266,6 +271,8 @@ export const ExportModal = ({
                           : 'bg-white text-gray-700 border-gray-300 hover:border-gray-400 hover:bg-gray-50',
                         isExporting && 'opacity-50 cursor-not-allowed'
                       )}
+                      aria-label={`${isSelected ? 'Deseleccionar' : 'Seleccionar'} columna ${column.label}`}
+                      aria-pressed={isSelected}
                     >
                       {column.label}
                       {isSelected && <X className="w-3 h-3" />}
@@ -293,6 +300,7 @@ export const ExportModal = ({
               onClick={handleClose}
               disabled={isExporting}
               className="px-3 py-1.5 sm:px-4 sm:py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              aria-label="Cancelar exportación"
             >
               Cancelar
             </button>
@@ -305,6 +313,7 @@ export const ExportModal = ({
                   ? 'bg-gray-400 cursor-not-allowed text-white'
                   : 'bg-primary text-primary-text hover:bg-primary-hover'
               )}
+              aria-label={`Exportar ${exportCount} ${exportCount === 1 ? 'propiedad' : 'propiedades'} a CSV`}
             >
               {isExporting ? (
                 <>

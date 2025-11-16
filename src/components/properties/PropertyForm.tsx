@@ -94,7 +94,7 @@ export const PropertyForm = forwardRef<HTMLFormElement, PropertyFormProps>(({
   }, [property, mode]);
 
   // Validation function
-  const validateField = (name: string, value: any): string => {
+  const validateField = (name: string, value: string | number | File | null | undefined): string => {
     // Required fields
     const requiredFields = [
       'title',
@@ -167,7 +167,7 @@ export const PropertyForm = forwardRef<HTMLFormElement, PropertyFormProps>(({
   };
 
   // Handle field change
-  const handleChange = (name: string, value: any) => {
+  const handleChange = (name: string, value: string | number | File | null) => {
     setFormData((prev) => ({
       ...prev,
       [name]: value

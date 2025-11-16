@@ -31,10 +31,18 @@ export const AppLayout = () => {
 
   return (
     <div className="flex h-screen bg-gray-50 overflow-hidden supports-[height:100dvh]:h-dvh">
+      {/* Skip Links for Accessibility */}
+      <a href="#main-content" className="skip-link">
+        Saltar al contenido principal
+      </a>
+      <a href="#sidebar-navigation" className="skip-link" style={{ top: '2.5rem' }}>
+        Ir a la navegación
+      </a>
+
       <AppSidebar isOpen={isSidebarOpen} onClose={closeSidebar} />
       <div className="flex-1 flex flex-col overflow-hidden">
         <AppHeader onToggleSidebar={toggleSidebar} isSidebarOpen={isSidebarOpen} />
-        <main className="flex-1 overflow-hidden bg-white">
+        <main id="main-content" className="flex-1 overflow-hidden bg-white">
           <Outlet />
         </main>
       </div>

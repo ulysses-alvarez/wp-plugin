@@ -50,7 +50,7 @@ export const SidebarNavigation = ({ onLinkClick }: SidebarNavigationProps) => {
   });
 
   return (
-    <nav className="flex-1 px-3 py-4 overflow-y-auto">
+    <nav id="sidebar-navigation" className="flex-1 px-3 py-4 overflow-y-auto" aria-label="Navegación principal">
       <ul className="space-y-1">
         {visibleNavItems.map((item) => {
           const Icon = item.icon;

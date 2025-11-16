@@ -75,7 +75,7 @@ export const validateProperty = (
   const title = property.title?.trim() || '[sin título]';
 
   // Helper to add error
-  const addError = (field: string, value: any, error: string) => {
+  const addError = (field: string, value: unknown, error: string) => {
     errors.push({
       row: rowNumber,
       title,

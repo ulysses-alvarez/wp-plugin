@@ -42,13 +42,22 @@ export const PropertyTableRow = memo(({
 
   return (
     <tr
+      role="button"
+      tabIndex={0}
       className={clsx(
-        'transition-colors cursor-pointer',
+        'transition-colors cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary focus:ring-inset',
         isHovered ? 'bg-gray-100' : 'hover:bg-gray-50'
       )}
       onMouseEnter={() => onMouseEnter(property.id)}
       onMouseLeave={onMouseLeave}
       onClick={() => onPropertySelect(property)}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          onPropertySelect(property);
+        }
+      }}
+      aria-label={`Propiedad ${property.title}`}
     >
       {/* Checkbox */}
       <td

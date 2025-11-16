@@ -27,7 +27,7 @@ export const DEFAULT_COLUMNS: CSVColumn[] = [
 /**
  * Escape CSV value to handle commas, quotes and newlines
  */
-export const escapeCSVValue = (value: any): string => {
+export const escapeCSVValue = (value: string | number | null | undefined): string => {
   if (value === null || value === undefined) {
     return '';
   }
