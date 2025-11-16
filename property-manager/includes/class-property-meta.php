@@ -12,6 +12,11 @@ if (!defined('ABSPATH')) {
 class Property_Meta {
 
     /**
+     * Allowed property statuses
+     */
+    const ALLOWED_STATUSES = ['available', 'sold', 'rented', 'reserved'];
+
+    /**
      * Initialize meta boxes
      */
     public static function init() {
@@ -21,19 +26,27 @@ class Property_Meta {
         // Save meta data when property is saved
         add_action('save_post_property', [self::class, 'save_meta_boxes'], 10, 2);
 
-        // Enqueue media uploader scripts
-        add_action('admin_enqueue_scripts', [self::class, 'enqueue_media_uploader']);
+        // Enqueue admin assets (scripts and styles)
+        add_action('admin_enqueue_scripts', [self::class, 'enqueue_admin_assets']);
     }
 
     /**
-     * Enqueue media uploader scripts
+     * Enqueue admin assets for property edit screens
      */
-    public static function enqueue_media_uploader($hook) {
+    public static function enqueue_admin_assets($hook) {
         global $post_type;
 
         // Only load on property edit/new screens
         if (('post.php' === $hook || 'post-new.php' === $hook) && 'property' === $post_type) {
             wp_enqueue_media();
+
+            // Enqueue admin CSS
+            wp_enqueue_style(
+                'property-admin-styles',
+                plugin_dir_url(dirname(__FILE__)) . 'assets/property-admin.css',
+                [],
+                filemtime(plugin_dir_path(dirname(__FILE__)) . 'assets/property-admin.css')
+            );
         }
     }
 
@@ -140,8 +153,7 @@ class Property_Meta {
      * @return string
      */
     public static function sanitize_status($value) {
-        $allowed = ['available', 'sold', 'rented', 'reserved'];
-        return in_array($value, $allowed, true) ? $value : 'available';
+        return in_array($value, self::ALLOWED_STATUSES, true) ? $value : 'available';
     }
 
     /**
@@ -418,34 +430,6 @@ class Property_Meta {
             });
         });
         </script>
-
-        <style>
-        .property-attachment-container {
-            margin-bottom: 10px;
-        }
-        .attachment-preview {
-            padding: 10px;
-            background: #f5f5f5;
-            border: 1px solid #ddd;
-            border-radius: 3px;
-            display: inline-block;
-        }
-        .attachment-link {
-            text-decoration: none;
-            color: #0073aa;
-            display: inline-flex;
-            align-items: center;
-            gap: 5px;
-        }
-        .attachment-link:hover {
-            color: #005177;
-        }
-        .attachment-link .dashicons {
-            font-size: 20px;
-            width: 20px;
-            height: 20px;
-        }
-        </style>
         <?php
     }
 

@@ -16,6 +16,7 @@ import type { PropertyStatus } from '@/types/bulk';
 import { MEXICAN_STATES } from '@/utils/constants';
 import { validateProperty, type ImportError, type PropertyData } from '@/services/propertyValidator';
 import { parseCSV, removeBOM, CSVParseError } from '@/utils/csvParser';
+import { uploadFile, bulkDownloadSheets } from '@/services/api';
 import toast from 'react-hot-toast';
 import { Info } from 'lucide-react';
 
@@ -123,8 +124,6 @@ export const PropertiesPage = () => {
   };
 
   const handleFormSubmit = async (data: PropertyFormData) => {
-    const { uploadFile } = await import('@/services/api');
-
     let attachmentId: number | undefined;
     if (data.attachment && data.attachment instanceof File) {
       try {
@@ -236,7 +235,6 @@ export const PropertiesPage = () => {
 
   const handleBulkDownloadSheets = async () => {
     try {
-      const { bulkDownloadSheets } = await import('@/services/api');
       // Save property IDs before clearing selections
       const propertyIds = Array.from(selectedIds);
 

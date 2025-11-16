@@ -11,6 +11,11 @@ if (!defined('ABSPATH')) {
 
 class Property_REST_API {
 
+    /**
+     * Allowed property statuses
+     */
+    const ALLOWED_STATUSES = ['available', 'sold', 'rented', 'reserved'];
+
     private $namespace = 'property-dashboard/v1';
 
     /**
@@ -117,7 +122,7 @@ class Property_REST_API {
                 'status' => [
                     'required' => true,
                     'type'     => 'string',
-                    'enum'     => ['available', 'sold', 'rented', 'reserved'],
+                    'enum'     => self::ALLOWED_STATUSES,
                 ],
             ],
         ]);
@@ -198,6 +203,20 @@ class Property_REST_API {
      * Get properties collection
      */
     public function get_properties($request) {
+        $args = $this->parse_query_params($request);
+        $search_hooks = $this->create_search_hooks($args);
+        $query = $this->execute_query_with_hooks($args, $search_hooks);
+
+        return $this->build_paginated_response($query);
+    }
+
+    /**
+     * Parse and prepare query parameters from request
+     *
+     * @param WP_REST_Request $request The REST API request
+     * @return array WP_Query arguments
+     */
+    private function parse_query_params($request) {
         $current_user = wp_get_current_user();
 
         // Use date as default orderby to match WordPress admin default behavior
@@ -225,6 +244,22 @@ class Property_REST_API {
             $args['author'] = $current_user->ID;
         }
 
+        // Apply search filters
+        $args = $this->build_search_filters($args, $search_field, $search_value, $request);
+
+        return $args;
+    }
+
+    /**
+     * Build search filters based on field and value
+     *
+     * @param array $args Current WP_Query arguments
+     * @param string $search_field Field to search in
+     * @param string $search_value Value to search for
+     * @param WP_REST_Request $request The REST API request
+     * @return array Modified WP_Query arguments
+     */
+    private function build_search_filters($args, $search_field, $search_value, $request) {
         // Advanced search with field context (already retrieved above)
         if (!empty($search_field) && !empty($search_value)) {
             // Field-specific search
@@ -344,13 +379,28 @@ class Property_REST_API {
             }
         }
 
+        return $args;
+    }
+
+    /**
+     * Create WordPress hooks for advanced search functionality
+     *
+     * @param array $args WP_Query arguments with search markers
+     * @return array Array of filter callbacks to be removed later
+     */
+    private function create_search_hooks($args) {
+        $hooks = [
+            'general_search' => null,
+            'title_search' => null,
+            'description_search' => null,
+            'postal_code_search' => null
+        ];
+
         // Add filter for general search if needed
-        $general_search_filter = null;
         if (!empty($args['property_general_search'])) {
             $search_term = sanitize_text_field($args['s']);
-            unset($args['property_general_search']); // Remove the marker as it's not a valid WP_Query arg
 
-            $general_search_filter = function($where, $wp_query) use ($search_term) {
+            $hooks['general_search'] = function($where, $wp_query) use ($search_term) {
                 global $wpdb;
 
                 if (empty($search_term)) {
@@ -393,16 +443,14 @@ class Property_REST_API {
                 return $where;
             };
 
-            add_filter('posts_where', $general_search_filter, 10, 2);
+            add_filter('posts_where', $hooks['general_search'], 10, 2);
         }
 
         // Add filter for title-only search if needed
-        $title_search_filter = null;
         if (!empty($args['property_title_search'])) {
             $search_term = $args['s'];
-            unset($args['property_title_search']); // Remove the marker as it's not a valid WP_Query arg
 
-            $title_search_filter = function($search, $wp_query) use ($search_term) {
+            $hooks['title_search'] = function($search, $wp_query) use ($search_term) {
                 global $wpdb;
 
                 if (empty($search_term)) {
@@ -418,16 +466,14 @@ class Property_REST_API {
                 return $search;
             };
 
-            add_filter('posts_search', $title_search_filter, 10, 2);
+            add_filter('posts_search', $hooks['title_search'], 10, 2);
         }
 
         // Add filter for description-only search if needed
-        $description_search_filter = null;
         if (!empty($args['property_description_search'])) {
             $search_term = $args['s'];
-            unset($args['property_description_search']); // Remove the marker as it's not a valid WP_Query arg
 
-            $description_search_filter = function($search, $wp_query) use ($search_term) {
+            $hooks['description_search'] = function($search, $wp_query) use ($search_term) {
                 global $wpdb;
 
                 if (empty($search_term)) {
@@ -443,16 +489,14 @@ class Property_REST_API {
                 return $search;
             };
 
-            add_filter('posts_search', $description_search_filter, 10, 2);
+            add_filter('posts_search', $hooks['description_search'], 10, 2);
         }
 
         // Add filter for postal code search if needed
-        $postal_code_filter = null;
         if (!empty($args['property_postal_code_search'])) {
             $postal_code_value = $args['property_postal_code_search'];
-            unset($args['property_postal_code_search']); // Remove the marker as it's not a valid WP_Query arg
 
-            $postal_code_filter = function($where, $wp_query) use ($postal_code_value) {
+            $hooks['postal_code_search'] = function($where, $wp_query) use ($postal_code_value) {
                 global $wpdb;
 
                 if (empty($postal_code_value)) {
@@ -476,29 +520,56 @@ class Property_REST_API {
                 return $where;
             };
 
-            add_filter('posts_where', $postal_code_filter, 10, 2);
+            add_filter('posts_where', $hooks['postal_code_search'], 10, 2);
         }
+
+        return $hooks;
+    }
+
+    /**
+     * Execute WP_Query with hooks and clean up afterwards
+     *
+     * @param array $args WP_Query arguments
+     * @param array $hooks Array of filter callbacks
+     * @return WP_Query The query object
+     */
+    private function execute_query_with_hooks($args, $hooks) {
+        // Remove search markers before executing query
+        unset($args['property_general_search']);
+        unset($args['property_title_search']);
+        unset($args['property_description_search']);
+        unset($args['property_postal_code_search']);
 
         // Execute query
         $query = new WP_Query($args);
 
         // Remove the filters if they were added
-        if ($general_search_filter !== null) {
-            remove_filter('posts_where', $general_search_filter, 10);
+        if ($hooks['general_search'] !== null) {
+            remove_filter('posts_where', $hooks['general_search'], 10);
         }
-        if ($title_search_filter !== null) {
-            remove_filter('posts_search', $title_search_filter, 10);
+        if ($hooks['title_search'] !== null) {
+            remove_filter('posts_search', $hooks['title_search'], 10);
         }
-        if ($description_search_filter !== null) {
-            remove_filter('posts_search', $description_search_filter, 10);
+        if ($hooks['description_search'] !== null) {
+            remove_filter('posts_search', $hooks['description_search'], 10);
         }
-        if ($postal_code_filter !== null) {
-            remove_filter('posts_where', $postal_code_filter, 10);
+        if ($hooks['postal_code_search'] !== null) {
+            remove_filter('posts_where', $hooks['postal_code_search'], 10);
         }
 
         // Performance optimization: Prime caches to avoid N+1 query problem
         $this->prime_query_caches($query);
 
+        return $query;
+    }
+
+    /**
+     * Build paginated REST response from WP_Query
+     *
+     * @param WP_Query $query The query object
+     * @return WP_REST_Response REST API response with pagination headers
+     */
+    private function build_paginated_response($query) {
         $properties = [];
 
         foreach ($query->posts as $post) {
@@ -954,8 +1025,7 @@ class Property_REST_API {
                     // Sanitize based on field type
                     switch ($meta_key) {
                         case '_property_status':
-                            $allowed = ['available', 'sold', 'rented', 'reserved'];
-                            $value = in_array($value, $allowed, true) ? $value : 'available';
+                            $value = in_array($value, self::ALLOWED_STATUSES, true) ? $value : 'available';
                             break;
 
                         case '_property_postal_code':
@@ -1217,8 +1287,7 @@ class Property_REST_API {
         ];
 
         // Validate status is allowed
-        $allowed_statuses = ['available', 'sold', 'rented', 'reserved'];
-        if (!in_array($new_status, $allowed_statuses, true)) {
+        if (!in_array($new_status, self::ALLOWED_STATUSES, true)) {
             error_log('Bulk update status - Invalid status: ' . $new_status);
             return new WP_Error(
                 'invalid_status',

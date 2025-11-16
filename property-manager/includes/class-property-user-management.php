@@ -12,6 +12,11 @@ if (!defined('ABSPATH')) {
 class Property_User_Management {
 
     /**
+     * Allowed property user roles
+     */
+    const ALLOWED_ROLES = ['property_admin', 'property_manager', 'property_associate'];
+
+    /**
      * Initialize user management restrictions
      */
     public static function init() {
@@ -55,13 +60,7 @@ class Property_User_Management {
         }
 
         // Only allow property_admin to see these roles (for creating new users)
-        $allowed_roles = [
-            'property_admin',
-            'property_manager',
-            'property_associate'
-        ];
-
-        return array_intersect_key($roles, array_flip($allowed_roles));
+        return array_intersect_key($roles, array_flip(self::ALLOWED_ROLES));
     }
 
     /**
@@ -83,11 +82,8 @@ class Property_User_Management {
         // Get the role being assigned and sanitize it
         $new_role = isset($_POST['role']) ? sanitize_text_field($_POST['role']) : '';
 
-        // Allowed roles for property_admin to assign
-        $allowed_roles_to_assign = ['property_admin', 'property_manager', 'property_associate'];
-
         // Check if trying to assign a prohibited role (including property_admin)
-        if (!empty($new_role) && !in_array($new_role, $allowed_roles_to_assign, true)) {
+        if (!empty($new_role) && !in_array($new_role, self::ALLOWED_ROLES, true)) {
             $errors->add(
                 'invalid_role',
                 __('No tienes permisos para asignar este rol.', 'property-dashboard')
@@ -101,7 +97,7 @@ class Property_User_Management {
                 $existing_role = $existing_user->roles[0];
 
                 // Prevent editing users with property_admin role or other prohibited roles
-                if (!in_array($existing_role, $allowed_roles_to_assign)) {
+                if (!in_array($existing_role, self::ALLOWED_ROLES)) {
                     $errors->add(
                         'cannot_edit_user',
                         __('No tienes permisos para editar este usuario.', 'property-dashboard')
@@ -153,10 +149,9 @@ class Property_User_Management {
         }
 
         $user_role = $user->roles[0];
-        $allowed_roles_to_edit = ['property_admin', 'property_manager', 'property_associate'];
 
         // Property admin can now edit other property admins and allowed roles
-        if (!in_array($user_role, $allowed_roles_to_edit)) {
+        if (!in_array($user_role, self::ALLOWED_ROLES)) {
             wp_die(
                 __('No tienes permisos para editar este usuario.', 'property-dashboard'),
                 __('Acceso Denegado', 'property-dashboard'),
@@ -198,10 +193,9 @@ class Property_User_Management {
         }
 
         $target_role = $target_user->roles[0];
-        $allowed_roles_to_delete = ['property_admin', 'property_manager', 'property_associate'];
 
         // Property admin can now delete other property admins and allowed roles
-        if (!in_array($target_role, $allowed_roles_to_delete)) {
+        if (!in_array($target_role, self::ALLOWED_ROLES)) {
             $allcaps['delete_user'] = false;
             $allcaps['delete_users'] = false;
         }
@@ -216,7 +210,7 @@ class Property_User_Management {
      */
     public static function get_dashboard_users() {
         return get_users([
-            'role__in' => ['property_admin', 'property_manager', 'property_associate'],
+            'role__in' => self::ALLOWED_ROLES,
             'orderby' => 'registered',
             'order' => 'DESC'
         ]);
@@ -256,14 +250,12 @@ class Property_User_Management {
         }
 
         // Filter to only show allowed roles plus current user
-        $allowed_roles = ['property_admin', 'property_manager', 'property_associate'];
-
         // IMPORTANT: Remove this filter temporarily to avoid infinite loop
         remove_action('pre_get_users', [__CLASS__, 'filter_users_list']);
 
         // Get all user IDs with allowed roles
         $allowed_users = get_users([
-            'role__in' => $allowed_roles,
+            'role__in' => self::ALLOWED_ROLES,
             'fields' => 'ID',
         ]);
 
@@ -297,28 +289,25 @@ class Property_User_Management {
             return $views;
         }
 
-        // Get allowed roles
-        $allowed_roles = ['property_admin', 'property_manager', 'property_associate'];
-
         // Get all WordPress roles
         $wp_roles = wp_roles()->roles;
 
         // Remove views for prohibited roles
         foreach ($wp_roles as $role_key => $role_data) {
-            if (!in_array($role_key, $allowed_roles)) {
+            if (!in_array($role_key, self::ALLOWED_ROLES)) {
                 unset($views[$role_key]);
             }
         }
 
         // Recalculate "All" count with caching to improve performance
-        $cache_key = 'property_user_count_' . md5(serialize($allowed_roles));
+        $cache_key = 'property_user_count_' . md5(serialize(self::ALLOWED_ROLES));
         $total_allowed = get_transient($cache_key);
 
         if (false === $total_allowed) {
             $users = count_users();
             $total_allowed = 0;
 
-            foreach ($allowed_roles as $role) {
+            foreach (self::ALLOWED_ROLES as $role) {
                 if (isset($users['avail_roles'][$role])) {
                     $total_allowed += $users['avail_roles'][$role];
                 }
@@ -348,8 +337,7 @@ class Property_User_Management {
      * This ensures the cached count stays accurate
      */
     public static function clear_user_count_cache() {
-        $allowed_roles = ['property_admin', 'property_manager', 'property_associate'];
-        $cache_key = 'property_user_count_' . md5(serialize($allowed_roles));
+        $cache_key = 'property_user_count_' . md5(serialize(self::ALLOWED_ROLES));
         delete_transient($cache_key);
     }
 }

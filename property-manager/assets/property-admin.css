@@ -1,0 +1,49 @@
+/**
+ * Property Manager Admin Styles
+ *
+ * CSS styles for WordPress admin interface components
+ */
+
+/* Property Attachment Meta Box */
+.property-attachment-container {
+    margin-bottom: 10px;
+}
+
+.attachment-preview {
+    padding: 10px;
+    background: #f5f5f5;
+    border: 1px solid #ddd;
+    border-radius: 3px;
+    display: inline-block;
+}
+
+.attachment-link {
+    text-decoration: none;
+    color: #0073aa;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.attachment-link:hover {
+    color: #005177;
+}
+
+.attachment-link .dashicons {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+}
+
+/* Property Audit Meta Box */
+.property-audit-info {
+    font-size: 13px;
+}
+
+.property-audit-info p {
+    margin: 0 0 8px;
+}
+
+.property-audit-info small {
+    color: #666;
+}

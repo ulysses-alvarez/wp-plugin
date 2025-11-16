@@ -104,17 +104,6 @@ class Property_Audit {
             </p>
             <?php endif; ?>
         </div>
-        <style>
-            .property-audit-info {
-                font-size: 13px;
-            }
-            .property-audit-info p {
-                margin: 0 0 8px;
-            }
-            .property-audit-info small {
-                color: #666;
-            }
-        </style>
         <?php
     }
 

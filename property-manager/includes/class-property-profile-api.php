@@ -56,17 +56,7 @@ class Property_Profile_API {
             );
         }
 
-        return rest_ensure_response([
-            'id' => $user->ID,
-            'name' => $user->display_name,  // Add 'name' for compatibility
-            'display_name' => $user->display_name,
-            'first_name' => get_user_meta($user->ID, 'first_name', true),
-            'last_name' => get_user_meta($user->ID, 'last_name', true),
-            'email' => $user->user_email,
-            'role' => !empty($user->roles) ? $user->roles[0] : '',
-            'roleLabel' => Property_Roles::get_role_label(!empty($user->roles) ? $user->roles[0] : ''),  // Add camelCase
-            'role_label' => Property_Roles::get_role_label(!empty($user->roles) ? $user->roles[0] : ''),
-        ]);
+        return rest_ensure_response(self::format_user_response($user));
     }
 
     /**
@@ -191,17 +181,27 @@ class Property_Profile_API {
         return rest_ensure_response([
             'success' => true,
             'message' => __('Perfil actualizado correctamente.', 'property-dashboard'),
-            'user' => [
-                'id' => $updated_user->ID,
-                'name' => $updated_user->display_name,  // Add 'name' for compatibility
-                'display_name' => $updated_user->display_name,
-                'first_name' => get_user_meta($updated_user->ID, 'first_name', true),
-                'last_name' => get_user_meta($updated_user->ID, 'last_name', true),
-                'email' => $updated_user->user_email,
-                'role' => !empty($updated_user->roles) ? $updated_user->roles[0] : '',
-                'roleLabel' => Property_Roles::get_role_label(!empty($updated_user->roles) ? $updated_user->roles[0] : ''),  // Add camelCase
-                'role_label' => Property_Roles::get_role_label(!empty($updated_user->roles) ? $updated_user->roles[0] : ''),
-            ],
+            'user' => self::format_user_response($updated_user),
         ]);
+    }
+
+    /**
+     * Format user data for API response
+     *
+     * @param WP_User $user WordPress user object
+     * @return array Formatted user data
+     */
+    private static function format_user_response($user) {
+        return [
+            'id' => $user->ID,
+            'name' => $user->display_name,  // Add 'name' for compatibility
+            'display_name' => $user->display_name,
+            'first_name' => get_user_meta($user->ID, 'first_name', true),
+            'last_name' => get_user_meta($user->ID, 'last_name', true),
+            'email' => $user->user_email,
+            'role' => !empty($user->roles) ? $user->roles[0] : '',
+            'roleLabel' => Property_Roles::get_role_label(!empty($user->roles) ? $user->roles[0] : ''),  // Add camelCase
+            'role_label' => Property_Roles::get_role_label(!empty($user->roles) ? $user->roles[0] : ''),
+        ];
     }
 }
