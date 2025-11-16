@@ -366,7 +366,7 @@ class Property_REST_API {
         // Add filter for general search if needed
         $general_search_filter = null;
         if (!empty($args['property_general_search'])) {
-            $search_term = $args['s'];
+            $search_term = sanitize_text_field($args['s']);
             unset($args['property_general_search']); // Remove the marker as it's not a valid WP_Query arg
 
             $general_search_filter = function($where, $wp_query) use ($search_term) {
@@ -376,33 +376,38 @@ class Property_REST_API {
                     return $where;
                 }
 
-                // Build OR conditions for meta fields
+                // Sanitize search term to prevent SQL injection
+                $safe_search_term = '%' . $wpdb->esc_like($search_term) . '%';
+
+                // Build OR conditions for meta fields with fully prepared statement
                 // IMPORTANT: Include post_status check to ensure only published posts are included
                 $meta_where = $wpdb->prepare(
-                    "OR EXISTS (
+                    " OR EXISTS (
                         SELECT 1 FROM {$wpdb->postmeta} pm
                         WHERE pm.post_id = {$wpdb->posts}.ID
-                        AND {$wpdb->posts}.post_status = 'publish'
+                        AND {$wpdb->posts}.post_status = %s
                         AND (
-                            (pm.meta_key = '_property_status' AND pm.meta_value LIKE %s) OR
-                            (pm.meta_key = '_property_state' AND pm.meta_value LIKE %s) OR
-                            (pm.meta_key = '_property_municipality' AND pm.meta_value LIKE %s) OR
-                            (pm.meta_key = '_property_street' AND pm.meta_value LIKE %s) OR
-                            (pm.meta_key = '_property_postal_code' AND pm.meta_value LIKE %s) OR
-                            (pm.meta_key = '_property_patent' AND pm.meta_value LIKE %s) OR
-                            (pm.meta_key = '_property_neighborhood' AND pm.meta_value LIKE %s)
+                            (pm.meta_key = %s AND pm.meta_value LIKE %s) OR
+                            (pm.meta_key = %s AND pm.meta_value LIKE %s) OR
+                            (pm.meta_key = %s AND pm.meta_value LIKE %s) OR
+                            (pm.meta_key = %s AND pm.meta_value LIKE %s) OR
+                            (pm.meta_key = %s AND pm.meta_value LIKE %s) OR
+                            (pm.meta_key = %s AND pm.meta_value LIKE %s) OR
+                            (pm.meta_key = %s AND pm.meta_value LIKE %s)
                         )
                     )",
-                    '%' . $wpdb->esc_like($search_term) . '%',
-                    '%' . $wpdb->esc_like($search_term) . '%',
-                    '%' . $wpdb->esc_like($search_term) . '%',
-                    '%' . $wpdb->esc_like($search_term) . '%',
-                    '%' . $wpdb->esc_like($search_term) . '%',
-                    '%' . $wpdb->esc_like($search_term) . '%',
-                    '%' . $wpdb->esc_like($search_term) . '%'
+                    'publish',
+                    '_property_status', $safe_search_term,
+                    '_property_state', $safe_search_term,
+                    '_property_municipality', $safe_search_term,
+                    '_property_street', $safe_search_term,
+                    '_property_postal_code', $safe_search_term,
+                    '_property_patent', $safe_search_term,
+                    '_property_neighborhood', $safe_search_term
                 );
 
-                $where .= " {$meta_where}";
+                // Safe concatenation with prepared statement
+                $where .= $meta_where;
 
                 return $where;
             };
@@ -678,9 +683,11 @@ class Property_REST_API {
             $this->update_property_meta($property_id, $request);
 
             // Check if update comes from dashboard (via custom header)
-            $is_dashboard_update = isset($_SERVER['HTTP_X_DASHBOARD_UPDATE']) && 
-                                  $_SERVER['HTTP_X_DASHBOARD_UPDATE'] === 'true';
-            
+            $dashboard_header = isset($_SERVER['HTTP_X_DASHBOARD_UPDATE'])
+                ? sanitize_text_field($_SERVER['HTTP_X_DASHBOARD_UPDATE'])
+                : '';
+            $is_dashboard_update = ($dashboard_header === 'true');
+
             if ($is_dashboard_update) {
                 // Update last dashboard update timestamp
                 update_post_meta($property_id, '_property_last_dashboard_update', current_time('mysql'));

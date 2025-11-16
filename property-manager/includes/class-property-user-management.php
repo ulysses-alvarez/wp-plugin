@@ -74,14 +74,14 @@ class Property_User_Management {
             return;
         }
 
-        // Get the role being assigned
-        $new_role = isset($_POST['role']) ? $_POST['role'] : '';
+        // Get the role being assigned and sanitize it
+        $new_role = isset($_POST['role']) ? sanitize_text_field($_POST['role']) : '';
 
         // Allowed roles for property_admin to assign
         $allowed_roles_to_assign = ['property_admin', 'property_manager', 'property_associate'];
 
         // Check if trying to assign a prohibited role (including property_admin)
-        if (!empty($new_role) && !in_array($new_role, $allowed_roles_to_assign)) {
+        if (!empty($new_role) && !in_array($new_role, $allowed_roles_to_assign, true)) {
             $errors->add(
                 'invalid_role',
                 __('No tienes permisos para asignar este rol.', 'property-dashboard')

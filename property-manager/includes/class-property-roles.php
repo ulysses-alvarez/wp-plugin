@@ -274,7 +274,10 @@ class Property_Roles {
         // Associate can only view own properties
         if (user_can($user_id, 'view_properties')) {
             $property = get_post($property_id);
-            return $property && (int) $property->post_author === (int) $user_id;
+            if (!$property || $property->post_type !== 'property') {
+                return false;
+            }
+            return (int) $property->post_author === (int) $user_id;
         }
 
         return false;
@@ -288,6 +291,12 @@ class Property_Roles {
      * @return bool
      */
     public static function can_edit_property($user_id, $property_id) {
+        // Validate that property exists and is a valid property post type
+        $property = get_post($property_id);
+        if (!$property || $property->post_type !== 'property') {
+            return false;
+        }
+
         // Admin and Manager can edit all
         if (user_can($user_id, 'edit_others_properties')) {
             return true;
@@ -295,8 +304,7 @@ class Property_Roles {
 
         // Associate can only edit own
         if (user_can($user_id, 'edit_properties')) {
-            $property = get_post($property_id);
-            return $property && (int) $property->post_author === (int) $user_id;
+            return (int) $property->post_author === (int) $user_id;
         }
 
         return false;
@@ -313,6 +321,12 @@ class Property_Roles {
         $user = get_user_by('id', $user_id);
 
         if (!$user) {
+            return false;
+        }
+
+        // Validate that property exists and is a valid property post type
+        $property = get_post($property_id);
+        if (!$property || $property->post_type !== 'property') {
             return false;
         }
 

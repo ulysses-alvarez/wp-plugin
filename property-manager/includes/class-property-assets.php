@@ -123,15 +123,18 @@ class Property_Assets {
     public static function enqueue_app($config = []) {
         $dist_url = PROPERTY_MANAGER_URL . 'dist/';
 
-        // Version con timestamp para forzar recarga
-        $version = '1.0.0-' . time();
+        // Version based on file modification time for proper browser caching
+        $js_file = PROPERTY_MANAGER_PATH . 'dist/assets/index.js';
+        $css_file = PROPERTY_MANAGER_PATH . 'dist/assets/index.css';
+        $js_version = file_exists($js_file) ? filemtime($js_file) : PROPERTY_MANAGER_VERSION;
+        $css_version = file_exists($css_file) ? filemtime($css_file) : PROPERTY_MANAGER_VERSION;
 
         // Enqueue CSS normally
         wp_enqueue_style(
             'property-manager-app',
             $dist_url . 'assets/index.css',
             [],
-            $version
+            $css_version
         );
 
         // Add inline CSS for fullscreen mode
@@ -208,14 +211,14 @@ class Property_Assets {
         ];
 
         // Add inline script to set wpPropertyDashboard BEFORE loading ES modules
-        add_action('wp_footer', function() use ($wp_data, $dist_url, $version) {
+        add_action('wp_footer', function() use ($wp_data, $dist_url, $js_version) {
             // Output wpPropertyDashboard data
             echo '<script id="property-manager-data">';
             echo 'window.wpPropertyDashboard = ' . wp_json_encode($wp_data) . ';';
             echo '</script>';
 
             // Load ES modules with type="module" and version param
-            echo '<script type="module" crossorigin src="' . esc_url($dist_url . 'assets/index.js?ver=' . $version) . '"></script>';
+            echo '<script type="module" crossorigin src="' . esc_url($dist_url . 'assets/index.js?ver=' . $js_version) . '"></script>';
         }, 20);
     }
 
