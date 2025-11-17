@@ -16,6 +16,8 @@ interface PaginationProps {
   showFirstLast?: boolean;
   showPerPageSelector?: boolean;
   className?: string;
+  itemLabel?: string; // Label for items (e.g., "propiedades", "usuarios")
+  perPageOptions?: number[]; // Custom options for per page selector (default: [10, 20, 50, 100])
 }
 
 export const Pagination = ({
@@ -28,11 +30,11 @@ export const Pagination = ({
   maxVisiblePages = 5,
   showFirstLast = true,
   showPerPageSelector = true,
-  className
+  className,
+  itemLabel = 'propiedades',
+  perPageOptions = [10, 20, 50, 100]
 }: PaginationProps) => {
   if (totalPages <= 1 && !showPerPageSelector) return null;
-
-  const perPageOptions = [10, 20, 50, 100];
   const startItem = (currentPage - 1) * perPage + 1;
   const endItem = Math.min(currentPage * perPage, total);
 
@@ -83,11 +85,11 @@ export const Pagination = ({
             <span className="font-semibold">{startItem}-{endItem}</span> /{' '}
             <span className="font-semibold">{total}</span>
           </span>
-          {/* Desktop: "1 a 20 de 150 propiedades" */}
+          {/* Desktop: "1 a 20 de 150 propiedades" / "1 a 20 de 150 usuarios" */}
           <span className="hidden sm:inline">
             <span className="font-semibold">{startItem}</span> a{' '}
             <span className="font-semibold">{endItem}</span> de{' '}
-            <span className="font-semibold">{total}</span> propiedades
+            <span className="font-semibold">{total}</span> {itemLabel}
           </span>
         </p>
       )}

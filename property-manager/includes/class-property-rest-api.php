@@ -1599,11 +1599,34 @@ class Property_REST_API {
     }
 
     /**
-     * Get users list (only property roles)
+     * Get users list (only property roles) with pagination
      */
     public function get_users($request) {
-        $users = Property_User_Management::get_dashboard_users();
+        // Get pagination parameters
+        $page = $request->get_param('page') ? absint($request->get_param('page')) : 1;
+        $per_page = $request->get_param('per_page') ? absint($request->get_param('per_page')) : 20;
 
+        // Limit per_page to prevent excessive queries
+        $per_page = min($per_page, 100);
+
+        // Get property roles
+        $property_roles = ['property_admin', 'property_manager', 'property_associate'];
+
+        // Build WP_User_Query args
+        $args = [
+            'role__in' => $property_roles,
+            'number' => $per_page,
+            'paged' => $page,
+            'orderby' => 'display_name',
+            'order' => 'ASC',
+        ];
+
+        // Execute query
+        $user_query = new WP_User_Query($args);
+        $users = $user_query->get_results();
+        $total = $user_query->get_total();
+
+        // Format users
         $formatted_users = [];
         foreach ($users as $user) {
             $role = !empty($user->roles) ? $user->roles[0] : '';
@@ -1620,7 +1643,15 @@ class Property_REST_API {
             ];
         }
 
-        return rest_ensure_response($formatted_users);
+        // Build response with pagination info
+        $response = [
+            'users' => $formatted_users,
+            'total' => (int) $total,
+            'totalPages' => (int) ceil($total / $per_page),
+            'currentPage' => (int) $page,
+        ];
+
+        return rest_ensure_response($response);
     }
 
     /**

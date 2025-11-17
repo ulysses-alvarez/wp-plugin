@@ -1,5 +1,13 @@
 import type { User, UserProfile, UserProfileUpdate } from '../types/user.types';
 
+// User list response with pagination
+export interface UserListResponse {
+  users: User[];
+  total: number;
+  totalPages: number;
+  currentPage: number;
+}
+
 // Get WordPress configuration
 const config = window.wpPropertyDashboard || {
   apiUrl: '/wp-json/property-dashboard/v1',
@@ -18,10 +26,15 @@ function getHeaders(): HeadersInit {
 
 class UserService {
   /**
-   * Get all users (only property roles)
+   * Get all users (only property roles) with pagination
    */
-  async getUsers(): Promise<User[]> {
-    const url = `${config.apiUrl}/users`;
+  async getUsers(page: number = 1, perPage: number = 20): Promise<UserListResponse> {
+    const params = new URLSearchParams({
+      page: page.toString(),
+      per_page: perPage.toString(),
+    });
+
+    const url = `${config.apiUrl}/users?${params.toString()}`;
 
     const response = await fetch(url, {
       method: 'GET',

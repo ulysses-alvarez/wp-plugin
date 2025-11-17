@@ -60,3 +60,21 @@ export const formatDateShort = (date: string | Date): string => {
     day: '2-digit'
   });
 };
+
+/**
+ * Get badge variant for user role
+ */
+export const getRoleVariant = (role: string): BadgeVariant => {
+  switch (role) {
+    case 'property_admin':
+      return 'info';      // Azul
+    case 'property_manager':
+      return 'warning';   // Amarillo/Naranja
+    case 'property_associate':
+      return 'default';   // Gris
+    case 'administrator':
+      return 'danger';    // Rojo (admin super)
+    default:
+      return 'default';   // Gris
+  }
+};
