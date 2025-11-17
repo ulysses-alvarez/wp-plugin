@@ -4,7 +4,7 @@
  */
 
 import type { Property } from '@/utils/permissions';
-import { Badge } from '@/components/ui';
+import { Badge, Button } from '@/components/ui';
 import { getStatusLabel, canEditProperty, canDeleteProperty } from '@/utils/permissions';
 import { getStateLabel } from '@/utils/constants';
 import { formatPrice, getStatusVariant } from '@/utils/formatters';
@@ -247,30 +247,29 @@ export const PropertyViewSidebar = ({
       </div>
 
       {/* Footer Actions */}
-      <div className="flex-shrink-0 bg-gradient-to-t from-gray-50 to-white border-t border-gray-200 px-6 py-4 flex justify-end gap-3">
+      <div className="flex-shrink-0 bg-white border-t border-gray-200 px-6 py-4 flex items-center justify-end gap-3">
+        {canDelete && onDelete && (
+          <Button
+            type="button"
+            variant="outline"
+            size="md"
+            onClick={() => onDelete(property)}
+            aria-label={`Eliminar propiedad ${property.title}`}
+            className="border-2 border-danger text-danger hover:bg-danger hover:text-white"
+          >
+            Eliminar
+          </Button>
+        )}
         {canEdit && onEdit && (
-          <button
+          <Button
+            type="button"
+            variant="primary"
+            size="md"
             onClick={() => onEdit(property)}
-            className="px-4 py-2.5 bg-primary text-white rounded-lg hover:bg-primary-hover transition-all duration-200 font-medium flex items-center justify-center gap-2 text-sm shadow-sm hover:shadow-md"
             aria-label={`Editar propiedad ${property.title}`}
           >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-            </svg>
             Editar
-          </button>
-        )}
-        {canDelete && onDelete && (
-          <button
-            onClick={() => onDelete(property)}
-            className="px-4 py-2.5 border-2 border-danger text-danger rounded-lg hover:bg-danger hover:text-white transition-all duration-200 font-medium flex items-center justify-center gap-2 text-sm"
-            aria-label={`Eliminar propiedad ${property.title}`}
-          >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-            </svg>
-            Eliminar
-          </button>
+          </Button>
         )}
       </div>
     </>

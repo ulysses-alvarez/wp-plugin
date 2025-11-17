@@ -21,7 +21,11 @@ export const DEFAULT_COLUMNS: CSVColumn[] = [
   { key: 'price', label: 'Precio' },
   { key: 'description', label: 'Descripción' },
   { key: 'google_maps_url', label: 'URL Google Maps' },
-  { key: 'created_at', label: 'Fecha Creación' }
+  { key: 'attachment_url', label: 'Ficha Técnica (URL)' },
+  { key: 'created_at', label: 'Fecha Creación' },
+  { key: 'created_by', label: 'Creado por' },
+  { key: 'modified_date', label: 'Última Modificación' },
+  { key: 'modified_by', label: 'Modificado por' }
 ];
 
 /**
@@ -49,7 +53,7 @@ export const escapeCSVValue = (value: string | number | null | undefined): strin
  */
 const formatPropertyValue = (property: Property, key: string): string => {
   const value = property[key as keyof Property];
-  
+
   // Format specific fields
   switch (key) {
     case 'status':
@@ -61,6 +65,20 @@ const formatPropertyValue = (property: Property, key: string): string => {
     case 'created_at':
       // WordPress date format
       return value ? new Date(String(value)).toLocaleDateString('es-MX') : '';
+    case 'created_by':
+      // Get name from audit trail
+      return property.audit?.created_by?.name || 'N/A';
+    case 'modified_by':
+      // Get name from audit trail
+      return property.audit?.modified_by?.name || 'N/A';
+    case 'modified_date':
+      // Get modified date from audit trail
+      return property.audit?.modified_date
+        ? new Date(property.audit.modified_date).toLocaleDateString('es-MX')
+        : 'N/A';
+    case 'attachment_url':
+      // URL of the technical file
+      return property.attachment_url || '';
     default:
       return value ? String(value) : '';
   }

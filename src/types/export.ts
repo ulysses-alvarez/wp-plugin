@@ -23,7 +23,7 @@ export interface ExportResult {
 }
 
 export interface CSVColumn {
-  key: keyof Property | 'created_at';
+  key: keyof Property | 'created_at' | 'created_by' | 'modified_by' | 'modified_date';
   label: string;
 }
 

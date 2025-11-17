@@ -4,7 +4,6 @@
  */
 
 import { useState, useRef, useEffect } from 'react';
-import { ChevronDown } from 'lucide-react';
 import clsx from 'clsx';
 
 export interface FilterOption {
@@ -14,7 +13,6 @@ export interface FilterOption {
 }
 
 interface FilterDropdownProps {
-  icon: React.ReactNode;
   options: FilterOption[];
   value: string;
   onChange: (value: string) => void;
@@ -23,7 +21,6 @@ interface FilterDropdownProps {
 }
 
 export const FilterDropdown = ({
-  icon,
   options,
   value,
   onChange,
@@ -71,13 +68,15 @@ export const FilterDropdown = ({
     setIsOpen(false);
   };
 
+  const selectedOption = options.find(opt => opt.value === value);
+
   return (
     <div className={clsx('relative', className)} ref={dropdownRef}>
       {/* Trigger Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
         className={clsx(
-          'flex items-center gap-2 px-3 py-2 rounded-lg border transition-colors text-sm',
+          'flex items-center gap-2 px-3 py-2 rounded-lg border transition-colors text-sm whitespace-nowrap',
           'hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1',
           isOpen
             ? 'border-primary bg-gray-50'
@@ -86,20 +85,25 @@ export const FilterDropdown = ({
         aria-haspopup="listbox"
         aria-expanded={isOpen}
       >
-        <span className="text-gray-600">{icon}</span>
-        <ChevronDown
+        <span className="text-gray-700 font-medium">{selectedOption?.label}</span>
+        <svg
           className={clsx(
-            'w-4 h-4 text-gray-500 transition-transform',
+            'w-4 h-4 text-primary transition-transform',
             isOpen && 'rotate-180'
           )}
-        />
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+        </svg>
       </button>
 
       {/* Dropdown Menu */}
       {isOpen && (
         <div
           className={clsx(
-            'absolute right-0 mt-2 w-56 rounded-lg shadow-lg bg-white border border-gray-200',
+            'absolute left-0 sm:right-0 sm:left-auto mt-2 w-48 sm:w-56 rounded-lg shadow-lg bg-white border border-gray-200',
             'animate-in fade-in slide-in-from-top-2 duration-200',
             'z-50'
           )}

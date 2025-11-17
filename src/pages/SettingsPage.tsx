@@ -3,22 +3,15 @@ import { useSettingsStore } from '../stores/useSettingsStore';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { LoadingSpinner } from '../components/ui/LoadingSpinner';
-import { Upload, X, Plus, Trash2 } from 'lucide-react';
+import { Upload, X } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { adjustColor, getContrastTextColor } from '../services/themeService';
-import type { PriceRoundingLevel } from '../types/settings';
 
 export const SettingsPage = () => {
   const { settings, isLoading, updateSettings, uploadLogo, deleteLogo } = useSettingsStore();
 
   const [formData, setFormData] = useState({
-    primaryColor: '#000000',
-    priceRounding: [
-      { threshold: 100000, multiplier: 10000 },
-      { threshold: 1000000, multiplier: 50000 },
-      { threshold: 5000000, multiplier: 100000 },
-      { threshold: 999999999999, multiplier: 500000 }
-    ] as PriceRoundingLevel[]
+    primaryColor: '#000000'
   });
 
   const [isSaving, setIsSaving] = useState(false);
@@ -27,13 +20,7 @@ export const SettingsPage = () => {
   useEffect(() => {
     if (settings) {
       setFormData({
-        primaryColor: settings.primaryColor || '#000000',
-        priceRounding: settings.priceRounding || [
-          { threshold: 100000, multiplier: 10000 },
-          { threshold: 1000000, multiplier: 50000 },
-          { threshold: 5000000, multiplier: 100000 },
-          { threshold: 999999999999, multiplier: 500000 }
-        ]
+        primaryColor: settings.primaryColor || '#000000'
       });
     }
   }, [settings]);
@@ -103,54 +90,6 @@ export const SettingsPage = () => {
     }
   };
 
-  // Price Rounding Management
-  const handleRoundingChange = (index: number, field: 'threshold' | 'multiplier', value: string) => {
-    const numValue = parseInt(value, 10);
-    if (isNaN(numValue) || numValue <= 0) return;
-
-    const newRounding = [...formData.priceRounding];
-    newRounding[index] = { ...newRounding[index], [field]: numValue };
-    setFormData(prev => ({ ...prev, priceRounding: newRounding }));
-  };
-
-  const addRoundingLevel = () => {
-    const newLevel: PriceRoundingLevel = {
-      threshold: 10000000,  // Default: 10M
-      multiplier: 1000000   // Default: round to nearest 1M
-    };
-    setFormData(prev => ({
-      ...prev,
-      priceRounding: [...prev.priceRounding, newLevel]
-    }));
-  };
-
-  const removeRoundingLevel = (index: number) => {
-    if (formData.priceRounding.length <= 1) {
-      toast.error('Debe haber al menos un nivel de redondeo');
-      return;
-    }
-    const newRounding = formData.priceRounding.filter((_, i) => i !== index);
-    setFormData(prev => ({ ...prev, priceRounding: newRounding }));
-  };
-
-  const resetRoundingToDefaults = () => {
-    setFormData(prev => ({
-      ...prev,
-      priceRounding: [
-        { threshold: 100000, multiplier: 10000 },
-        { threshold: 1000000, multiplier: 50000 },
-        { threshold: 5000000, multiplier: 100000 },
-        { threshold: 999999999999, multiplier: 500000 }
-      ]
-    }));
-    toast.success('Niveles de redondeo restablecidos a valores por defecto');
-  };
-
-  const formatNumber = (num: number): string => {
-    if (num >= 1000000) return `${num / 1000000}M`;
-    if (num >= 1000) return `${num / 1000}k`;
-    return num.toString();
-  };
 
   if (isLoading && !settings) {
     return (
@@ -349,96 +288,6 @@ export const SettingsPage = () => {
             </div>
           </div>
 
-          {/* Card de redondeo de precios */}
-          <div className="bg-white rounded-lg shadow-sm p-6">
-            <div className="flex items-center justify-between mb-4">
-              <div>
-                <h2 className="text-lg font-semibold text-gray-900">
-                  Redondeo de Precios
-                </h2>
-                <p className="text-sm text-gray-600 mt-1">
-                  Configura cómo se redondean los rangos de precios en los filtros
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={resetRoundingToDefaults}
-                className="px-3 py-2 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors whitespace-nowrap"
-              >
-                Valores por defecto
-              </button>
-            </div>
-
-            <div className="space-y-3">
-              {/* Table header */}
-              <div className="grid grid-cols-[1fr_1fr_auto] gap-3 text-sm font-medium text-gray-700 pb-2 border-b">
-                <div>Umbral (hasta)</div>
-                <div>Redondear a múltiplo de</div>
-                <div className="w-10"></div>
-              </div>
-
-              {/* Rounding levels */}
-              {formData.priceRounding.map((level, index) => (
-                <div key={index} className="grid grid-cols-[1fr_1fr_auto] gap-3 items-center">
-                  <div>
-                    <Input
-                      type="number"
-                      value={level.threshold}
-                      onChange={(e) => handleRoundingChange(index, 'threshold', e.target.value)}
-                      min="1"
-                      step="1000"
-                      className="w-full"
-                      placeholder="100000"
-                    />
-                    <p className="text-xs text-gray-500 mt-1">
-                      ${formatNumber(level.threshold)}
-                    </p>
-                  </div>
-                  <div>
-                    <Input
-                      type="number"
-                      value={level.multiplier}
-                      onChange={(e) => handleRoundingChange(index, 'multiplier', e.target.value)}
-                      min="1"
-                      step="1000"
-                      className="w-full"
-                      placeholder="10000"
-                    />
-                    <p className="text-xs text-gray-500 mt-1">
-                      ${formatNumber(level.multiplier)}
-                    </p>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => removeRoundingLevel(index)}
-                    className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                    title="Eliminar nivel"
-                    disabled={formData.priceRounding.length <= 1}
-                  >
-                    <Trash2 size={18} />
-                  </button>
-                </div>
-              ))}
-
-              {/* Add level button */}
-              <button
-                type="button"
-                onClick={addRoundingLevel}
-                className="flex items-center gap-2 px-3 py-2 text-sm text-primary hover:bg-gray-50 rounded-lg transition-colors w-full justify-center border-2 border-dashed border-gray-300 hover:border-primary"
-              >
-                <Plus size={18} />
-                <span>Agregar nivel de redondeo</span>
-              </button>
-
-              {/* Explanation */}
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mt-4">
-                <p className="text-sm text-blue-900">
-                  <strong>Ejemplo:</strong> Si el umbral es $100,000 y el múltiplo es $10,000, entonces los precios menores a $100,000 se redondearán al múltiplo de $10,000 más cercano (ej: $47,500 → $50,000).
-                </p>
-              </div>
-            </div>
-          </div>
-
           {/* Botones de acción */}
           <div className="flex justify-end gap-3">
             <Button
@@ -447,13 +296,7 @@ export const SettingsPage = () => {
               onClick={() => {
                 if (settings) {
                   setFormData({
-                    primaryColor: settings.primaryColor || '#000000',
-                    priceRounding: settings.priceRounding || [
-                      { threshold: 100000, multiplier: 10000 },
-                      { threshold: 1000000, multiplier: 50000 },
-                      { threshold: 5000000, multiplier: 100000 },
-                      { threshold: 999999999999, multiplier: 500000 }
-                    ]
+                    primaryColor: settings.primaryColor || '#000000'
                   });
                 }
               }}

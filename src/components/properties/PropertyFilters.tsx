@@ -7,7 +7,7 @@ import { useCallback, useMemo } from 'react';
 import { usePropertyStore } from '@/stores/usePropertyStore';
 import { AdvancedSearchBar, FilterDropdown } from '@/components/ui';
 import type { FilterOption } from '@/components/ui';
-import { Download, Plus, Upload, Users, ArrowUpDown, Calendar, DollarSign, Type } from 'lucide-react';
+import { Download, Plus, Upload, Users, Calendar, DollarSign, Type } from 'lucide-react';
 import { canCreateProperty } from '@/utils/permissions';
 import clsx from 'clsx';
 
@@ -40,8 +40,8 @@ export const PropertyFilters = ({ onCreateNew, onExport, onImport }: PropertyFil
 
   // View filter options
   const viewOptions: FilterOption[] = useMemo(() => [
-    { value: 'all', label: 'Todas las propiedades', icon: <Users className="w-4 h-4" /> },
-    { value: 'mine', label: 'Mis propiedades', icon: <Users className="w-4 h-4" /> }
+    { value: 'all', label: 'Todas', icon: <Users className="w-4 h-4" /> },
+    { value: 'mine', label: 'Solo mías', icon: <Users className="w-4 h-4" /> }
   ], []);
 
   // Sort options
@@ -75,9 +75,9 @@ export const PropertyFilters = ({ onCreateNew, onExport, onImport }: PropertyFil
   return (
     <div className="bg-white border-b border-gray-200 px-4 sm:px-6 py-4">
       {/* Desktop: Una sola fila */}
-      <div className="hidden md:flex items-center justify-between gap-4">
+      <div className="hidden md:flex items-start justify-between gap-4">
         {/* Izquierda: Search + Dropdowns */}
-        <div className="flex-1 flex items-center gap-3 max-w-3xl">
+        <div className="flex-1 flex items-start gap-3 max-w-3xl">
           <div className="flex-1 max-w-2xl">
             <AdvancedSearchBar
               onSearch={handleSearch}
@@ -87,7 +87,6 @@ export const PropertyFilters = ({ onCreateNew, onExport, onImport }: PropertyFil
 
           {/* Dropdown: Vista (Todas/Mis propiedades) */}
           <FilterDropdown
-            icon={<Users className="w-4 h-4" />}
             options={viewOptions}
             value={currentViewFilter}
             onChange={handleViewFilterChange}
@@ -95,7 +94,6 @@ export const PropertyFilters = ({ onCreateNew, onExport, onImport }: PropertyFil
 
           {/* Dropdown: Ordenamiento */}
           <FilterDropdown
-            icon={<ArrowUpDown className="w-4 h-4" />}
             options={sortOptions}
             value={currentSortValue}
             onChange={handleSortChange}
@@ -157,13 +155,11 @@ export const PropertyFilters = ({ onCreateNew, onExport, onImport }: PropertyFil
           {/* Izquierda: Dropdowns compactos */}
           <div className="flex gap-2">
             <FilterDropdown
-              icon={<Users className="w-4 h-4" />}
               options={viewOptions}
               value={currentViewFilter}
               onChange={handleViewFilterChange}
             />
             <FilterDropdown
-              icon={<ArrowUpDown className="w-4 h-4" />}
               options={sortOptions}
               value={currentSortValue}
               onChange={handleSortChange}

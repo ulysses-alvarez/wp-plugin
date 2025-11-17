@@ -3,7 +3,7 @@
  * Modal for configuring and exporting properties to CSV
  */
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Download, X } from 'lucide-react';
 import { usePropertyStore } from '@/stores/usePropertyStore';
 import { LoadingSpinner } from '@/components/ui';
@@ -31,6 +31,13 @@ export const ExportModal = ({
     DEFAULT_COLUMNS.map(col => String(col.key))
   );
   const [isExporting, setIsExporting] = useState(false);
+
+  // Reset columns to default when modal opens
+  useEffect(() => {
+    if (isOpen) {
+      setSelectedColumns(DEFAULT_COLUMNS.map(col => String(col.key)));
+    }
+  }, [isOpen]);
 
   // Get store data
   const properties = usePropertyStore(state => state.properties);
@@ -83,7 +90,9 @@ export const ExportModal = ({
 
   // Handle export
   const handleExport = async () => {
-    if (selectedColumns.length === 0) {
+    // Check if at least one column is selected (excluding ID which is always included)
+    const selectableColumnsCount = selectedColumns.filter(col => col !== 'id').length;
+    if (selectableColumnsCount === 0) {
       toast.error('Selecciona al menos una columna para exportar');
       return;
     }
@@ -108,9 +117,12 @@ export const ExportModal = ({
       }
 
       // Filter columns based on selection
-      const columnsToExport = DEFAULT_COLUMNS.filter(col =>
-        selectedColumns.includes(String(col.key))
+      // Always include ID as the first column, then add selected columns (excluding ID)
+      const idColumn = DEFAULT_COLUMNS.find(col => col.key === 'id')!;
+      const otherColumns = DEFAULT_COLUMNS.filter(col =>
+        col.key !== 'id' && selectedColumns.includes(String(col.key))
       );
+      const columnsToExport = [idColumn, ...otherColumns];
 
       // Export to CSV
       exportPropertiesToCSV(
@@ -237,24 +249,29 @@ export const ExportModal = ({
                 </label>
                 <button
                   onClick={() => {
-                    if (selectedColumns.length === DEFAULT_COLUMNS.length) {
-                      setSelectedColumns([]);
+                    const selectableColumns = DEFAULT_COLUMNS.filter(col => col.key !== 'id');
+                    const currentSelectableCount = selectedColumns.filter(col => col !== 'id').length;
+
+                    if (currentSelectableCount === selectableColumns.length) {
+                      // Keep ID, remove all others
+                      setSelectedColumns(['id']);
                     } else {
+                      // Select all (including ID)
                       setSelectedColumns(DEFAULT_COLUMNS.map(col => String(col.key)));
                     }
                   }}
                   className="text-xs text-primary hover:text-primary-hover font-medium"
                   disabled={isExporting}
-                  aria-label={selectedColumns.length === DEFAULT_COLUMNS.length ? 'Deseleccionar todas las columnas' : 'Seleccionar todas las columnas'}
+                  aria-label={selectedColumns.filter(col => col !== 'id').length === DEFAULT_COLUMNS.filter(col => col.key !== 'id').length ? 'Deseleccionar todas las columnas' : 'Seleccionar todas las columnas'}
                 >
-                  {selectedColumns.length === DEFAULT_COLUMNS.length
+                  {selectedColumns.filter(col => col !== 'id').length === DEFAULT_COLUMNS.filter(col => col.key !== 'id').length
                     ? 'Deseleccionar todas'
                     : 'Seleccionar todas'}
                 </button>
               </div>
 
               <div className="flex flex-wrap gap-2 max-h-80 overflow-y-auto pb-2">
-                {DEFAULT_COLUMNS.map((column) => {
+                {DEFAULT_COLUMNS.filter(col => col.key !== 'id').map((column) => {
                   const columnKey = String(column.key);
                   const isSelected = selectedColumns.includes(columnKey);
 
@@ -283,9 +300,9 @@ export const ExportModal = ({
 
               <div className="flex items-center justify-between mt-2 pt-2 border-t border-gray-200">
                 <p className="text-xs text-gray-600">
-                  {selectedColumns.length} de {DEFAULT_COLUMNS.length} columnas seleccionadas
+                  {selectedColumns.filter(col => col !== 'id').length} de {DEFAULT_COLUMNS.filter(col => col.key !== 'id').length} columnas seleccionadas
                 </p>
-                {selectedColumns.length === 0 && (
+                {selectedColumns.filter(col => col !== 'id').length === 0 && (
                   <p className="text-xs text-red-600">
                     Selecciona al menos una columna
                   </p>
@@ -306,10 +323,10 @@ export const ExportModal = ({
             </button>
             <button
               onClick={handleExport}
-              disabled={isExporting || selectedColumns.length === 0 || propertiesToExport.length === 0}
+              disabled={isExporting || selectedColumns.filter(col => col !== 'id').length === 0 || propertiesToExport.length === 0}
               className={clsx(
                 'px-3 py-1.5 sm:px-4 sm:py-2 text-sm font-medium rounded-lg transition-colors flex items-center gap-2',
-                isExporting || selectedColumns.length === 0 || propertiesToExport.length === 0
+                isExporting || selectedColumns.filter(col => col !== 'id').length === 0 || propertiesToExport.length === 0
                   ? 'bg-gray-400 cursor-not-allowed text-white'
                   : 'bg-primary text-primary-text hover:bg-primary-hover'
               )}
