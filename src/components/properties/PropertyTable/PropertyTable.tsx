@@ -249,7 +249,7 @@ export const PropertyTable = ({
   return (
     <div ref={tableContainerRef} className="h-full flex flex-col">
       {/* Table Container - Scrollable con altura calculada */}
-      <div className="flex-1 min-h-0 overflow-auto px-4 sm:px-0">
+      <div className="flex-1 min-h-0 overflow-y-auto sm:px-0">
         <table className="w-full">
           <PropertyTableHeader
             isAllSelected={isAllCurrentPageSelected}

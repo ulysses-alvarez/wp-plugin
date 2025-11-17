@@ -214,7 +214,8 @@ class Property_User_Fields_Customization {
     public static function hide_web_field_in_new_user() {
         ?>
         <style>
-            /* Hide Website field in add new user form */
+            /* Hide Website field in add new user form - more specific selector */
+            #createuser tr.form-field:has(input[name="url"]),
             #createuser .form-field.user-url-wrap {
                 display: none !important;
             }

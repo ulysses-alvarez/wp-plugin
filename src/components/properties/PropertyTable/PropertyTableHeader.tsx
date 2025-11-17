@@ -18,7 +18,7 @@ export const PropertyTableHeader = ({
     <thead>
       <tr className="bg-gray-50 border-b border-gray-200">
         {/* Checkbox column */}
-        <th className="sticky top-0 z-30 bg-gray-50 w-12 px-3 py-2 sm:py-3">
+        <th className="sticky top-0 left-0 z-40 bg-gray-50 w-12 pl-4 pr-3 py-2 sm:py-3 shadow-sticky-column-left">
           <input
             type="checkbox"
             checked={isAllSelected}
@@ -50,8 +50,8 @@ export const PropertyTableHeader = ({
         </th>
 
         {/* Actions column (sticky) - no sorting */}
-        <th className="sticky top-0 right-0 z-30 bg-gray-50 w-32 px-2 py-2 sm:px-6 sm:py-3 text-right text-xs font-semibold text-gray-700 uppercase tracking-wider shadow-sticky-column">
-          Acciones
+        <th className="sticky top-0 right-0 z-40 bg-gray-50 w-32 pl-2 pr-3 py-2 sm:pl-6 sm:pr-7 sm:py-3 text-right text-xs font-semibold text-gray-700 uppercase tracking-wider shadow-sticky-column">
+          <span className="hidden sm:inline">Acciones</span>
         </th>
       </tr>
     </thead>

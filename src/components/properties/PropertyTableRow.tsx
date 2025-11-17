@@ -61,7 +61,10 @@ export const PropertyTableRow = memo(({
     >
       {/* Checkbox */}
       <td
-        className="w-12 px-3 py-3"
+        className={clsx(
+          'sticky left-0 z-10 w-12 pl-4 pr-3 py-3 shadow-sticky-column-left',
+          isHovered ? 'bg-gray-100' : 'bg-white'
+        )}
         onClick={(e) => e.stopPropagation()}
       >
         <input
@@ -131,7 +134,7 @@ export const PropertyTableRow = memo(({
       {/* Actions - Sticky Column */}
       <td
         className={clsx(
-          'sticky right-0 z-10 px-2 py-2 sm:px-6 sm:py-4 text-right shadow-sticky-column',
+          'sticky right-0 z-10 pl-2 pr-3 py-2 sm:pl-6 sm:pr-7 sm:py-4 text-right shadow-sticky-column',
           isHovered ? 'bg-gray-100' : 'bg-white'
         )}
         onClick={(e) => e.stopPropagation()}
