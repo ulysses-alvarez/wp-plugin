@@ -21,19 +21,6 @@ export const UserDropdown = ({ name, firstName, lastName, role, roleLabel, email
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  // DEBUG: Log para ver qué valores llegan
-  console.log('[UserDropdown DEBUG]', {
-    name,
-    firstName,
-    lastName,
-    firstName_type: typeof firstName,
-    lastName_type: typeof lastName,
-    firstName_length: firstName?.length,
-    lastName_length: lastName?.length,
-    firstName_trimmed: firstName?.trim(),
-    lastName_trimmed: lastName?.trim()
-  });
-
   // Calcular nombre completo
   // Si tiene firstName Y lastName (ambos no vacíos): mostrar ambos
   // Si solo tiene firstName (no vacío): mostrarlo
@@ -48,8 +35,6 @@ export const UserDropdown = ({ name, firstName, lastName, role, roleLabel, email
     }
     return null;
   })();
-
-  console.log('[UserDropdown DEBUG] fullName:', fullName);
 
   // Get initials from name
   const getInitials = (name: string): string => {

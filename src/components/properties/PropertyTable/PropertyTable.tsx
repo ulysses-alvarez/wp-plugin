@@ -94,6 +94,17 @@ export const PropertyTable = ({
     return () => window.removeEventListener('storage', handleStorageChange);
   }, [selectedIds.size, clearSelections]);
 
+  // Listen for custom event to clear selections (from same tab)
+  // This is triggered when modals are closed or bulk actions are cancelled
+  useEffect(() => {
+    const handleClearSelections = () => {
+      clearSelections();
+    };
+
+    window.addEventListener('clearPropertySelections', handleClearSelections);
+    return () => window.removeEventListener('clearPropertySelections', handleClearSelections);
+  }, [clearSelections]);
+
   // Notify parent of selection changes
   useEffect(() => {
     if (onSelectionChange) {

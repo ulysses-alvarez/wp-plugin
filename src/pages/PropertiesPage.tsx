@@ -315,6 +315,10 @@ export const PropertiesPage = () => {
     setIsBulkDeleteModalOpen(false);
     setIsBulkStatusModalOpen(false);
     setIsBulkPatentModalOpen(false);
+
+    // Dispatch custom event to notify PropertyTable to clear selections
+    // This ensures the hook inside PropertyTable also clears its state
+    window.dispatchEvent(new CustomEvent('clearPropertySelections'));
   };
 
   // Handle CSV import with validation and sanitization
