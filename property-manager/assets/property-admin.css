@@ -10,11 +10,17 @@
 }
 
 .attachment-preview {
-    padding: 10px;
+    padding: 8px 12px;
     background: #f5f5f5;
     border: 1px solid #ddd;
     border-radius: 3px;
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
+}
+
+/* Remove WordPress core ::before pseudo-element */
+.wp-core-ui .attachment-preview:before {
+    display: none !important;
 }
 
 .attachment-link {
@@ -30,9 +36,16 @@
 }
 
 .attachment-link .dashicons {
-    font-size: 20px;
-    width: 20px;
-    height: 20px;
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+}
+
+.attachment-link .attachment-filename {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 300px;
 }
 
 /* Property Audit Meta Box */

@@ -176,7 +176,7 @@ export const PropertyTable = ({
 
   if (initialLoad && loading) {
     return (
-      <div className="flex justify-center items-center py-20">
+      <div className="h-full flex items-center justify-center">
         <LoadingSpinner size="lg" text="Cargando propiedades..." />
       </div>
     );

@@ -5,7 +5,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { ChevronDown, User, HelpCircle, LogOut } from 'lucide-react';
+import { ChevronDown, User, LogOut } from 'lucide-react';
 import clsx from 'clsx';
 
 interface UserDropdownProps {
@@ -134,18 +134,6 @@ export const UserDropdown = ({ name, firstName, lastName, role, roleLabel, email
               <User size={16} className="text-gray-400" />
               <span>Perfil</span>
             </Link>
-
-            {/* Ayuda */}
-            <a
-              href="https://wordpress.org/support/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-2 sm:gap-3 px-3 py-2 sm:px-4 sm:py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
-              onClick={() => setIsOpen(false)}
-            >
-              <HelpCircle size={16} className="text-gray-400" />
-              <span>Ayuda</span>
-            </a>
 
             {/* Divider */}
             <div className="my-1 border-t border-gray-100" />

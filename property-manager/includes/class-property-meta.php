@@ -225,15 +225,6 @@ class Property_Meta {
         );
 
         add_meta_box(
-            'property_location',
-            __('Ubicación', 'property-dashboard'),
-            [self::class, 'render_location_meta_box'],
-            'property',
-            'normal',
-            'high'
-        );
-
-        add_meta_box(
             'property_last_update',
             __('Información de Actualización', 'property-dashboard'),
             [self::class, 'render_last_update_meta_box'],
@@ -252,6 +243,11 @@ class Property_Meta {
 
         // Get current values
         $status = get_post_meta($post->ID, '_property_status', true) ?: 'available';
+        $state = get_post_meta($post->ID, '_property_state', true);
+        $municipality = get_post_meta($post->ID, '_property_municipality', true);
+        $neighborhood = get_post_meta($post->ID, '_property_neighborhood', true);
+        $street = get_post_meta($post->ID, '_property_street', true);
+        $postal_code = get_post_meta($post->ID, '_property_postal_code', true);
         $patent = get_post_meta($post->ID, '_property_patent', true);
         $price = get_post_meta($post->ID, '_property_price', true);
         $google_maps_url = get_post_meta($post->ID, '_property_google_maps_url', true);
@@ -280,6 +276,85 @@ class Property_Meta {
                         <?php endforeach; ?>
                     </select>
                     <p class="description"><?php _e('Estado actual de la propiedad', 'property-dashboard'); ?></p>
+                </td>
+            </tr>
+
+            <tr>
+                <th scope="row">
+                    <label for="property_state"><?php _e('Estado de la República', 'property-dashboard'); ?> <span class="required">*</span></label>
+                </th>
+                <td>
+                    <select name="property_state" id="property_state" class="widefat" required>
+                        <option value=""><?php _e('Seleccione un estado', 'property-dashboard'); ?></option>
+                        <?php foreach (Property_CPT::get_states_options() as $value => $label): ?>
+                            <option value="<?php echo esc_attr($value); ?>" <?php selected($state, $value); ?>>
+                                <?php echo esc_html($label); ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                </td>
+            </tr>
+
+            <tr>
+                <th scope="row">
+                    <label for="property_municipality"><?php _e('Municipio', 'property-dashboard'); ?> <span class="required">*</span></label>
+                </th>
+                <td>
+                    <input type="text"
+                           name="property_municipality"
+                           id="property_municipality"
+                           value="<?php echo esc_attr($municipality); ?>"
+                           class="widefat"
+                           required
+                           placeholder="Ej: Guadalajara">
+                </td>
+            </tr>
+
+            <tr>
+                <th scope="row">
+                    <label for="property_neighborhood"><?php _e('Colonia', 'property-dashboard'); ?> <span class="required">*</span></label>
+                </th>
+                <td>
+                    <input type="text"
+                           name="property_neighborhood"
+                           id="property_neighborhood"
+                           value="<?php echo esc_attr($neighborhood); ?>"
+                           class="widefat"
+                           required
+                           placeholder="Ej: Colonia Americana">
+                </td>
+            </tr>
+
+            <tr>
+                <th scope="row">
+                    <label for="property_street"><?php _e('Dirección', 'property-dashboard'); ?> <span class="required">*</span></label>
+                </th>
+                <td>
+                    <input type="text"
+                           name="property_street"
+                           id="property_street"
+                           value="<?php echo esc_attr($street); ?>"
+                           class="widefat"
+                           required>
+                    <p class="description"><?php _e('Dirección completa', 'property-dashboard'); ?></p>
+                </td>
+            </tr>
+
+            <tr>
+                <th scope="row">
+                    <label for="property_postal_code"><?php _e('Código Postal', 'property-dashboard'); ?> <span class="required">*</span></label>
+                </th>
+                <td>
+                    <input type="text"
+                           name="property_postal_code"
+                           id="property_postal_code"
+                           value="<?php echo esc_attr($postal_code); ?>"
+                           class="widefat"
+                           maxlength="5"
+                           pattern="[0-9]{5}"
+                           required
+                           placeholder="44100">
+                    <p class="description"><?php _e('5 dígitos', 'property-dashboard'); ?></p>
                 </td>
             </tr>
 
@@ -430,101 +505,6 @@ class Property_Meta {
             });
         });
         </script>
-        <?php
-    }
-
-    /**
-     * Render location meta box
-     */
-    public static function render_location_meta_box($post) {
-        // Get current values
-        $state = get_post_meta($post->ID, '_property_state', true);
-        $municipality = get_post_meta($post->ID, '_property_municipality', true);
-        $neighborhood = get_post_meta($post->ID, '_property_neighborhood', true);
-        $postal_code = get_post_meta($post->ID, '_property_postal_code', true);
-        $street = get_post_meta($post->ID, '_property_street', true);
-
-        ?>
-        <table class="form-table property-meta-table">
-            <tr>
-                <th scope="row">
-                    <label for="property_state"><?php _e('Estado', 'property-dashboard'); ?> <span class="required">*</span></label>
-                </th>
-                <td>
-                    <select name="property_state" id="property_state" class="widefat" required>
-                        <option value=""><?php _e('Seleccione un estado', 'property-dashboard'); ?></option>
-                        <?php foreach (Property_CPT::get_states_options() as $value => $label): ?>
-                            <option value="<?php echo esc_attr($value); ?>" <?php selected($state, $value); ?>>
-                                <?php echo esc_html($label); ?>
-                            </option>
-                        <?php endforeach; ?>
-                    </select>
-                </td>
-            </tr>
-
-            <tr>
-                <th scope="row">
-                    <label for="property_municipality"><?php _e('Municipio', 'property-dashboard'); ?> <span class="required">*</span></label>
-                </th>
-                <td>
-                    <input type="text"
-                           name="property_municipality"
-                           id="property_municipality"
-                           value="<?php echo esc_attr($municipality); ?>"
-                           class="widefat"
-                           required
-                           placeholder="Ej: Guadalajara">
-                </td>
-            </tr>
-
-            <tr>
-                <th scope="row">
-                    <label for="property_neighborhood"><?php _e('Colonia', 'property-dashboard'); ?> <span class="required">*</span></label>
-                </th>
-                <td>
-                    <input type="text"
-                           name="property_neighborhood"
-                           id="property_neighborhood"
-                           value="<?php echo esc_attr($neighborhood); ?>"
-                           class="widefat"
-                           required
-                           placeholder="Ej: Colonia Americana">
-                </td>
-            </tr>
-
-            <tr>
-                <th scope="row">
-                    <label for="property_postal_code"><?php _e('Código Postal', 'property-dashboard'); ?> <span class="required">*</span></label>
-                </th>
-                <td>
-                    <input type="text"
-                           name="property_postal_code"
-                           id="property_postal_code"
-                           value="<?php echo esc_attr($postal_code); ?>"
-                           class="widefat"
-                           maxlength="5"
-                           pattern="[0-9]{5}"
-                           required
-                           placeholder="44100">
-                    <p class="description"><?php _e('5 dígitos', 'property-dashboard'); ?></p>
-                </td>
-            </tr>
-
-            <tr>
-                <th scope="row">
-                    <label for="property_street"><?php _e('Dirección', 'property-dashboard'); ?> <span class="required">*</span></label>
-                </th>
-                <td>
-                    <input type="text"
-                           name="property_street"
-                           id="property_street"
-                           value="<?php echo esc_attr($street); ?>"
-                           class="widefat"
-                           required>
-                    <p class="description"><?php _e('Dirección completa', 'property-dashboard'); ?></p>
-                </td>
-            </tr>
-        </table>
         <?php
     }
 

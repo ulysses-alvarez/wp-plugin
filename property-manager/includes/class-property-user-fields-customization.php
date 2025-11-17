@@ -22,6 +22,7 @@ class Property_User_Fields_Customization {
 
         // Customize new user form
         add_action('user_new_form', [__CLASS__, 'customize_new_user_form'], 10, 1);
+        add_action('admin_footer-user-new.php', [__CLASS__, 'hide_web_field_in_new_user']);
 
         // Customize edit user form
         add_action('show_user_profile', [__CLASS__, 'customize_edit_user_form'], 1);
@@ -39,13 +40,13 @@ class Property_User_Fields_Customization {
     }
 
     /**
-     * Check if current user is property_admin
+     * Check if current user is property_admin or administrator
      *
      * @return bool
      */
     private static function is_property_admin() {
         $current_user = wp_get_current_user();
-        return in_array('property_admin', $current_user->roles);
+        return in_array('property_admin', $current_user->roles) || in_array('administrator', $current_user->roles);
     }
 
     /**
@@ -205,5 +206,19 @@ class Property_User_Fields_Customization {
 
         // Add hidden input to force send_user_notification to false
         echo '<input type="hidden" name="send_user_notification_forced" value="0">';
+    }
+
+    /**
+     * Hide Web field in new user form (admin footer)
+     */
+    public static function hide_web_field_in_new_user() {
+        ?>
+        <style>
+            /* Hide Website field in add new user form */
+            #createuser .form-field.user-url-wrap {
+                display: none !important;
+            }
+        </style>
+        <?php
     }
 }

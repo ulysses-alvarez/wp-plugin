@@ -3,6 +3,7 @@ import { ExternalLink, UserPlus } from 'lucide-react';
 import { userService } from '../services/userService';
 import type { User } from '../types/user.types';
 import { Button } from '../components/ui/Button';
+import { LoadingSpinner } from '../components/ui/LoadingSpinner';
 
 export default function UsersPage() {
   const [users, setUsers] = useState<User[]>([]);
@@ -43,11 +44,8 @@ export default function UsersPage() {
 
   if (isLoading) {
     return (
-      <div className="p-6">
-        <div className="animate-pulse space-y-4">
-          <div className="h-8 bg-gray-200 rounded w-1/4"></div>
-          <div className="h-64 bg-gray-200 rounded"></div>
-        </div>
+      <div className="h-full flex items-center justify-center">
+        <LoadingSpinner size="lg" text="Cargando usuarios..." />
       </div>
     );
   }
