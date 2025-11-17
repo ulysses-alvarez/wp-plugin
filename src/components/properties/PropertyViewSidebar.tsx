@@ -251,11 +251,11 @@ export const PropertyViewSidebar = ({
         {canDelete && onDelete && (
           <Button
             type="button"
-            variant="outline"
+            variant="secondary"
             size="md"
             onClick={() => onDelete(property)}
             aria-label={`Eliminar propiedad ${property.title}`}
-            className="border-2 border-danger text-danger hover:bg-danger hover:text-white"
+            className="bg-white border-2 border-danger text-danger hover:bg-danger hover:text-white focus:ring-danger"
           >
             Eliminar
           </Button>

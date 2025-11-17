@@ -150,7 +150,7 @@ export const PropertyTable = ({
   useEffect(() => {
     loadProperties().finally(() => setInitialLoad(false));
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentPage, perPage, sortBy, sortOrder, filters.searchField, filters.searchValue]);
+  }, [currentPage, perPage, sortBy, sortOrder, filters.searchField, filters.searchValue, filters.onlyMyProperties]);
 
   const handlePageChange = (page: number) => {
     setPage(page);

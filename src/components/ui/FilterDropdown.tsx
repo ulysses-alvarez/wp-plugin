@@ -13,6 +13,7 @@ export interface FilterOption {
 }
 
 interface FilterDropdownProps {
+  icon: React.ReactNode;
   options: FilterOption[];
   value: string;
   onChange: (value: string) => void;
@@ -21,6 +22,7 @@ interface FilterDropdownProps {
 }
 
 export const FilterDropdown = ({
+  icon,
   options,
   value,
   onChange,
@@ -72,38 +74,28 @@ export const FilterDropdown = ({
 
   return (
     <div className={clsx('relative', className)} ref={dropdownRef}>
-      {/* Trigger Button */}
+      {/* Trigger Button - Icon only */}
       <button
         onClick={() => setIsOpen(!isOpen)}
         className={clsx(
-          'flex items-center gap-2 px-3 py-2 rounded-lg border transition-colors text-sm whitespace-nowrap',
+          'flex items-center justify-center px-2 sm:px-3 py-2.5 rounded-lg border transition-colors',
           'hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1',
           isOpen
-            ? 'border-primary bg-gray-50'
+            ? 'border-primary bg-gray-50 text-primary'
             : 'border-gray-300 bg-white text-gray-700'
         )}
         aria-haspopup="listbox"
         aria-expanded={isOpen}
+        title={selectedOption?.label}
       >
-        <span className="text-gray-700 font-medium">{selectedOption?.label}</span>
-        <svg
-          className={clsx(
-            'w-4 h-4 text-primary transition-transform',
-            isOpen && 'rotate-180'
-          )}
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-        </svg>
+        {icon}
       </button>
 
-      {/* Dropdown Menu */}
+      {/* Dropdown Menu - fit-content width */}
       {isOpen && (
         <div
           className={clsx(
-            'absolute left-0 sm:right-0 sm:left-auto mt-2 w-48 sm:w-56 rounded-lg shadow-lg bg-white border border-gray-200',
+            'absolute left-0 sm:right-0 sm:left-auto mt-2 w-max min-w-[12rem] rounded-lg shadow-lg bg-white border border-gray-200',
             'animate-in fade-in slide-in-from-top-2 duration-200',
             'z-50'
           )}
@@ -115,7 +107,7 @@ export const FilterDropdown = ({
                 key={option.value}
                 onClick={() => handleSelect(option.value)}
                 className={clsx(
-                  'w-full px-4 py-2.5 text-left text-sm transition-colors flex items-center gap-3',
+                  'w-full px-4 py-2.5 text-left text-sm transition-colors flex items-center gap-3 whitespace-nowrap',
                   'hover:bg-gray-50',
                   value === option.value
                     ? 'bg-primary-light text-primary font-medium'
@@ -124,15 +116,10 @@ export const FilterDropdown = ({
                 role="option"
                 aria-selected={value === option.value}
               >
-                {option.icon && (
-                  <span className={value === option.value ? 'text-primary' : 'text-gray-500'}>
-                    {option.icon}
-                  </span>
-                )}
-                <span>{option.label}</span>
+                <span className="flex-1">{option.label}</span>
                 {value === option.value && (
                   <svg
-                    className="ml-auto w-4 h-4 text-primary"
+                    className="w-4 h-4 text-primary flex-shrink-0"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"

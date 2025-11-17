@@ -56,7 +56,6 @@ export const ProfilePage = () => {
       }
 
       const data = await response.json();
-      console.log('Profile loaded:', data); // Debug log
 
       // Map API response to expected format (handle both name and display_name)
       const profileData = {

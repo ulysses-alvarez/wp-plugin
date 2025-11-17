@@ -7,7 +7,7 @@ import { useCallback, useMemo } from 'react';
 import { usePropertyStore } from '@/stores/usePropertyStore';
 import { AdvancedSearchBar, FilterDropdown } from '@/components/ui';
 import type { FilterOption } from '@/components/ui';
-import { Download, Plus, Upload, Users, Calendar, DollarSign, Type } from 'lucide-react';
+import { Download, Plus, Upload, Users, ArrowUpDown, Calendar, DollarSign, Type } from 'lucide-react';
 import { canCreateProperty } from '@/utils/permissions';
 import clsx from 'clsx';
 
@@ -87,6 +87,7 @@ export const PropertyFilters = ({ onCreateNew, onExport, onImport }: PropertyFil
 
           {/* Dropdown: Vista (Todas/Mis propiedades) */}
           <FilterDropdown
+            icon={<Users className="w-4 h-4" />}
             options={viewOptions}
             value={currentViewFilter}
             onChange={handleViewFilterChange}
@@ -94,6 +95,7 @@ export const PropertyFilters = ({ onCreateNew, onExport, onImport }: PropertyFil
 
           {/* Dropdown: Ordenamiento */}
           <FilterDropdown
+            icon={<ArrowUpDown className="w-4 h-4" />}
             options={sortOptions}
             value={currentSortValue}
             onChange={handleSortChange}
@@ -102,11 +104,12 @@ export const PropertyFilters = ({ onCreateNew, onExport, onImport }: PropertyFil
 
         {/* Derecha: Botones de acción */}
         <div className="flex items-center gap-2 flex-shrink-0">
-          {/* Importar - SOLO en desktop */}
+          {/* Importar - SOLO en desktop - Oculto por defecto (puede mostrarse con dev tools) */}
           {onImport && canCreate && (
             <button
               onClick={onImport}
               className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium items-center gap-2 text-sm inline-flex"
+              style={{ display: 'none' }}
             >
               <Upload size={16} />
               <span>Importar</span>
@@ -155,11 +158,13 @@ export const PropertyFilters = ({ onCreateNew, onExport, onImport }: PropertyFil
           {/* Izquierda: Dropdowns compactos */}
           <div className="flex gap-2">
             <FilterDropdown
+              icon={<Users className="w-4 h-4" />}
               options={viewOptions}
               value={currentViewFilter}
               onChange={handleViewFilterChange}
             />
             <FilterDropdown
+              icon={<ArrowUpDown className="w-4 h-4" />}
               options={sortOptions}
               value={currentSortValue}
               onChange={handleSortChange}
