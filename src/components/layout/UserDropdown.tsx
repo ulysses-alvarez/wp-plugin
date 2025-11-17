@@ -115,11 +115,11 @@ export const UserDropdown = ({ name, firstName, lastName, role, roleLabel, email
           <div className="px-3 py-2 sm:px-4 sm:py-3 border-b border-gray-100">
             {/* Mostrar nombre completo en mobile arriba del rol */}
             {fullName && (
-              <div className="text-sm font-medium text-gray-700 md:hidden mb-1">{fullName}</div>
+              <div className="text-sm font-medium text-gray-700 md:hidden mb-1 truncate">{fullName}</div>
             )}
             <div className="text-xs text-gray-500">{displayRole}</div>
             {email && (
-              <div className="text-xs text-gray-400 mt-1">{email}</div>
+              <div className="text-xs text-gray-400 mt-1 truncate overflow-hidden">{email}</div>
             )}
           </div>
 

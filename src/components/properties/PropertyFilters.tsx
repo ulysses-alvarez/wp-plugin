@@ -194,10 +194,10 @@ export const PropertyFilters = ({ onCreateNew, onExport, onImport }: PropertyFil
             {canCreate && onCreateNew && (
               <button
                 onClick={onCreateNew}
-                className="p-2 bg-primary text-white rounded-lg hover:bg-primary-hover transition-colors"
-                aria-label="Agregar propiedad"
+                className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-hover transition-colors font-medium flex items-center gap-2 text-sm"
               >
-                <Plus size={18} />
+                <Plus size={16} />
+                <span>Agregar</span>
               </button>
             )}
           </div>
