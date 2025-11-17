@@ -7,13 +7,11 @@
 import { useEffect, useState, useRef, useMemo, useCallback } from 'react';
 import { usePropertyStore } from '@/stores/usePropertyStore';
 import { LoadingSpinner, Pagination } from '@/components/ui';
-import type { SortKey } from '@/components/ui';
 import type { Property } from '@/utils/permissions';
 import { canCreateProperty } from '@/utils/permissions';
 import { usePropertySelection } from '@/hooks/usePropertySelection';
 import { PropertyTableRow } from '../PropertyTableRow';
 import { PropertyTableHeader } from './PropertyTableHeader';
-import { PropertySortIndicator } from './PropertySortIndicator';
 
 interface PropertyTableProps {
   onPropertySelect: (property: Property) => void;
@@ -44,9 +42,7 @@ export const PropertyTable = ({
     filters,
     loadProperties,
     setPage,
-    setPerPage,
-    setSortBy,
-    setSortOrder
+    setPerPage
   } = usePropertyStore();
 
   const [initialLoad, setInitialLoad] = useState(true);
@@ -178,52 +174,6 @@ export const PropertyTable = ({
     setPerPage(newPerPage);
   };
 
-  const handleSort = (sortKey: SortKey) => {
-    if (sortBy === sortKey) {
-      // Toggle order if same column
-      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
-    } else {
-      // New column, default to descending
-      setSortBy(sortKey);
-      setSortOrder('desc');
-    }
-  };
-
-  const handleResetSort = () => {
-    setSortBy('date');
-    setSortOrder('desc');
-  };
-
-  // Check if current sort is different from default
-  const isCustomSort = sortBy !== 'date' || sortOrder !== 'desc';
-
-  // Get human-readable sort label
-  const getSortLabel = () => {
-    const labels: Record<string, string> = {
-      ID: 'Orden de creación',
-      title: 'Propiedad',
-      state: 'Ubicación',
-      status: 'Estado',
-      price: 'Precio',
-      date: 'Fecha de publicación'
-    };
-
-    const columnLabel = labels[sortBy] || sortBy;
-    const direction = sortOrder === 'asc' ? 'Menor a mayor' : 'Mayor a menor';
-
-    // Customize direction based on sort key
-    let directionText = direction;
-    if (sortBy === 'price') {
-      directionText = sortOrder === 'asc' ? 'Menor a mayor' : 'Mayor a menor';
-    } else if (sortBy === 'date' || sortBy === 'ID') {
-      directionText = sortOrder === 'asc' ? 'Más antiguo primero' : 'Más reciente primero';
-    } else {
-      directionText = sortOrder === 'asc' ? 'A → Z' : 'Z → A';
-    }
-
-    return `${columnLabel} (${directionText})`;
-  };
-
   if (initialLoad && loading) {
     return (
       <div className="flex justify-center items-center py-20">
@@ -298,14 +248,6 @@ export const PropertyTable = ({
 
   return (
     <div ref={tableContainerRef} className="h-full flex flex-col">
-      {/* Sort Indicator Badge - Only shown when not default sort */}
-      {isCustomSort && (
-        <PropertySortIndicator
-          sortLabel={getSortLabel()}
-          onReset={handleResetSort}
-        />
-      )}
-
       {/* Table Container - Scrollable con altura calculada */}
       <div className="flex-1 min-h-0 overflow-auto px-4 sm:px-0">
         <table className="w-full">
@@ -313,9 +255,6 @@ export const PropertyTable = ({
             isAllSelected={isAllCurrentPageSelected}
             isSomeSelected={isSomeCurrentPageSelected}
             onSelectAll={handleSelectAllCurrentPage}
-            sortBy={sortBy}
-            sortOrder={sortOrder}
-            onSort={handleSort}
           />
           <tbody className="bg-white divide-y divide-gray-200">
             {properties.map((property) => (

@@ -33,3 +33,6 @@ export { BulkActionSelect } from './BulkActionSelect';
 export type { BulkActionOption } from './BulkActionSelect';
 
 export { DropdownMenu, DropdownMenuItem } from './DropdownMenu';
+
+export { FilterDropdown } from './FilterDropdown';
+export type { FilterOption } from './FilterDropdown';
