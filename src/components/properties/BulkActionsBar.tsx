@@ -55,14 +55,14 @@ export const BulkActionsBar = ({
       label: permissions.canEditAll ? 'Estado' : `Estado (${permissions.editableCount}/${selectedCount})`,
       icon: RefreshCw,
       action: onStatusChange,
-      disabled: !permissions.canEditAll,
+      disabled: permissions.editableCount === 0, // Only disable if NONE are editable
     },
     {
       id: 'patent',
       label: permissions.canEditAll ? 'Patente' : `Patente (${permissions.editableCount}/${selectedCount})`,
       icon: Tag,
       action: onPatentChange,
-      disabled: !permissions.canEditAll,
+      disabled: permissions.editableCount === 0, // Only disable if NONE are editable
     },
     {
       id: 'export',
@@ -83,7 +83,7 @@ export const BulkActionsBar = ({
       icon: Trash2,
       color: 'danger' as const,
       action: onDelete,
-      disabled: !permissions.canDeleteAll,
+      disabled: permissions.deletableCount === 0, // Only disable if NONE are deletable
     },
   ];
 

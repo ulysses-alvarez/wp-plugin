@@ -3,11 +3,12 @@
  * Modal for changing status of multiple properties
  */
 
-import { useState } from 'react';
-import { RefreshCw, X } from 'lucide-react';
+import { useState, useMemo } from 'react';
+import { RefreshCw, X, AlertCircle } from 'lucide-react';
 import type { Property } from '@/utils/permissions';
 import type { PropertyStatus } from '@/types/bulk';
 import { ComboBox, LoadingSpinner } from '@/components/ui';
+import { canEditProperty } from '@/utils/permissions';
 import clsx from 'clsx';
 
 interface BulkStatusModalProps {
@@ -41,6 +42,19 @@ export const BulkStatusModal = ({
   const [selectedStatusLabel, setSelectedStatusLabel] = useState<string>('Disponible');
   const [isUpdating, setIsUpdating] = useState(false);
 
+  // Calculate editable vs non-editable properties
+  const propertyPermissions = useMemo(() => {
+    const editableProperties = properties.filter(p => canEditProperty(p));
+    const nonEditableProperties = properties.filter(p => !canEditProperty(p));
+    return {
+      editable: editableProperties,
+      nonEditable: nonEditableProperties,
+      editableCount: editableProperties.length,
+      nonEditableCount: nonEditableProperties.length,
+      hasNonEditable: nonEditableProperties.length > 0
+    };
+  }, [properties]);
+
   if (!isOpen) return null;
 
   const handleStatusChange = (label: string) => {
@@ -51,7 +65,8 @@ export const BulkStatusModal = ({
   const handleConfirm = async () => {
     setIsUpdating(true);
     try {
-      const propertyIds = properties.map((p) => p.id);
+      // Only send editable properties to the backend
+      const propertyIds = propertyPermissions.editable.map((p) => p.id);
       await onConfirm(propertyIds, selectedStatus);
       onClose();
     } catch {
@@ -95,8 +110,18 @@ export const BulkStatusModal = ({
                   Cambiar estado
                 </h2>
                 <p className="text-sm text-gray-500 mt-1">
-                  Actualizar el estado de {properties.length}{' '}
-                  {properties.length === 1 ? 'propiedad' : 'propiedades'}
+                  {propertyPermissions.hasNonEditable ? (
+                    <>
+                      Actualizar el estado de {propertyPermissions.editableCount}{' '}
+                      de {properties.length}{' '}
+                      {properties.length === 1 ? 'propiedad seleccionada' : 'propiedades seleccionadas'}
+                    </>
+                  ) : (
+                    <>
+                      Actualizar el estado de {properties.length}{' '}
+                      {properties.length === 1 ? 'propiedad' : 'propiedades'}
+                    </>
+                  )}
                 </p>
               </div>
             </div>
@@ -127,8 +152,29 @@ export const BulkStatusModal = ({
               />
             </div>
 
+            {/* Warning for non-editable properties */}
+            {propertyPermissions.hasNonEditable && (
+              <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 mb-4" role="alert">
+                <div className="flex gap-2">
+                  <AlertCircle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+                  <div className="text-sm text-amber-800">
+                    <p className="font-semibold mb-1">Propiedades omitidas</p>
+                    <p>
+                      {propertyPermissions.nonEditableCount}{' '}
+                      {propertyPermissions.nonEditableCount === 1 ? 'propiedad será omitida' : 'propiedades serán omitidas'}{' '}
+                      porque no tienes permisos para editarlas.
+                    </p>
+                    <p className="mt-1">
+                      Solo se actualizarán {propertyPermissions.editableCount}{' '}
+                      {propertyPermissions.editableCount === 1 ? 'propiedad' : 'propiedades'}.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* Note */}
-            {selectedStatusLabel && (
+            {selectedStatusLabel && !propertyPermissions.hasNonEditable && (
               <div className="bg-blue-50 border border-blue-200 rounded-lg p-3" role="status" aria-live="polite">
                 <p className="text-sm text-blue-800">
                   <strong>Nota:</strong> Todas las propiedades seleccionadas cambiarán a estado <span className="font-bold">{selectedStatusLabel}</span>

@@ -3,11 +3,12 @@
  * Modal for changing patents of multiple properties
  */
 
-import { useState, useEffect } from 'react';
-import { Tag, X } from 'lucide-react';
+import { useState, useEffect, useMemo } from 'react';
+import { Tag, X, AlertCircle } from 'lucide-react';
 import type { Property } from '@/utils/permissions';
 import { LoadingSpinner, ComboBox } from '@/components/ui';
 import { fetchUniquePatents } from '@/services/api';
+import { canEditProperty } from '@/utils/permissions';
 import clsx from 'clsx';
 
 interface BulkPatentModalProps {
@@ -27,6 +28,19 @@ export const BulkPatentModal = ({
   const [uniquePatents, setUniquePatents] = useState<string[]>([]);
   const [isUpdating, setIsUpdating] = useState(false);
   const [loadingPatents, setLoadingPatents] = useState(true);
+
+  // Calculate editable vs non-editable properties
+  const propertyPermissions = useMemo(() => {
+    const editableProperties = properties.filter(p => canEditProperty(p));
+    const nonEditableProperties = properties.filter(p => !canEditProperty(p));
+    return {
+      editable: editableProperties,
+      nonEditable: nonEditableProperties,
+      editableCount: editableProperties.length,
+      nonEditableCount: nonEditableProperties.length,
+      hasNonEditable: nonEditableProperties.length > 0
+    };
+  }, [properties]);
 
   // Load unique patents when modal opens
   useEffect(() => {
@@ -51,7 +65,8 @@ export const BulkPatentModal = ({
 
     setIsUpdating(true);
     try {
-      const propertyIds = properties.map(p => p.id);
+      // Only send editable properties to the backend
+      const propertyIds = propertyPermissions.editable.map(p => p.id);
       await onConfirm(propertyIds, selectedPatent);
       onClose();
     } catch {
@@ -95,9 +110,19 @@ export const BulkPatentModal = ({
                   Cambiar patente
                 </h2>
                 <p className="text-sm text-gray-500 mt-1">
-                  {properties.length === 1
-                    ? '1 propiedad seleccionada'
-                    : `${properties.length} propiedades seleccionadas`}
+                  {propertyPermissions.hasNonEditable ? (
+                    <>
+                      Actualizar la patente de {propertyPermissions.editableCount}{' '}
+                      de {properties.length}{' '}
+                      {properties.length === 1 ? 'propiedad seleccionada' : 'propiedades seleccionadas'}
+                    </>
+                  ) : (
+                    <>
+                      {properties.length === 1
+                        ? '1 propiedad seleccionada'
+                        : `${properties.length} propiedades seleccionadas`}
+                    </>
+                  )}
                 </p>
               </div>
             </div>
@@ -142,8 +167,29 @@ export const BulkPatentModal = ({
               )}
             </div>
 
-            {/* Warning */}
-            {selectedPatent && (
+            {/* Warning for non-editable properties */}
+            {propertyPermissions.hasNonEditable && (
+              <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 mb-4" role="alert">
+                <div className="flex gap-2">
+                  <AlertCircle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+                  <div className="text-sm text-amber-800">
+                    <p className="font-semibold mb-1">Propiedades omitidas</p>
+                    <p>
+                      {propertyPermissions.nonEditableCount}{' '}
+                      {propertyPermissions.nonEditableCount === 1 ? 'propiedad será omitida' : 'propiedades serán omitidas'}{' '}
+                      porque no tienes permisos para editarlas.
+                    </p>
+                    <p className="mt-1">
+                      Solo se actualizarán {propertyPermissions.editableCount}{' '}
+                      {propertyPermissions.editableCount === 1 ? 'propiedad' : 'propiedades'}.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Note */}
+            {selectedPatent && !propertyPermissions.hasNonEditable && (
               <div className="bg-blue-50 border border-blue-200 rounded-lg p-3" role="status" aria-live="polite">
                 <p className="text-sm text-blue-800">
                   <strong>Nota:</strong> Todas las propiedades seleccionadas tendrán la patente <span className="font-mono font-bold">{selectedPatent}</span>

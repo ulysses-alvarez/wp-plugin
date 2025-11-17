@@ -31,6 +31,7 @@ export interface PropertyQueryParams {
   state?: string;
   municipality?: string;
   author?: number;
+  author_id?: string;  // 'current' to filter by current user, or numeric string for specific author
   orderby?: 'ID' | 'date' | 'title' | 'price' | 'status' | 'state' | 'municipality';
   order?: 'asc' | 'desc';
   search_field?: string;  // Field context for advanced search

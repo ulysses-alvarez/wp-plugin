@@ -239,10 +239,16 @@ class Property_REST_API {
         // Handle different orderby options
         $args = $this->build_orderby_args($orderby, $args);
 
-        // If user can't view all properties, only show their own
-        if (!current_user_can('view_all_properties')) {
+        // Handle author_id parameter for "only my properties" filter
+        $author_id = $request->get_param('author_id');
+        if ($author_id === 'current') {
+            // User explicitly wants to filter by their own properties
             $args['author'] = $current_user->ID;
+        } elseif ($author_id && is_numeric($author_id)) {
+            // Filter by specific author (admin feature)
+            $args['author'] = intval($author_id);
         }
+        // Otherwise, show all properties (no author filter)
 
         // Apply search filters
         $args = $this->build_search_filters($args, $search_field, $search_value, $request);

@@ -41,6 +41,7 @@ interface PropertyState {
     municipality: string;
     searchField: string;  // Field context for advanced search
     searchValue: string;  // Value for advanced search
+    onlyMyProperties: boolean;  // Filter to show only current user's properties
   };
 
   // Sort
@@ -65,6 +66,7 @@ interface PropertyState {
   setStateFilter: (state: string) => void;
   setMunicipalityFilter: (municipality: string) => void;
   setFieldSearch: (field: string, value: string) => void;  // Advanced search
+  setOnlyMyProperties: (value: boolean) => void;  // Filter by current user's properties
   clearFilters: () => void;
 
   // Pagination Actions
@@ -100,7 +102,8 @@ const initialState = {
     state: '',
     municipality: '',
     searchField: 'all',
-    searchValue: ''
+    searchValue: '',
+    onlyMyProperties: false
   },
   sortBy: 'date' as const,
   sortOrder: 'desc' as const
@@ -143,6 +146,11 @@ export const usePropertyStore = create<PropertyState>((set, get) => ({
         queryParams.status = params?.status ?? filters.status;
         queryParams.state = params?.state ?? filters.state;
         queryParams.municipality = params?.municipality ?? filters.municipality;
+      }
+
+      // Add "only my properties" filter if enabled
+      if (filters.onlyMyProperties) {
+        queryParams.author_id = 'current';
       }
 
       const response = await fetchProperties(queryParams);
@@ -416,6 +424,13 @@ export const usePropertyStore = create<PropertyState>((set, get) => ({
     }));
   },
 
+  setOnlyMyProperties: (onlyMyProperties: boolean) => {
+    set(state => ({
+      filters: { ...state.filters, onlyMyProperties },
+      currentPage: 1 // Reset to first page when filtering
+    }));
+  },
+
   clearFilters: () => {
     set({
       filters: {
@@ -424,7 +439,8 @@ export const usePropertyStore = create<PropertyState>((set, get) => ({
         state: '',
         municipality: '',
         searchField: 'all',
-        searchValue: ''
+        searchValue: '',
+        onlyMyProperties: false
       },
       currentPage: 1
     });
